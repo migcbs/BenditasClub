@@ -14,6 +14,7 @@ const Home = () => {
   const [showPedido, setShowPedido] = useState(false);
   const touchStartX = useRef(null);
 
+  // Efecto para el carrusel automático con barra de progreso
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -32,6 +33,7 @@ const Home = () => {
     setProgress(0);
   };
 
+  // Manejadores para el control del carrusel por touch
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -45,18 +47,28 @@ const Home = () => {
     setProgress(0);
   };
 
+  // Efecto para el paralaje en el scroll
   useEffect(() => {
     const handleScroll = () => {
-      const offset = window.scrollY;
-      const image = document.querySelector(".home-image.active");
+      const offset = window.scrollY; // Obtiene la posición actual de scroll
+      const image = document.querySelector(".home-image.active"); // Selecciona la imagen activa
       if (image) {
+        // Aplica la transformación translateY basada en el scroll
         image.style.transform = `translateY(${offset * 0.2}px)`;
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("scroll", handleScroll); // Agrega el listener de scroll
+    
+    // --- ADECUACIÓN CLAVE AQUÍ ---
+    // Ejecuta handleScroll una vez al montar el componente.
+    // Esto asegura que la imagen se posicione correctamente desde el inicio,
+    // incluso si la página ya tiene un desplazamiento inicial.
+    handleScroll(); 
+    // --- FIN DE ADECUACIÓN ---
+
+    return () => window.removeEventListener("scroll", handleScroll); // Limpia el listener al desmontar
+  }, []); // El array de dependencias vacío asegura que este efecto se ejecute solo una vez al montar
 
   return (
     <>

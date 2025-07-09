@@ -13,7 +13,6 @@ body {
   background-color: #fff8f0;
   color: #222;
 }
-
 /* ------------------------------
    NAVBAR
 ------------------------------ */
@@ -22,26 +21,27 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 60px; /* Aumentado ligeramente para mejor visibilidad y clickabilidad */
+  height: 60px;
   background: none;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   z-index: 1000;
   padding: 0 2rem;
-  transition: background-color 0.3s ease, height 0.3s ease; /* Transición para cuando el navbar se hace 'scrolled' */
+  transition: background-color 0.3s ease, height 0.3s ease;
 }
 
 .navbar.scrolled {
-  background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente al hacer scroll */
+  background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  height: 50px; /* Altura ligeramente reducida al hacer scroll */
+  height: 50px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* REMUEVE margin-top: 350px; si todavía está aquí */
 }
 
 
-/* Contenedor de links */
+/* Contenedor de links (Desktop) */
 .navbar-links-container {
   flex: 1;
   display: flex;
@@ -49,24 +49,19 @@ body {
   align-items: center;
 }
 
-/* Lista de links */
+/* Lista de links (Desktop) */
 .navbar-links {
   display: flex;
-  gap: 2.5rem; /* Aumentado el espacio entre los links */
+  gap: 2.5rem;
   list-style: none;
-  padding: 0; /* Asegura que no haya padding por defecto de la lista */
-  margin: 0; /* Asegura que no haya margen por defecto de la lista */
-}
-
-.navbar-links li {
-    /* Esto es para los elementos de la lista, no para los 'a' */
-    /* Puedes añadir margen si quieres espacio vertical entre ellos en el menú móvil */
+  padding: 0;
+  margin: 0;
 }
 
 .navbar-links a {
-  font-family: 'Titan One', cursive; /* Asegúrate de que esta fuente esté importada */
+  font-family: 'Titan One', cursive; /* <-- Asegura esta fuente */
   text-transform: uppercase;
-  font-size: 1.2rem; /* Ligeramente ajustado */
+  font-size: 1.2rem; /* <-- Tu tamaño original */
   letter-spacing: 0.5px;
   color: white; /* Color por defecto de los links */
   background: none;
@@ -77,11 +72,9 @@ body {
   transition: color 0.3s ease;
 }
 
-
-
 /* Color de los links cuando el navbar está 'scrolled' */
 .navbar.scrolled .navbar-links a {
-  color: #333; /* Color oscuro para los links cuando el fondo es claro */
+  color: #333;
 }
 
 .navbar-links a:hover {
@@ -89,17 +82,17 @@ body {
 }
 
 /* ------------------------------
-   SOCIAL ICONS (para desktop)
+   SOCIAL ICONS (para desktop, ocultar en móvil si no está en el menú)
 ------------------------------ */
 .social-icons {
   display: flex;
   gap: 1.2rem;
-  margin-left: 2rem; /* Espacio a la izquierda de los links */
+  margin-left: 2rem;
 }
 
 .social-icons a {
-  color: white; /* Color de los iconos en desktop */
-  font-size: 1.5rem;
+  color: white;
+  font-size: 1.5rem; /* <-- Tu tamaño original */
   transition: color 0.3s ease;
 }
 
@@ -107,149 +100,180 @@ body {
   color: #e78fbb;
 }
 
-/* Color de los iconos cuando el navbar está 'scrolled' */
 .navbar.scrolled .social-icons a {
-  color: #555; /* Color oscuro para los iconos cuando el fondo es claro */
+  color: #555;
 }
 
 
 /* ------------------------------
-   ICONO HAMBURGUESA
+   ICONO HAMBURGUESA (GLOBAL)
+   ... (sin cambios relevantes para tipografía aquí) ...
 ------------------------------ */
 .hamburger {
-  display: none; /* Oculto por defecto en desktop */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 20px;
+  z-index: 1002;
+
+  display: none;
   cursor: pointer;
   flex-direction: column;
   justify-content: space-around;
-  width: 28px; /* Ligeramente más grande */
-  height: 24px; /* Ligeramente más grande */
-  position: absolute; /* Posición absoluta para centrarlo */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1002; /* Por encima del menú activo */
+  width: 28px;
+  height: 24px;
+  transition: all 0.3s ease;
 }
 
 .hamburger div {
   width: 100%;
   height: 3px;
-  background-color: #e78fbb; /* Color de las líneas de la hamburguesa */
+  background-color: #e78fbb;
   border-radius: 3px;
-  transition: all 0.3s ease; /* Transición para la animación de la hamburguesa */
+  transition: all 0.3s ease;
 }
 
-/* Estilos para el icono de hamburguesa cuando el menú está abierto */
-.hamburger.active div:nth-child(2) {
-  opacity: 0; /* Oculta la línea del medio */
-}
-
-.hamburger.active div:nth-child(1) {
-  transform: translateY(9px) rotate(45deg); /* Gira y mueve la línea superior */
-}
-
-.hamburger.active div:nth-child(3) {
-  transform: translateY(-9px) rotate(-45deg); /* Gira y mueve la línea inferior */
+.navbar:not(.scrolled) .hamburger div {
+    background-color: white;
 }
 
 /* ------------------------------
-   RESPONSIVE NAV (Menú Desplegable)
+   ICONO HAMBURGUESA (Estado ACTIVO - DENTRO del Menú Abierto)
+   ... (sin cambios relevantes para tipografía aquí) ...
+------------------------------ */
+.hamburger.active {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  left: auto;
+  transform: none;
+  z-index: 1003;
+}
+
+.hamburger.active div:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active div:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger.active div:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+
+/* ------------------------------
+   FULLSCREEN MENU OVERLAY (El contenedor principal del menú móvil)
+   ... (sin cambios relevantes para tipografía aquí) ...
+------------------------------ */
+.fullscreen-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+/* El contenedor interno de los links dentro del overlay (CLASE CAMBIADA) */
+.mobile-menu-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 85%;
+  max-width: 380px;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: transparent;
+  border: none;
+  border-radius: 28px;
+  padding: 0 1.5rem;
+  box-shadow: none;
+}
+
+.mobile-menu-links li {
+  margin-bottom: 1.2rem;
+
+}
+
+.mobile-menu-links a {
+  font-family: 'Titan One', cursive; /* <-- Asegura esta fuente para móvil */
+  text-transform: uppercase;
+  font-size: 2.2rem; /* <-- Tu tamaño para móvil */
+  padding: 0.8rem 0;
+  color: #e78fbb;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.mobile-menu-links a:hover {
+  color: #d16b9b;
+}
+
+/* Social icons dentro del menú móvil */
+.mobile-menu-links .social-icons { /* Asegúrate de que esta regla sobrescribe si los iconos vienen de otro lado */
+  display: flex;
+  margin-top: 2rem;
+  gap: 1.8rem;
+}
+
+.mobile-menu-links .social-icons a {
+  font-size: 2rem; /* <-- Tu tamaño para iconos en móvil */
+  color: #e78fbb;
+  transition: color 0.3s ease;
+}
+
+.mobile-menu-links .social-icons a:hover {
+  color: #d16b9b;
+}
+
+
+/* ------------------------------
+   MEDIA QUERIES (PARA MÓVIL)
 ------------------------------ */
 @media (max-width: 768px) {
   .hamburger {
-    display: flex; /* Muestra el icono de hamburguesa en móvil */
-  }
-
-  .navbar-links {
-    display: none; /* Oculta los enlaces de navegación por defecto en móvil */
-  }
-
-  .navbar-links.active {
     display: flex;
-    flex-direction: column; /* Apila los elementos verticalmente */
-    align-items: center; /* Centra horizontalmente los elementos */
-    justify-content: center; /* Centra verticalmente los elementos */
-    
-    position: fixed; /* Fija el menú en la pantalla */
-    top: 50%; /* Centra verticalmente */
-    left: 50%; /* Centra horizontalmente */
-    transform: translate(-50%, -50%); /* Ajusta para el punto de origen del elemento */
-
-    width: 85%;
-    max-width: 380px; /* Ancho máximo para el menú móvil */
-    
-    /* Altura flexible: usa max-height y overflow-y para scroll si es necesario */
-    max-height: 90vh; /* Permite que el menú ocupe hasta el 90% de la altura de la ventana */
-    overflow-y: auto; /* Permite scroll vertical si el contenido excede max-height */
-    overflow-x: hidden; /* Evita scroll horizontal */
-
-    background-color: rgba(255, 255, 255, 0.95); /* Fondo blanco semitransparente */
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Borde un poco más visible */
-    border-radius: 28px;
-    padding: 2.5rem 1.5rem; /* Padding interno */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
-    animation: fadeAndSlideIn 0.35s ease-out forwards; /* Cambiado el nombre de la animación */
-    z-index: 1001; /* Asegura que esté por encima de otros elementos */
   }
 
-  .navbar-links.active li {
-    margin-bottom: 1.2rem; /* Espacio entre los elementos de la lista */
-  }
-
-  .navbar-links.active a {
-    width: 100%;
-    text-align: center;
-    font-size: 2.2rem; /* Aumentado para mejor legibilidad en móvil */
-    padding: 0.8rem 0;
-    color: #e78fbb;
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-
-  .navbar-links.active a:hover {
-    color: #d16b9b;
-  }
-
-  /* Estilos para los iconos sociales dentro del menú activo */
-  .navbar-links.active .social-icons {
-    display: flex; /* Muestra los iconos en fila */
-    margin-top: 2rem; /* Espacio superior para separarlos de los enlaces */
-    gap: 1.8rem; /* Espacio entre los iconos */
-  }
-
-  .navbar-links.active .social-icons a {
-    font-size: 2rem; /* Tamaño de los iconos */
-    color: #e78fbb; /* Color de los iconos */
-    transition: color 0.3s ease;
-  }
-
-  .navbar-links.active .social-icons a:hover {
-    color: #d16b9b;
-  }
-
-  /* Asegura que el color del texto del navbar cambie cuando está en modo móvil y el menú está cerrado */
-  .navbar:not(.scrolled) .hamburger div {
-    background-color: white; /* Color de la hamburguesa cuando el navbar no ha hecho scroll */
+  .navbar-links-container,
+  .social-icons {
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
-  .navbar-links.active {
-    width: 95%; /* Un poco más ancho en pantallas muy pequeñas */
-    border-radius: 20px; /* Ajuste de radio para pantallas más pequeñas */
-    padding: 2rem 1rem; /* Ajuste de padding */
+  .mobile-menu-links {
+    width: 95%;
+    border-radius: 20px;
+    padding: 0 1rem;
   }
 
-  .navbar-links.active li {
-    margin-bottom: 1rem; /* Menos espacio entre elementos en pantallas muy pequeñas */
+  .mobile-menu-links li {
+    margin-bottom: 1rem;
   }
 
-  .navbar-links.active a {
-    font-size: 1.8rem; /* Tamaño de fuente ligeramente más pequeño */
+  .mobile-menu-links a {
+    font-size: 1.8rem; /* <-- Tu tamaño más pequeño para móvil */
     padding: 0.6rem 0;
   }
 
-  .navbar-links.active .social-icons {
+  .mobile-menu-links .social-icons {
     margin-top: 1.5rem;
     gap: 1.2rem;
   }
@@ -273,46 +297,60 @@ body {
 /* ------------------------------
    HOME
 ------------------------------ */
-
+/* --- Sección Home --- */
 .home {
   position: relative;
   width: 100%;
-  height: 100vh; /* Pantalla completa */
-  overflow: hidden;
-  margin-top: 0; /* debajo de la navbar fija */
-  z-index: 0;
+  height: 100vh; /* Ocupa toda la altura de la ventana (viewport height) */
+  overflow: hidden; /* Muy importante para ocultar partes de imágenes que se desbordan */
+  margin-top: 0; /* Asegura que no haya margen superior por defecto */
+  display: flex; /* Usamos flexbox para centrar el overlay */
+  flex-direction: column;
+  justify-content: center; /* Centra el overlay verticalmente */
+  align-items: center; /* Centra el overlay horizontalmente */
+  z-index: 0; /* Buen z-index base */
 }
 
 .home-images {
   position: absolute;
-  inset: 0;
-  filter: brightness(0.3);
+  inset: 0; /* Atajo para top: 0; right: 0; bottom: 0; left: 0; */
+  filter: brightness(0.3); /* Aplica el filtro de brillo a todas las imágenes en el contenedor */
 }
 
 .home-image {
   position: absolute;
-  inset: 0;
+  inset: 0; /* Atajo para top: 0; right: 0; bottom: 0; left: 0; */
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1s ease;
-  z-index: 1;
+  object-fit: cover; /* **LA CLAVE** para que las imágenes cubran el área sin distorsión, recortando lo necesario */
+  object-position: center; /* Centra la imagen dentro de su contenedor si se recorta */
+  opacity: 0; /* Por defecto, ocultas */
+  transition: opacity 1s ease; /* Transición suave para el cambio de imagen */
+  transform: translateY(0px); /* <--- ESPECÍFICAMENTE EN PIXELES, para un punto de partida claro */
+  will-change: transform, opacity; /* Optimización para las animaciones de transform y opacity */
+  z-index: 1; /* Para imágenes inactivas */
 }
 
 .home-image.active {
-  opacity: 1;
-  z-index: 2;
+  opacity: 1; /* La imagen activa se muestra */
+  z-index: 2; /* Para la imagen activa, para que esté por encima de las inactivas */
 }
 
 .home-overlay {
-  position: relative;
-  z-index: 3;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 900px;
+  padding: 0 1rem;
   text-align: center;
   color: white;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 0 1rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .home-overlay h2 {
@@ -371,17 +409,21 @@ body {
     font-size: 1rem;
   }
 
-  .indicator {
+  .home-indicators .indicator {
     width: 12px;
     height: 12px;
+  }
+  
+  .home-overlay {
+    gap: 1rem;
   }
 }
 
 .home-logo {
   width: 500px;
-  max-width: 90vw; /* que no pase del 90% del viewport width */
+  max-width: 90vw;
   height: auto;
-  margin: 0 auto;
+  margin: 0;
   display: block;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
   transform: scale(0.8);
@@ -402,7 +444,6 @@ body {
   .home-logo {
     width: 400px;
     max-width: 80vw;
-    transform: scale(0.7);
   }
 }
 
@@ -410,12 +451,11 @@ body {
   .home-logo {
     width: 300px;
     max-width: 90vw;
-    transform: scale(0.6);
   }
 }
 
 .order-button {
-  margin-top: 8rem;
+  margin-top: 0;
   padding: 0.8rem 2rem;
   font-size: 1rem;
   font-weight: bold;
@@ -442,19 +482,6 @@ body {
     font-size: 1rem;
     padding: 0.7rem 1.5rem;
   }
-}
-
-.home-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1s ease;
-  transform: translateY(0);
-  will-change: transform;
-  z-index: 1;
 }
 
 /* ------------------------------
