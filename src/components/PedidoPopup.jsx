@@ -24,8 +24,6 @@ const ChevronIcon = ({ isOpen, size = 24, color = '#e78fbb' }) => (
   </svg>
 );
 
-// Mueve la declaración de productosMenu FUERA del componente PedidoPopup
-// para que esté disponible antes de que el estado inicial de `seleccion` lo use.
 const productosMenu = {
     Snacks: [
       { nombre: "Salchipulpos", precio: 30, isPromotion: false },
@@ -58,7 +56,8 @@ const productosMenu = {
         "Tamarindo", "Miel & mostaza", "Teriyaki", "Machas", "Habanero",
         "Búfalo", "Mango habanero", "Tamarindo habanero", "Habanero parmesano",
         "Sriracha", "Diabla", "Piña chipotle", "Valentina", "Pelón Pelo Rico",
-        "Takis Blue", "Cheetos Flamin’ Hot", "Takis Fuego", "Doritos Cheddar"
+        "Takis Blue", "Cheetos Flamin’ Hot", "Takis Fuego", "Doritos Cheddar",
+        "Naturales"
       ],
     },
     Boneless: {
@@ -72,24 +71,181 @@ const productosMenu = {
         "Tamarindo", "Miel & mostaza", "Teriyaki", "Machas", "Habanero",
         "Búfalo", "Mango habanero", "Tamarindo habanero", "Habanero parmesano",
         "Sriracha", "Diabla", "Piña chipotle", "Valentina", "Pelón Pelo Rico",
-        "Takis Blue", "Cheetos Flamin’ Hot", "Takis Fuego", "Doritos Cheddar"
+        "Takis Blue", "Cheetos Flamin’ Hot", "Takis Fuego", "Doritos Cheddar",
+        "Naturales"
       ],
     },
     Burgys: [
-      { nombre: "Burgy Res", precio: 89, isPromotion: false },
-      { nombre: "Burgy Pollo", precio: 89, isPromotion: false },
-      { nombre: "Burgy West", precio: 89, isPromotion: false },
-      { nombre: "Bonely", precio: 89, isPromotion: false },
-      { nombre: "Burgy Mexa", precio: 109, isPromotion: false },
-      { nombre: "Burgy Cheesy", precio: 109, isPromotion: false },
-      { nombre: "Mega Res", precio: 109, isPromotion: false },
-      { nombre: "Mega Pollo", precio: 109, isPromotion: false },
-      { nombre: "Mega West", precio: 109, isPromotion: false },
+      {
+        nombre: "Burgy Res",
+        precio: 89,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Burgy Pollo",
+        precio: 89,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Burgy West",
+        precio: 89,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Bonely",
+        precio: 89,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Burgy Mexa",
+        precio: 109,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Burgy Cheesy",
+        precio: 109,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Mega Res",
+        precio: 109,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Mega Pollo",
+        precio: 109,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Mega West",
+        precio: 109,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
     ],
     Doggys: [
-      { nombre: "Doggy Club", precio: 99, isPromotion: false },
-      { nombre: "Doggy", precio: 89, isPromotion: false },
-      { nombre: "Doggy Wacamole", precio: 109, isPromotion: false },
+      {
+        nombre: "Doggy Club",
+        precio: 99,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Doggy",
+        precio: 89,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
+      {
+        nombre: "Doggy Wacamole",
+        precio: 109,
+        isPromotion: false,
+        configurableItems: [
+          {
+            type: "Papas",
+            quantity: "Papas",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => productosMenu.Papas.items.map(p => p.nombre),
+          },
+        ],
+      },
     ],
     "Paquetes de Alitas": [
       {
@@ -184,8 +340,19 @@ const productosMenu = {
         isPromotion: false,
         configurableItems: [
           { type: "Boneless", quantity: "500g", maxSabores: 2 },
-          { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
-            options: () => productosMenu.Papas.items.map(p => p.nombre)
+          {
+            type: "Papas",
+            quantity: "Papas a la Francesa",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => ["Papas a la Francesa"]
+          },
+          {
+            type: "Papas",
+            quantity: "Papas en Gajo",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => ["Papas en Gajo"]
           },
         ],
       },
@@ -207,8 +374,19 @@ const productosMenu = {
         isPromotion: false,
         configurableItems: [
           { type: "Alitas", quantity: "35pzs", maxSabores: 3 },
-          { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
-            options: () => productosMenu.Papas.items.map(p => p.nombre)
+          {
+            type: "Papas",
+            quantity: "Papas a la Francesa",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => ["Papas a la Francesa"]
+          },
+          {
+            type: "Papas",
+            quantity: "Papas en Gajo",
+            maxSabores: 1,
+            isGeneric: true,
+            options: () => ["Papas en Gajo"]
           },
         ],
       },
@@ -384,15 +562,15 @@ const PedidoPopup = ({ onClose }) => {
     'Paquete 3 Boneless (1.5kg + papas + dedos de queso)_papasTipo': '',
     'Paquete 3 Boneless (1.5kg + papas + dedos de queso)_papasSabores': [],
     'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_bonelessSabores': [],
-    'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_papasTipo': '',
-    'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_papasSabores': [],
+    'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_papasFrancesaSabores': [],
+    'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_papasGajoSabores': [],
     'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_alitasSabores': [],
     'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_bonelessSabores': [],
     'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_papasTipo': '',
     'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_papasSabores': [],
     'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_alitasSabores': [],
-    'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_papasTipo': '',
-    'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_papasSabores': [],
+    'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_papasFrancesaSabores': [],
+    'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_papasGajoSabores': [],
     'Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)_alitasSabores': [],
     'Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)_papasTipo': '',
     'Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)_papasSabores': [],
@@ -413,6 +591,30 @@ const PedidoPopup = ({ onClose }) => {
     'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_kidsMainOption': '',
     'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_papasTipo': '',
     'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_papasSabores': [],
+    'Burgy Res_papasTipo': '',
+    'Burgy Res_papasSabores': [],
+    'Burgy Pollo_papasTipo': '',
+    'Burgy Pollo_papasSabores': [],
+    'Burgy West_papasTipo': '',
+    'Burgy West_papasSabores': [],
+    'Bonely_papasTipo': '',
+    'Bonely_papasSabores': [],
+    'Burgy Mexa_papasTipo': '',
+    'Burgy Mexa_papasSabores': [],
+    'Burgy Cheesy_papasTipo': '',
+    'Burgy Cheesy_papasSabores': [],
+    'Mega Res_papasTipo': '',
+    'Mega Res_papasSabores': [],
+    'Mega Pollo_papasTipo': '',
+    'Mega Pollo_papasSabores': [],
+    'Mega West_papasTipo': '',
+    'Mega West_papasSabores': [],
+    'Doggy Club_papasTipo': '',
+    'Doggy Club_papasSabores': [],
+    'Doggy_papasTipo': '',
+    'Doggy_papasSabores': [],
+    'Doggy Wacamole_papasTipo': '',
+    'Doggy Wacamole_papasSabores': [],
   });
 
   const [activeCategory, setActiveCategory] = useState(null);
@@ -422,7 +624,6 @@ const PedidoPopup = ({ onClose }) => {
   const [errors, setErrors] = useState({});
   const [micheladaOption, setMicheladaOption] = useState({});
   const [micheladaPromoOption, setMicheladaPromoOption] = useState({});
-
 
   const orderedCategories = [
     "Snacks", "Papas", "Alitas", "Boneless",
@@ -455,6 +656,9 @@ const PedidoPopup = ({ onClose }) => {
     if (type === "Papas" && quantity === "Papas a la Francesa") {
       return 1;
     }
+    if (type === "Papas" && quantity === "Papas en Gajo") {
+      return 1;
+    }
     if (type === "Alitas") {
         if (quantity.includes("8pzs") || quantity.includes("16pzs") || quantity.includes("12pzs") || quantity.includes("10pzs") || quantity.includes("20pzs") || quantity.includes("6 Alitas")) return 2;
         if (quantity.includes("25pzs") || quantity.includes("30pzs") || quantity.includes("35pzs")) return 3;
@@ -477,7 +681,7 @@ const PedidoPopup = ({ onClose }) => {
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const handleSeleccionChange = (itemType, tipo, valor, parentProductName = null) => {
+  const handleSeleccionChange = (itemType, tipo, valor, parentProductName = null, configurableItemIndex = null) => {
     const keyBase = itemType.toLowerCase();
     let currentSelectionStateKey;
 
@@ -486,15 +690,20 @@ const PedidoPopup = ({ onClose }) => {
 
       if (parentProductName) {
         if (tipo === "Sabor") {
-          currentSelectionStateKey = `${parentProductName}_${keyBase}Sabores`;
+            currentSelectionStateKey = `${parentProductName}_${keyBase}Sabores`;
+            if (configurableItemIndex !== null && itemType === "Papas") {
+                const papasType = productosMenu.Boxes.find(p => p.nombre === parentProductName).configurableItems[configurableItemIndex].quantity;
+                const papasKey = papasType.includes("Francesa") ? "papasFrancesaSabores" : "papasGajoSabores";
+                currentSelectionStateKey = `${parentProductName}_${papasKey}`;
+            }
         } else if (tipo === "Bebida") {
-          currentSelectionStateKey = `${parentProductName}_${keyBase}Bebida`;
+            currentSelectionStateKey = `${parentProductName}_${keyBase}Bebida`;
         } else if (tipo === "Tipo") {
-          currentSelectionStateKey = `${parentProductName}_${keyBase}Tipo`;
+            currentSelectionStateKey = `${parentProductName}_${keyBase}Tipo`;
         } else if (itemType === "KidsMainOption") {
-          currentSelectionStateKey = `${parentProductName}_kidsMainOption`;
-          newSelection[currentSelectionStateKey] = valor;
-          return newSelection;
+            currentSelectionStateKey = `${parentProductName}_kidsMainOption`;
+            newSelection[currentSelectionStateKey] = valor;
+            return newSelection;
         }
       } else if (tipo === "Sabor") {
         currentSelectionStateKey = `${keyBase}Sabores`;
@@ -521,12 +730,16 @@ const PedidoPopup = ({ onClose }) => {
                 parentCategoryArray = productosMenu.Boxes;
             } else if (parentProductName.includes("Lunes:") || parentProductName.includes("Miércoles:") || parentProductName.includes("Sábado:")) {
                 parentCategoryArray = productosMenu.Promociones;
+            } else if (productosMenu.Burgys.find(p => p.nombre === parentProductName)) {
+                parentCategoryArray = productosMenu.Burgys;
+            } else if (productosMenu.Doggys.find(p => p.nombre === parentProductName)) {
+                parentCategoryArray = productosMenu.Doggys;
             }
 
             const parentProduct = parentCategoryArray.find(p => p.nombre === parentProductName);
 
             if (parentProduct && parentProduct.configurableItems) {
-                const itemConfig = parentProduct.configurableItems.find(item => item.type === itemType);
+                const itemConfig = parentProduct.configurableItems.find(item => item.type === itemType && (itemType !== "Papas" || item.quantity === productosMenu.Papas.items.find(p => p.nombre === (configurableItemIndex === 0 ? "Papas a la Francesa" : "Papas en Gajo"))?.nombre));
                 if (itemConfig) {
                     quantityForFlavor = itemConfig.quantity;
                 }
@@ -644,14 +857,44 @@ const PedidoPopup = ({ onClose }) => {
     let allConfigured = true;
 
     if (configurableItems && configurableItems.length > 0) {
-      configurableItems.forEach(itemConfig => {
+      configurableItems.forEach((itemConfig, index) => {
         const itemType = itemConfig.type;
         let currentSelectionStateKey;
         let selectedValueOrItems;
         let maxCount;
 
-        if (itemType === "Alitas" || itemType === "Boneless" || itemType === "Papas") {
-            if (nombre.includes("Paquete Kids") && itemType === "Papas") {
+        if (itemType === "Alitas" || itemType === "Boneless") {
+            currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}Sabores`;
+            selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
+            maxCount = getMaxSabores(itemType, itemConfig.quantity);
+
+            if (maxCount > 0 && selectedValueOrItems.length !== maxCount) {
+                allConfigured = false;
+            }
+            if (selectedValueOrItems.length > 0) {
+                itemDetails.push(`${itemConfig.quantity} ${itemType} (${selectedValueOrItems.join(" + ")})`);
+            } else if (maxCount > 0) {
+                allConfigured = false;
+            }
+        } else if (itemType === "Papas") {
+            const isTwoPapasBox = nombre.includes("Boneless Box") || nombre.includes("Bendito Box");
+
+            if (isTwoPapasBox) {
+                const papasType = itemConfig.quantity;
+                const papasKey = papasType.includes("Francesa") ? "papasFrancesaSabores" : "papasGajoSabores";
+                currentSelectionStateKey = `${nombre}_${papasKey}`;
+                selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
+                maxCount = getMaxSabores(itemType, papasType);
+
+                if (maxCount > 0 && selectedValueOrItems.length !== maxCount) {
+                    allConfigured = false;
+                }
+                if (selectedValueOrItems.length > 0) {
+                    itemDetails.push(`${papasType} (${selectedValueOrItems.join(" + ")})`);
+                } else if (maxCount > 0) {
+                    allConfigured = false;
+                }
+            } else {
                 currentSelectionStateKey = `${nombre}_papasTipo`;
                 const papaTipoSeleccionada = seleccion[currentSelectionStateKey];
                 if (!papaTipoSeleccionada) {
@@ -668,35 +911,6 @@ const PedidoPopup = ({ onClose }) => {
                 }
                 if (selectedValueOrItems.length > 0) {
                     itemDetails.push(`(${selectedValueOrItems.join(" + ")})`);
-                }
-            } else {
-                currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}${itemType === "Papas" ? 'Tipo' : 'Sabores'}`;
-                if (itemType === "Papas") {
-                    const papaTipoSeleccionada = seleccion[currentSelectionStateKey];
-                    if (!papaTipoSeleccionada) {
-                        allConfigured = false;
-                        return;
-                    }
-                    itemDetails.push(papaTipoSeleccionada);
-
-                    currentSelectionStateKey = `${nombre}_papasSabores`;
-                    selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
-                    maxCount = getMaxSabores(itemType, papaTipoSeleccionada);
-                    if (maxCount > 0 && selectedValueOrItems.length !== maxCount) {
-                        allConfigured = false;
-                    }
-                    if (selectedValueOrItems.length > 0) {
-                        itemDetails.push(`(${selectedValueOrItems.join(" + ")})`);
-                    }
-                } else {
-                    selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
-                    maxCount = getMaxSabores(itemType, itemConfig.quantity);
-                    if (maxCount > 0 && selectedValueOrItems.length !== maxCount) {
-                        allConfigured = false;
-                    }
-                    if (selectedValueOrItems.length > 0) {
-                        itemDetails.push(`${itemType} (${selectedValueOrItems.join(" + ")})`);
-                    }
                 }
             }
         } else if (itemType === "Bebida") {
@@ -749,8 +963,14 @@ const PedidoPopup = ({ onClose }) => {
                 if (itemType === "Alitas" || itemType === "Boneless") {
                     newState[`${nombre}_${itemType.toLowerCase()}Sabores`] = [];
                 } else if (itemType === "Papas") {
-                    newState[`${nombre}_papasTipo`] = '';
-                    newState[`${nombre}_papasSabores`] = [];
+                    const isTwoPapasBox = nombre.includes("Boneless Box") || nombre.includes("Bendito Box");
+                    if (isTwoPapasBox) {
+                        newState[`${nombre}_papasFrancesaSabores`] = [];
+                        newState[`${nombre}_papasGajoSabores`] = [];
+                    } else {
+                        newState[`${nombre}_papasTipo`] = '';
+                        newState[`${nombre}_papasSabores`] = [];
+                    }
                 } else if (itemType === "Bebida") {
                     newState[`${nombre}_bebidaBebida`] = [];
                 }
@@ -844,7 +1064,6 @@ Número de orden: *#${ordenId}*
 
     return `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(texto)}`;
   };
-  // ... resto del componente PedidoPopup, incluyendo el return del JSX
 
 
   return (
@@ -862,9 +1081,9 @@ Número de orden: *#${ordenId}*
               name="nombre"
               value={formData.nombre}
               onChange={handleInputChange}
-              className={errors.nombre ? "input-error" : ""} // Aplica clase para error
+              className={errors.nombre ? "input-error" : ""}
             />
-            {errors.nombre && <p className="error-message">{errors.nombre}</p>} {/* Muestra mensaje de error */}
+            {errors.nombre && <p className="error-message">{errors.nombre}</p>}
 
             <label>Teléfono</label>
             <input
@@ -907,7 +1126,7 @@ Número de orden: *#${ordenId}*
 
             <div className="step-buttons">
               <button onClick={() => {
-                if (validateStep1()) { // Valida el paso antes de avanzar
+                if (validateStep1()) {
                   setStep(2);
                 }
               }}>Siguiente</button>
@@ -919,33 +1138,25 @@ Número de orden: *#${ordenId}*
         {step === 2 && (
           <div className="popup-step">
             <h2>Tu pedido</h2>
-            {/* Mapea y renderiza las categorías en el orden definido en `orderedCategories` */}
             {orderedCategories.map((categoria) => {
               const datos = productosMenu[categoria];
-              if (!datos) return null; // No renderiza si la categoría no existe en el menú
+              if (!datos) return null;
 
-              // Determina si la categoría actual debe estar abierta (usando activeCategory del estado)
               const estaAbierta = activeCategory === categoria;
 
-              // Función para alternar la visibilidad de la categoría al hacer clic en su encabezado
               const toggleCategoria = () => {
                 setActiveCategory(activeCategory === categoria ? null : categoria);
-                // Si la categoría que se está cerrando es diferente a la que se abre,
-                // asegura que ningún paquete interno quede abierto por error.
                 if (activeCategory !== categoria) {
                     setActivePackage(null);
                 }
               };
 
-              // --- Manejador para las secciones principales de Alitas, Boneless, Papas (con selección de cantidad y sabores) ---
               if (categoria === "Alitas" || categoria === "Boneless" || categoria === "Papas") {
-                const keyBase = categoria.toLowerCase(); // 'alitas', 'boneless', 'papas'
-                // Determina la clave de estado para la cantidad (Piezas o Gramaje)
+                const keyBase = categoria.toLowerCase();
                 const medidaTipo = categoria === "Alitas" ? "Piezas" : categoria === "Boneless" ? "Gramaje" : "Piezas";
-                const cantidadSeleccionada = seleccion[`${keyBase}${medidaTipo}`]; // Valor de la cantidad seleccionada
-                const saboresSeleccionados = seleccion[`${keyBase}Sabores`]; // Array de sabores seleccionados
-                const maxSabores = getMaxSabores(categoria, cantidadSeleccionada); // Máximo de sabores permitidos
-                // Condición para habilitar el botón "Agregar"
+                const cantidadSeleccionada = seleccion[`${keyBase}${medidaTipo}`];
+                const saboresSeleccionados = seleccion[`${keyBase}Sabores`];
+                const maxSabores = getMaxSabores(categoria, cantidadSeleccionada);
                 const canAddSpecialProduct = cantidadSeleccionada && (maxSabores === 0 || saboresSeleccionados.length === maxSabores);
 
                 return (
@@ -954,11 +1165,11 @@ Número de orden: *#${ordenId}*
                       style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
                       onClick={toggleCategoria}
                     >
-                      <ChevronIcon isOpen={estaAbierta} /> {/* Icono de flecha */}
+                      <ChevronIcon isOpen={estaAbierta} />
                       {categoria}
                     </h3>
 
-                    {estaAbierta && ( // Muestra el contenido solo si la categoría está activa
+                    {estaAbierta && (
                       <>
                         <p className="help-text">1. Elige la cantidad. {maxSabores > 0 && "2. Selecciona tus sabores."} 3. Haz clic en 'Agregar'.</p>
                         <select
@@ -970,7 +1181,7 @@ Número de orden: *#${ordenId}*
                             <option key={item.nombre} value={item.nombre}>{item.nombre}</option>
                           ))}
                         </select>
-                        {cantidadSeleccionada && maxSabores > 0 && ( // Muestra selección de sabores si hay cantidad y sabores requeridos
+                        {cantidadSeleccionada && maxSabores > 0 && (
                           <>
                             <label>
                               Selecciona Condimentos ({saboresSeleccionados.length}{" "}
@@ -982,14 +1193,12 @@ Número de orden: *#${ordenId}*
                                   key={sabor}
                                   className={`producto-btn ${saboresSeleccionados.includes(sabor) ? "activo" : ""}`}
                                   onClick={() => handleSeleccionChange(categoria, "Sabor", sabor)}
-                                  // Deshabilita el botón si ya se alcanzó el máximo de sabores y este no está seleccionado
                                   disabled={!saboresSeleccionados.includes(sabor) && saboresSeleccionados.length >= maxSabores}
                                 >
                                   {sabor}
                                 </button>
                               ))}
                             </div>
-                            {/* Mensajes de error/ayuda para la selección de sabores */}
                             {saboresSeleccionados.length < maxSabores && (
                               <p className="error-message">Faltan {maxSabores - saboresSeleccionados.length} sabor(es).</p>
                             )}
@@ -1001,7 +1210,7 @@ Número de orden: *#${ordenId}*
                         <button
                           className="producto-btn agregar-btn"
                           onClick={() => agregarProductoEspecial(categoria)}
-                          disabled={!canAddSpecialProduct} // Deshabilita si no se cumplen las condiciones
+                          disabled={!canAddSpecialProduct}
                         >
                           Agregar {cantidadSeleccionada || categoria}
                         </button>
@@ -1010,7 +1219,6 @@ Número de orden: *#${ordenId}*
                   </div>
                 );
               }
-              // --- Manejador para bebidas con opciones (ej. Micheladas normales) ---
               else if (categoria === "Drinks") {
                 return (
                   <div key={categoria} className={`categoria-productos ${estaAbierta ? 'categoria-activa' : ''}`}>
@@ -1026,21 +1234,18 @@ Número de orden: *#${ordenId}*
                       <div className="productos-disponibles">
                         {datos.map((producto) => (
                           <div key={producto.nombre} className="producto-item-with-options">
-                            {/* Botón principal del producto */}
                             <button
                               onClick={() => {
-                                // Si no tiene opciones, se agrega directamente
                                 if (!producto.options) {
                                   agregarProducto(producto);
                                 }
                               }}
                               className="producto-btn"
-                              // Si tiene opciones, se deshabilita hasta que se elija una
                               disabled={producto.options && !micheladaOption[producto.nombre]}
                             >
                               {producto.nombre} - ${producto.precio.toFixed(2)}
                             </button>
-                            {producto.options && ( // Muestra las opciones si existen
+                            {producto.options && (
                               <div className="michelada-options">
                                 <p className="help-text">Elige una opción:</p>
                                 {producto.options.map(option => (
@@ -1049,13 +1254,12 @@ Número de orden: *#${ordenId}*
                                     className={`option-btn ${micheladaOption[producto.nombre] === option ? "activo" : ""}`}
                                     onClick={() => {
                                       setMicheladaOption(prev => ({ ...prev, [producto.nombre]: option }));
-                                      // Agrega el producto directamente al seleccionar la opción
                                       if (producto.nombre.includes("Michelada")) {
                                         agregarProducto({
                                           nombre: `${producto.nombre} (${option})`,
                                           precio: producto.precio
                                         });
-                                        setMicheladaOption(prev => ({ ...prev, [producto.nombre]: undefined })); // Limpia la opción después de agregar
+                                        setMicheladaOption(prev => ({ ...prev, [producto.nombre]: undefined }));
                                       }
                                     }}
                                   >
@@ -1071,8 +1275,7 @@ Número de orden: *#${ordenId}*
                   </div>
                 );
               }
-              // --- Manejador para Paquetes y Cajas configurables (con opciones anidadas) ---
-              else if (categoria.includes("Paquetes") || categoria === "Boxes") {
+              else if (categoria.includes("Paquetes") || categoria === "Boxes" || categoria === "Burgys" || categoria === "Doggys") {
                 return (
                   <div key={categoria} className={`categoria-productos ${estaAbierta ? 'categoria-activa' : ''}`}>
                     <h3
@@ -1086,96 +1289,103 @@ Número de orden: *#${ordenId}*
                     {estaAbierta && (
                       <div className="productos-disponibles">
                         {datos.map((paqueteProducto) => {
-                          // Determina si este paquete específico está abierto para mostrar sus opciones
                           const isPackageActive = activePackage === paqueteProducto.nombre;
                           return (
                           <div key={paqueteProducto.nombre} className={`producto-item-with-options ${isPackageActive ? 'activo' : ''}`}>
                             <h4
                                 style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
-                                onClick={() => setActivePackage(isPackageActive ? null : paqueteProducto.nombre)} // Alterna la visibilidad del paquete
+                                onClick={() => setActivePackage(isPackageActive ? null : paqueteProducto.nombre)}
                             >
-                                <ChevronIcon isOpen={isPackageActive} size={20} color='#333' /> {/* Icono para paquetes */}
+                                <ChevronIcon isOpen={isPackageActive} size={20} color='#333' />
                                 {paqueteProducto.nombre} - ${paqueteProducto.precio.toFixed(2)}
                             </h4>
-                            {/* Muestra la descripción extra para el Paquete Kids */}
                             {paqueteProducto.nombre.includes("Paquete Kids") && isPackageActive && (
                                 <p className="help-text" style={{margin: '0.5rem 0', fontStyle: 'italic'}}>{paqueteProducto.description}</p>
                             )}
-                            {isPackageActive && ( // Muestra los ítems configurables solo si el paquete está activo
+                            {isPackageActive && (
                                 <>
                                 {paqueteProducto.configurableItems && paqueteProducto.configurableItems.map((itemConfig, idx) => {
-                                    const itemType = itemConfig.type; // Ej. 'Alitas', 'Boneless', 'Papas', 'Bebida', 'KidsMainOption'
+                                    const itemType = itemConfig.type;
                                     let itemOptions = [];
                                     let labelText = "";
                                     let isFlavorSelection = false;
-                                    let currentSelectionStateKey; // Declarada aquí para este scope
-                                    let selectedItemsOrOption; // Usado para cualquier tipo de selección: string o array
-                                    let maxCount = 1; // Default para items simples o de tipo
+                                    let currentSelectionStateKey;
+                                    let selectedItemsOrOption;
+                                    let maxCount = 1;
 
-                                    // Determina las opciones disponibles y el texto de la etiqueta
                                     if (itemType === "Alitas" || itemType === "Boneless") {
                                       itemOptions = productosMenu[itemType]?.sabores;
-                                      labelText = `${itemType} - Elige Condimentos`;
+                                      labelText = `${itemType} - Elige Sabores`;
                                       isFlavorSelection = true;
                                       currentSelectionStateKey = `${paqueteProducto.nombre}_${itemType.toLowerCase()}Sabores`;
                                       selectedItemsOrOption = seleccion[currentSelectionStateKey] || [];
                                       maxCount = getMaxSabores(itemType, itemConfig.quantity);
                                     } else if (itemType === "Papas") {
-                                      // Para Papas, primero se elige el tipo (Francesa/Gajo)
-                                      // itemConfig.options es una función, así que la llamamos
-                                      itemOptions = itemConfig.options();
-                                      labelText = "Tipo de Papas";
-                                      currentSelectionStateKey = `${paqueteProducto.nombre}_papasTipo`;
-                                      selectedItemsOrOption = seleccion[currentSelectionStateKey] || '';
+                                        const isTwoPapasBox = paqueteProducto.nombre.includes("Boneless Box") || paqueteProducto.nombre.includes("Bendito Box");
 
-                                      // Si ya se seleccionó el tipo de papa, mostrar opciones de sabor
-                                      const papaTipoSeleccionada = seleccion[currentSelectionStateKey];
-                                      const saboresDePapaKey = `${paqueteProducto.nombre}_papasSabores`;
-                                      const saboresDePapaSeleccionados = seleccion[saboresDePapaKey] || [];
-                                      const maxSaboresPapa = getMaxSabores(itemType, papaTipoSeleccionada);
+                                        if (isTwoPapasBox) {
+                                            const papasType = itemConfig.quantity;
+                                            const papasKey = papasType.includes("Francesa") ? "papasFrancesaSabores" : "papasGajoSabores";
+                                            labelText = `Condimentos para ${papasType}`;
+                                            isFlavorSelection = true;
+                                            itemOptions = productosMenu.Papas.sabores;
+                                            currentSelectionStateKey = `${paqueteProducto.nombre}_${papasKey}`;
+                                            selectedItemsOrOption = seleccion[currentSelectionStateKey] || [];
+                                            maxCount = getMaxSabores(itemType, papasType);
+                                        } else {
+                                            itemOptions = itemConfig.options();
+                                            labelText = "Tipo de Papas";
+                                            currentSelectionStateKey = `${paqueteProducto.nombre}_papasTipo`;
+                                            selectedItemsOrOption = seleccion[currentSelectionStateKey] || '';
 
-                                      return (
-                                        <div key={`${paqueteProducto.nombre}-${itemType}-${idx}`} style={{width: '100%', textAlign: 'center'}}>
-                                            <label style={{marginTop: '1rem'}}>{labelText}</label>
-                                            <div className="productos-disponibles">
-                                                {itemOptions.map(option => (
-                                                    <button
-                                                        key={`${paqueteProducto.nombre}-${itemType}-${option}`}
-                                                        className={`producto-btn ${selectedItemsOrOption === option ? "activo" : ""}`}
-                                                        onClick={() => handleSeleccionChange(itemType, "Tipo", option, paqueteProducto.nombre)}
-                                                        disabled={selectedItemsOrOption && selectedItemsOrOption !== option} // Deshabilita si ya hay una seleccionada y no es esta
-                                                    >
-                                                        {option}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            {papaTipoSeleccionada && maxSaboresPapa > 0 && (
-                                                <>
-                                                    <label style={{marginTop: '1rem'}}>
-                                                        Elige Sabor Papas ({saboresDePapaSeleccionados.length} de {maxSaboresPapa})
-                                                    </label>
-                                                    <div className="productos-disponibles sabores-grid" style={{marginTop: '0.5rem'}}>
-                                                        {productosMenu.Papas.sabores.map(sabor => (
+                                            const papaTipoSeleccionada = seleccion[currentSelectionStateKey];
+                                            const saboresDePapaKey = `${paqueteProducto.nombre}_papasSabores`;
+                                            const saboresDePapaSeleccionados = seleccion[saboresDePapaKey] || [];
+                                            const maxSaboresPapa = getMaxSabores(itemType, papaTipoSeleccionada);
+
+                                            return (
+                                                <div key={`${paqueteProducto.nombre}-${itemType}-${idx}`} style={{width: '100%', textAlign: 'center'}}>
+                                                    <label style={{marginTop: '1rem'}}>{labelText}</label>
+                                                    <div className="productos-disponibles">
+                                                        {itemOptions.map(option => (
                                                             <button
-                                                                key={`${paqueteProducto.nombre}-${itemType}-${papaTipoSeleccionada}-${sabor}`}
-                                                                className={`producto-btn ${saboresDePapaSeleccionados.includes(sabor) ? "activo" : ""}`}
-                                                                onClick={() => handleSeleccionChange(itemType, "Sabor", sabor, paqueteProducto.nombre)}
-                                                                disabled={!saboresDePapaSeleccionados.includes(sabor) && saboresDePapaSeleccionados.length >= maxSaboresPapa}
+                                                                key={`${paqueteProducto.nombre}-${itemType}-${option}`}
+                                                                className={`producto-btn ${selectedItemsOrOption === option ? "activo" : ""}`}
+                                                                onClick={() => handleSeleccionChange(itemType, "Tipo", option, paqueteProducto.nombre)}
+                                                                disabled={selectedItemsOrOption && selectedItemsOrOption !== option}
                                                             >
-                                                                {sabor}
+                                                                {option}
                                                             </button>
                                                         ))}
                                                     </div>
-                                                    {saboresDePapaSeleccionados.length < maxSaboresPapa && (
-                                                        <p className="error-message">Faltan {maxSaboresPapa - saboresDePapaSeleccionados.length} sabor(es) para las papas.</p>
+                                                    {papaTipoSeleccionada && maxSaboresPapa > 0 && (
+                                                        <>
+                                                            <label style={{marginTop: '1rem'}}>
+                                                                Elige Sabor Papas ({saboresDePapaSeleccionados.length} de {maxSaboresPapa})
+                                                            </label>
+                                                            <div className="productos-disponibles sabores-grid" style={{marginTop: '0.5rem'}}>
+                                                                {productosMenu.Papas.sabores.map(sabor => (
+                                                                    <button
+                                                                        key={`${paqueteProducto.nombre}-${itemType}-${papaTipoSeleccionada}-${sabor}`}
+                                                                        className={`producto-btn ${saboresDePapaSeleccionados.includes(sabor) ? "activo" : ""}`}
+                                                                        onClick={() => handleSeleccionChange(itemType, "Sabor", sabor, paqueteProducto.nombre)}
+                                                                        disabled={!saboresDePapaSeleccionados.includes(sabor) && saboresDePapaSeleccionados.length >= maxSaboresPapa}
+                                                                    >
+                                                                        {sabor}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                            {saboresDePapaSeleccionados.length < maxSaboresPapa && (
+                                                                <p className="error-message">Faltan {maxSaboresPapa - saboresDePapaSeleccionados.length} sabor(es) para las papas.</p>
+                                                            )}
+                                                            {saboresDePapaSeleccionados.length > maxSaboresPapa && (
+                                                                <p className="error-message">Has seleccionado demasiados sabores para las papas. Máximo {maxSaboresPapa}.</p>
+                                                            )}
+                                                        </>
                                                     )}
-                                                    {saboresDePapaSeleccionados.length > maxSaboresPapa && (
-                                                        <p className="error-message">Has seleccionado demasiados sabores para las papas. Máximo {maxSaboresPapa}.</p>
-                                                    )}
-                                                </>
-                                            )}
-                                        </div>
-                                      );
+                                                </div>
+                                            );
+                                        }
                                     } else if (itemType === "Bebida") {
                                       itemOptions = itemConfig.options;
                                       labelText = `${itemConfig.quantity} - Elige Bebida`;
@@ -1183,14 +1393,13 @@ Número de orden: *#${ordenId}*
                                       selectedItemsOrOption = seleccion[currentSelectionStateKey] || [];
                                       maxCount = itemConfig.quantity.includes('2 Bebidas') ? 2 : 1;
                                     }
-                                    // ADECUACIONES PARA PAQUETE KIDS: Renderizado de la opción principal de Kids
                                     else if (itemType === "KidsMainOption") {
                                         itemOptions = itemConfig.options;
                                         labelText = "Elige tu Opción Principal";
 
                                         currentSelectionStateKey = `${paqueteProducto.nombre}_kidsMainOption`;
-                                        selectedItemsOrOption = seleccion[currentSelectionStateKey] || ''; // Es un string
-                                        maxCount = 1; // Solo se puede elegir 1 opción principal
+                                        selectedItemsOrOption = seleccion[currentSelectionStateKey] || '';
+                                        maxCount = 1;
 
                                         return (
                                             <div key={`${paqueteProducto.nombre}-${itemType}-${idx}`} style={{width: '100%', textAlign: 'center'}}>
@@ -1200,15 +1409,13 @@ Número de orden: *#${ordenId}*
                                                         <button
                                                             key={`${paqueteProducto.nombre}-${itemType}-${option}`}
                                                             className={`producto-btn ${selectedItemsOrOption === option ? "activo" : ""}`}
-                                                            // Lógica para permitir deseleccionar
                                                             onClick={() => {
                                                                 if (selectedItemsOrOption === option) {
-                                                                    handleSeleccionChange(itemType, itemType, '', paqueteProducto.nombre); // Deseleccionar
+                                                                    handleSeleccionChange(itemType, itemType, '', paqueteProducto.nombre);
                                                                 } else {
-                                                                    handleSeleccionChange(itemType, itemType, option, paqueteProducto.nombre); // Seleccionar
+                                                                    handleSeleccionChange(itemType, itemType, option, paqueteProducto.nombre);
                                                                 }
                                                             }}
-                                                            // Deshabilita otras opciones si ya hay una seleccionada y no es la actual
                                                             disabled={selectedItemsOrOption !== '' && selectedItemsOrOption !== option}
                                                         >
                                                             {option}
@@ -1221,11 +1428,40 @@ Número de orden: *#${ordenId}*
                                             </div>
                                         );
                                     }
-                                    // Jugo y Postre ya no se renderizan aquí como configurables
 
+                                    if (itemType === "Papas" && (paqueteProducto.nombre.includes("Boneless Box") || paqueteProducto.nombre.includes("Bendito Box"))) {
+                                        const papaTipo = itemConfig.quantity;
+                                        const papaKey = papaTipo.includes("Francesa") ? "papasFrancesaSabores" : "papasGajoSabores";
+                                        const saboresDePapaSeleccionados = seleccion[`${paqueteProducto.nombre}_${papaKey}`] || [];
+                                        const maxSaboresPapa = getMaxSabores("Papas", papaTipo);
+                                        return (
+                                            <div key={`${paqueteProducto.nombre}-${itemType}-${idx}`} style={{width: '100%', textAlign: 'center'}}>
+                                                <label style={{marginTop: '1rem'}}>
+                                                    Condimentos para {papaTipo} ({saboresDePapaSeleccionados.length} de {maxSaboresPapa})
+                                                </label>
+                                                <div className="productos-disponibles sabores-grid" style={{marginTop: '0.5rem'}}>
+                                                    {productosMenu.Papas.sabores.map(sabor => (
+                                                        <button
+                                                            key={`${paqueteProducto.nombre}-${papaKey}-${sabor}`}
+                                                            className={`producto-btn ${saboresDePapaSeleccionados.includes(sabor) ? "activo" : ""}`}
+                                                            onClick={() => handleSeleccionChange("Papas", "Sabor", sabor, paqueteProducto.nombre, idx)}
+                                                            disabled={!saboresDePapaSeleccionados.includes(sabor) && saboresDePapaSeleccionados.length >= maxSaboresPapa}
+                                                        >
+                                                            {sabor}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                {saboresDePapaSeleccionados.length < maxSaboresPapa && (
+                                                    <p className="error-message">Faltan {maxSaboresPapa - saboresDePapaSeleccionados.length} sabor(es) para {papaTipo}.</p>
+                                                )}
+                                                {saboresDePapaSeleccionados.length > maxSaboresPapa && (
+                                                    <p className="error-message">Has seleccionado demasiados sabores para {papaTipo}. Máximo {maxSaboresPapa}.</p>
+                                                )}
+                                            </div>
+                                        );
+                                    }
 
-                                    // Si no hay opciones o no está configurado, no renderiza este sub-item (excepto para Papas que ya se manejó y KidsMainOption que se manejó arriba)
-                                    if (!itemOptions || itemOptions.length === 0 || itemType === "Papas" || itemType === "KidsMainOption") return null;
+                                    if (!itemOptions || itemOptions.length === 0 || itemType === "Papas") return null;
 
                                     return (
                                         <div key={`${paqueteProducto.nombre}-${itemType}-${idx}`} style={{width: '100%', textAlign: 'center'}}>
@@ -1240,7 +1476,6 @@ Número de orden: *#${ordenId}*
                                                             (Array.isArray(selectedItemsOrOption) && selectedItemsOrOption.includes(option)) ||
                                                             (typeof selectedItemsOrOption === 'string' && selectedItemsOrOption === option)
                                                             ? "activo" : ""}`}
-                                                        // Llama a handleSeleccionChange pasando el nombre del paquete padre
                                                         onClick={() => handleSeleccionChange(itemType, isFlavorSelection ? "Sabor" : (itemType === "Bebida" ? "Bebida" : "Option"), option, paqueteProducto.nombre)}
                                                         disabled={
                                                             (Array.isArray(selectedItemsOrOption) && !selectedItemsOrOption.includes(option) && selectedItemsOrOption.length >= maxCount)
@@ -1276,7 +1511,6 @@ Número de orden: *#${ordenId}*
                   </div>
                 );
               }
-              // --- Manejador para Promociones (con validación de día y opciones configurables) ---
               else if (categoria === "Promociones") {
                 return (
                   <div key={categoria} className={`categoria-productos ${estaAbierta ? 'categoria-activa' : ''}`}>
@@ -1291,12 +1525,10 @@ Número de orden: *#${ordenId}*
                     {estaAbierta && (
                       <div className="productos-disponibles">
                         {datos.map((promo) => {
-                          // Filtrar promociones para mostrar solo las del día actual (o sin restricción de día)
                           if (promo.dia && promo.dia !== currentDay) {
                             return null;
                           }
 
-                          // Promociones de descuento o informativas (sin botón de agregar)
                           if (promo.isDiscount) {
                             return (
                               <div key={promo.nombre} className="promo-info-card">
@@ -1307,7 +1539,6 @@ Número de orden: *#${ordenId}*
                             );
                           }
 
-                          // Promociones con opciones de bebida (ej. Michelada Viernes)
                           if (promo.isSpecialOffer && promo.options) {
                             return (
                               <div key={promo.nombre} className="producto-item-with-options">
@@ -1321,10 +1552,10 @@ Número de orden: *#${ordenId}*
                                       nombre: `${promo.nombre} (${micheladaPromoOption[promo.nombre]})`,
                                       precio: promo.precio
                                     });
-                                    setMicheladaPromoOption(prev => ({ ...prev, [promo.nombre]: undefined })); // Limpiar después de agregar
+                                    setMicheladaPromoOption(prev => ({ ...prev, [promo.nombre]: undefined }));
                                   }}
                                   className="producto-btn"
-                                  disabled={!micheladaPromoOption[promo.nombre]} // Deshabilita hasta seleccionar opción
+                                  disabled={!micheladaPromoOption[promo.nombre]}
                                 >
                                   {promo.nombre} - ${promo.precio.toFixed(2)}
                                 </button>
@@ -1344,38 +1575,37 @@ Número de orden: *#${ordenId}*
                             );
                             }
 
-                          // Promociones configurables (Lunes, Miércoles, Sábado)
                           if (promo.configurableItems) {
-                             const isPromoActive = activePackage === promo.nombre; // Usamos activePackage para las promos también
+                             const isPromoActive = activePackage === promo.nombre;
                             return (
                               <div key={promo.nombre} className={`producto-item-with-options ${isPromoActive ? 'activo' : ''}`}>
                                 <h4
                                     style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
-                                    onClick={() => setActivePackage(isPromoActive ? null : promo.nombre)} // Alterna la visibilidad de la promo
+                                    onClick={() => setActivePackage(isPromoActive ? null : promo.nombre)}
                                 >
-                                    <ChevronIcon isOpen={isPromoActive} size={20} color='#333' /> {/* Icono para promociones */}
+                                    <ChevronIcon isOpen={isPromoActive} size={20} color='#333' />
                                     {promo.nombre} - ${promo.precio.toFixed(2)}
                                 </h4>
-                                {isPromoActive && ( // Muestra los ítems configurables solo si la promo está activa
+                                {isPromoActive && (
                                     <>
                                     {promo.configurableItems.map((itemConfig, idx) => {
                                         const itemType = itemConfig.type;
                                         let itemOptions = [];
                                         let labelText = "";
                                         let isFlavorSelection = false;
-                                        let currentSelectionStateKey; // Declarada aquí para este scope
-                                        let selectedItemsOrOption; // Usado para cualquier tipo de selección: string o array
+                                        let currentSelectionStateKey;
+                                        let selectedItemsOrOption;
                                         let maxCount = 1;
 
                                         if (itemType === "Alitas" || itemType === "Boneless") {
                                           itemOptions = productosMenu[itemType]?.sabores;
-                                          labelText = `${itemType} - Elige Condimentos`;
+                                          labelText = `${itemType} - Elige Sabores`;
                                           isFlavorSelection = true;
                                           currentSelectionStateKey = `${promo.nombre}_${itemType.toLowerCase()}Sabores`;
                                           selectedItemsOrOption = seleccion[currentSelectionStateKey] || [];
                                           maxCount = getMaxSabores(itemType, itemConfig.quantity);
                                         } else if (itemType === "Papas") {
-                                          itemOptions = itemConfig.options(); // Llama a la función
+                                          itemOptions = itemConfig.options();
                                           labelText = "Tipo de Papas";
                                           currentSelectionStateKey = `${promo.nombre}_papasTipo`;
                                           selectedItemsOrOption = seleccion[currentSelectionStateKey] || '';
@@ -1450,7 +1680,6 @@ Número de orden: *#${ordenId}*
                                                                 (Array.isArray(selectedItemsOrOption) && selectedItemsOrOption.includes(option)) ||
                                                                 (typeof selectedItemsOrOption === 'string' && selectedItemsOrOption === option)
                                                                 ? "activo" : ""}`}
-                                                            // Llama a handleSeleccionChange pasando el nombre de la promo padre
                                                             onClick={() => handleSeleccionChange(itemType, isFlavorSelection ? "Sabor" : (itemType === "Bebida" ? "Bebida" : "Option"), option, promo.nombre)}
                                                             disabled={
                                                                 (Array.isArray(selectedItemsOrOption) && !selectedItemsOrOption.includes(option) && selectedItemsOrOption.length >= maxCount)
@@ -1472,7 +1701,7 @@ Número de orden: *#${ordenId}*
                                     })}
                                     <button
                                       className="producto-btn agregar-btn"
-                                      onClick={() => agregarProductoPaquete(promo)} // Usamos agregarProductoPaquete para promociones configurables
+                                      onClick={() => agregarProductoPaquete(promo)}
                                     >
                                       Agregar {promo.nombre}
                                     </button>
@@ -1482,7 +1711,6 @@ Número de orden: *#${ordenId}*
                             );
                           }
 
-                          // Fallback para cualquier otra promoción simple (sin opciones ni configurables)
                           return (
                             <button
                               key={promo.nombre}
@@ -1498,7 +1726,6 @@ Número de orden: *#${ordenId}*
                   </div>
                 );
               }
-              // --- Manejador por defecto para listas de productos simples (Snacks, Burgys, Doggys, Postres, etc.) ---
               else if (Array.isArray(datos)) {
                 return (
                   <div key={categoria} className={`categoria-productos ${estaAbierta ? 'categoria-activa' : ''}`}>
@@ -1526,7 +1753,7 @@ Número de orden: *#${ordenId}*
                   </div>
                 );
               } else {
-                return null; // Si no coincide con ningún tipo de categoría manejado
+                return null;
               }
             })}
 
@@ -1570,7 +1797,7 @@ Número de orden: *#${ordenId}*
             <div className="step-buttons">
               <button onClick={() => setStep(2)}>Atrás</button>
               <a
-                href={generarMensaje()} // Genera el enlace de WhatsApp
+                href={generarMensaje()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="enviar-btn"
