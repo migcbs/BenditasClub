@@ -214,7 +214,7 @@ body {
 .mobile-menu-links a {
   font-family: 'Titan One', cursive; /* <-- Asegura esta fuente para móvil */
   text-transform: uppercase;
-  font-size: 2.2rem; /* <-- Tu tamaño para móvil */
+  font-size: 2rem; /* <-- Tu tamaño para móvil */
   padding: 0.8rem 0;
   color: #e78fbb;
   text-decoration: none;
@@ -492,53 +492,71 @@ body {
 }
 
 /* ------------------------------
-   BANNER
+   BANNER DE AVISOS MEJORADO
 ------------------------------ */
 
+/* Estilos principales del banner */
 .banner-avisos {
   width: 100%;
   background-color: #e78fbb;
-  overflow: hidden;
-  padding: 0.7rem 1rem;
+  padding: 0.7rem 0.5rem;
   font-family: 'Titan One', cursive;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-size: 1rem;
   color: white;
   position: relative;
   z-index: 10;
+  overflow: hidden;
+  text-align: center;
 }
 
-/* Contenedor de desplazamiento */
+/* Contenedor del slider */
 .mensaje-slider {
-  width: 100%;
-  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  overflow: hidden;
 }
 
-/* Línea horizontal con animación */
+/* Contenedor interno con la animación de movimiento */
 .mensaje-slider-inner {
   display: flex;
-  transition: transform 0.6s ease-in-out;
-  width: 300%; /* 3 mensajes, ajustar si agregas más */
+  white-space: nowrap;
+  animation: slide 15s linear infinite;
 }
 
 /* Mensaje individual */
 .mensaje-horizontal {
-  flex: 0 0 100%;
-  text-align: center;
-  white-space: nowrap;
+  padding: 0 1rem;
+  font-size: 1rem;
+  /* Evita que el texto se rompa, manteniendo todo en una línea */
+  flex-shrink: 0;
 }
 
-/* Responsivo */
-@media (max-width: 768px) {
-  .banner-avisos {
-    font-size: 0.5rem;
+/* Animación del slider */
+@keyframes slide {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
 
+/* ------------------------------
+   RESPONSIVE
+------------------------------ */
+
+@media (max-width: 768px) {
+  .banner-avisos {
+    padding: 0.5rem;
+  }
+
+  .mensaje-horizontal {
+    font-size: 0.7rem;
+  }
+}
 
 /* ------------------------------
    MENU

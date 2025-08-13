@@ -328,10 +328,10 @@ const productosMenu = {
       { nombre: "Michelada Sin Alcohol", precio: 40, isPromotion: false },
     ],
     "Shakes (Malteadas)": [
-      { nombre: "Chocolate", precio: 55, isPromotion: false },
-      { nombre: "Fresa", precio: 55, isPromotion: false },
-      { nombre: "Vainilla", precio: 55, isPromotion: false },
-      { nombre: "De Temporada", precio: 60, isPromotion: false },
+      { nombre: "Malteada de Chocolate", precio: 55, isPromotion: false },
+      { nombre: "Malteada de Fresa", precio: 55, isPromotion: false },
+      { nombre: "Malteada de Vainilla", precio: 55, isPromotion: false },
+      { nombre: "Malteada de Temporada", precio: 60, isPromotion: false },
     ],
     "Vino(187ml)": [
       { nombre: "Riunite Lambrussco", precio: 89, isPromotion: false },
