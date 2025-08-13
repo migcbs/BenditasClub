@@ -457,6 +457,7 @@ const productosMenu = {
         dia: "Viernes",
         isPromotion: true,
         options: ["Con Clamato", "Sin Clamato"],
+        beerOptions: ["Indio", "Tecate", "XX lager"],
         isSpecialOffer: true,
       },
       {
@@ -515,8 +516,8 @@ const productosMenu = {
       { nombre: "Riunite Lambrussco", precio: 89, isPromotion: false },
     ],
     Drinks: [
-      { nombre: "Michelada 1L", precio: 80, options: ["Con Clamato", "Sin Clamato"], isPromotion: false },
-      { nombre: "Michelada 500ml", precio: 50, options: ["Con Clamato", "Sin Clamato"], isPromotion: false },
+      { nombre: "Michelada 1L", precio: 80, options: ["Con Clamato", "Sin Clamato"], beerOptions: ["Indio", "Tecate", "XX lager"], isPromotion: false },
+      { nombre: "Michelada 500ml", precio: 50, options: ["Con Clamato", "Sin Clamato"], beerOptions: ["Indio", "Tecate", "XX lager"], isPromotion: false },
       { nombre: "Blue Drink 1L", precio: 80, isPromotion: false },
       { nombre: "Blue Drink 500ml", precio: 50, isPromotion: false },
       { nombre: "Pinky Drink 1L", precio: 80, isPromotion: false },
@@ -622,8 +623,12 @@ const PedidoPopup = ({ onClose }) => {
 
   const [ordenId] = useState(Math.floor(Math.random() * 100000));
   const [errors, setErrors] = useState({});
-  const [micheladaOption, setMicheladaOption] = useState({});
-  const [micheladaPromoOption, setMicheladaPromoOption] = useState({});
+
+  const [micheladaClamatoOption, setMicheladaClamatoOption] = useState({});
+  const [micheladaBeerOption, setMicheladaBeerOption] = useState({});
+  const [micheladaPromoClamatoOption, setMicheladaPromoClamatoOption] = useState({});
+  const [micheladaPromoBeerOption, setMicheladaPromoBeerOption] = useState({});
+
 
   const orderedCategories = [
     "Snacks", "Papas", "Alitas", "Boneless",
@@ -699,7 +704,7 @@ const PedidoPopup = ({ onClose }) => {
         } else if (tipo === "Bebida") {
             currentSelectionStateKey = `${parentProductName}_${keyBase}Bebida`;
         } else if (tipo === "Tipo") {
-            currentSelectionStateKey = `${parentProductName}_${keyBase}Tipo`;
+            currentSelectionStateKey = `${parentProductName}_papasTipo`;
         } else if (itemType === "KidsMainOption") {
             currentSelectionStateKey = `${parentProductName}_kidsMainOption`;
             newSelection[currentSelectionStateKey] = valor;
@@ -859,12 +864,11 @@ const PedidoPopup = ({ onClose }) => {
     if (configurableItems && configurableItems.length > 0) {
       configurableItems.forEach((itemConfig, index) => {
         const itemType = itemConfig.type;
-        let currentSelectionStateKey;
         let selectedValueOrItems;
         let maxCount;
-
+        
         if (itemType === "Alitas" || itemType === "Boneless") {
-            currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}Sabores`;
+            const currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}Sabores`;
             selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
             maxCount = getMaxSabores(itemType, itemConfig.quantity);
 
@@ -882,7 +886,7 @@ const PedidoPopup = ({ onClose }) => {
             if (isTwoPapasBox) {
                 const papasType = itemConfig.quantity;
                 const papasKey = papasType.includes("Francesa") ? "papasFrancesaSabores" : "papasGajoSabores";
-                currentSelectionStateKey = `${nombre}_${papasKey}`;
+                const currentSelectionStateKey = `${nombre}_${papasKey}`;
                 selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
                 maxCount = getMaxSabores(itemType, papasType);
 
@@ -895,7 +899,7 @@ const PedidoPopup = ({ onClose }) => {
                     allConfigured = false;
                 }
             } else {
-                currentSelectionStateKey = `${nombre}_papasTipo`;
+                const currentSelectionStateKey = `${nombre}_papasTipo`;
                 const papaTipoSeleccionada = seleccion[currentSelectionStateKey];
                 if (!papaTipoSeleccionada) {
                     allConfigured = false;
@@ -903,8 +907,8 @@ const PedidoPopup = ({ onClose }) => {
                 }
                 itemDetails.push(papaTipoSeleccionada);
 
-                currentSelectionStateKey = `${nombre}_papasSabores`;
-                selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
+                const saboresDePapaKey = `${nombre}_papasSabores`;
+                selectedValueOrItems = seleccion[saboresDePapaKey] || [];
                 maxCount = getMaxSabores(itemType, papaTipoSeleccionada);
                 if (maxCount > 0 && selectedValueOrItems.length !== maxCount) {
                     allConfigured = false;
@@ -914,7 +918,7 @@ const PedidoPopup = ({ onClose }) => {
                 }
             }
         } else if (itemType === "Bebida") {
-            currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}Bebida`;
+            const currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}Bebida`;
             selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
             maxCount = itemConfig.quantity.includes('2 Bebidas') ? 2 : 1;
             if (selectedValueOrItems.length !== maxCount) {
@@ -925,7 +929,7 @@ const PedidoPopup = ({ onClose }) => {
             }
         }
         else if (itemType === "KidsMainOption") {
-            currentSelectionStateKey = `${nombre}_kidsMainOption`;
+            const currentSelectionStateKey = `${nombre}_kidsMainOption`;
             selectedValueOrItems = seleccion[currentSelectionStateKey];
             if (!selectedValueOrItems) {
                 allConfigured = false;
@@ -1236,12 +1240,23 @@ Número de orden: *#${ordenId}*
                           <div key={producto.nombre} className="producto-item-with-options">
                             <button
                               onClick={() => {
-                                if (!producto.options) {
+                                if (producto.options && producto.beerOptions) {
+                                  if (!micheladaClamatoOption[producto.nombre] || !micheladaBeerOption[producto.nombre]) {
+                                    alert("Por favor, selecciona una opción y el tipo de cerveza.");
+                                    return;
+                                  }
+                                  agregarProducto({
+                                    nombre: `${producto.nombre} (${micheladaClamatoOption[producto.nombre]}, ${micheladaBeerOption[producto.nombre]})`,
+                                    precio: producto.precio
+                                  });
+                                  setMicheladaClamatoOption(prev => ({ ...prev, [producto.nombre]: undefined }));
+                                  setMicheladaBeerOption(prev => ({ ...prev, [producto.nombre]: undefined }));
+                                } else {
                                   agregarProducto(producto);
                                 }
                               }}
                               className="producto-btn"
-                              disabled={producto.options && !micheladaOption[producto.nombre]}
+                              disabled={(producto.options && !micheladaClamatoOption[producto.nombre]) || (producto.beerOptions && !micheladaBeerOption[producto.nombre])}
                             >
                               {producto.nombre} - ${producto.precio.toFixed(2)}
                             </button>
@@ -1251,17 +1266,22 @@ Número de orden: *#${ordenId}*
                                 {producto.options.map(option => (
                                   <button
                                     key={`${producto.nombre}-${option}`}
-                                    className={`option-btn ${micheladaOption[producto.nombre] === option ? "activo" : ""}`}
-                                    onClick={() => {
-                                      setMicheladaOption(prev => ({ ...prev, [producto.nombre]: option }));
-                                      if (producto.nombre.includes("Michelada")) {
-                                        agregarProducto({
-                                          nombre: `${producto.nombre} (${option})`,
-                                          precio: producto.precio
-                                        });
-                                        setMicheladaOption(prev => ({ ...prev, [producto.nombre]: undefined }));
-                                      }
-                                    }}
+                                    className={`option-btn ${micheladaClamatoOption[producto.nombre] === option ? "activo" : ""}`}
+                                    onClick={() => setMicheladaClamatoOption(prev => ({ ...prev, [producto.nombre]: option }))}
+                                  >
+                                    {option}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                            {producto.beerOptions && (
+                              <div className="michelada-options">
+                                <p className="help-text">Elige el tipo de cerveza:</p>
+                                {producto.beerOptions.map(option => (
+                                  <button
+                                    key={`${producto.nombre}-${option}`}
+                                    className={`option-btn ${micheladaBeerOption[producto.nombre] === option ? "activo" : ""}`}
+                                    onClick={() => setMicheladaBeerOption(prev => ({ ...prev, [producto.nombre]: option }))}
                                   >
                                     {option}
                                   </button>
@@ -1315,7 +1335,7 @@ Número de orden: *#${ordenId}*
 
                                     if (itemType === "Alitas" || itemType === "Boneless") {
                                       itemOptions = productosMenu[itemType]?.sabores;
-                                      labelText = `${itemType} - Elige Sabores`;
+                                      labelText = `${itemType} - Elige Condimentos`;
                                       isFlavorSelection = true;
                                       currentSelectionStateKey = `${paqueteProducto.nombre}_${itemType.toLowerCase()}Sabores`;
                                       selectedItemsOrOption = seleccion[currentSelectionStateKey] || [];
@@ -1544,33 +1564,50 @@ Número de orden: *#${ordenId}*
                               <div key={promo.nombre} className="producto-item-with-options">
                                 <button
                                   onClick={() => {
-                                    if (!micheladaPromoOption[promo.nombre]) {
-                                      alert("Por favor, selecciona una opción para la Michelada.");
+                                    if (!micheladaPromoClamatoOption[promo.nombre] || !micheladaPromoBeerOption[promo.nombre]) {
+                                      alert("Por favor, selecciona una opción y el tipo de cerveza.");
                                       return;
                                     }
                                     agregarProducto({
-                                      nombre: `${promo.nombre} (${micheladaPromoOption[promo.nombre]})`,
+                                      nombre: `${promo.nombre} (${micheladaPromoClamatoOption[promo.nombre]}, ${micheladaPromoBeerOption[promo.nombre]})`,
                                       precio: promo.precio
                                     });
-                                    setMicheladaPromoOption(prev => ({ ...prev, [promo.nombre]: undefined }));
+                                    setMicheladaPromoClamatoOption(prev => ({ ...prev, [promo.nombre]: undefined }));
+                                    setMicheladaPromoBeerOption(prev => ({ ...prev, [promo.nombre]: undefined }));
                                   }}
                                   className="producto-btn"
-                                  disabled={!micheladaPromoOption[promo.nombre]}
+                                  disabled={!micheladaPromoClamatoOption[promo.nombre] || !micheladaPromoBeerOption[promo.nombre]}
                                 >
                                   {promo.nombre} - ${promo.precio.toFixed(2)}
                                 </button>
-                                <div className="michelada-options">
-                                  <p className="help-text">Elige una opción:</p>
-                                  {promo.options.map(option => (
-                                    <button
-                                      key={`${promo.nombre}-${option}`}
-                                      className={`option-btn ${micheladaPromoOption[promo.nombre] === option ? "activo" : ""}`}
-                                      onClick={() => setMicheladaPromoOption(prev => ({ ...prev, [promo.nombre]: option }))}
-                                    >
-                                      {option}
-                                    </button>
-                                  ))}
-                                </div>
+                                {promo.options && (
+                                    <div className="michelada-options">
+                                      <p className="help-text">Elige una opción:</p>
+                                      {promo.options.map(option => (
+                                        <button
+                                          key={`${promo.nombre}-${option}`}
+                                          className={`option-btn ${micheladaPromoClamatoOption[promo.nombre] === option ? "activo" : ""}`}
+                                          onClick={() => setMicheladaPromoClamatoOption(prev => ({ ...prev, [promo.nombre]: option }))}
+                                        >
+                                          {option}
+                                        </button>
+                                      ))}
+                                    </div>
+                                )}
+                                {promo.beerOptions && (
+                                    <div className="michelada-options">
+                                      <p className="help-text">Elige el tipo de cerveza:</p>
+                                      {promo.beerOptions.map(option => (
+                                        <button
+                                          key={`${promo.nombre}-${option}`}
+                                          className={`option-btn ${micheladaPromoBeerOption[promo.nombre] === option ? "activo" : ""}`}
+                                          onClick={() => setMicheladaPromoBeerOption(prev => ({ ...prev, [promo.nombre]: option }))}
+                                        >
+                                          {option}
+                                        </button>
+                                      ))}
+                                    </div>
+                                )}
                               </div>
                             );
                             }
@@ -1599,7 +1636,7 @@ Número de orden: *#${ordenId}*
 
                                         if (itemType === "Alitas" || itemType === "Boneless") {
                                           itemOptions = productosMenu[itemType]?.sabores;
-                                          labelText = `${itemType} - Elige Sabores`;
+                                          labelText = `${itemType} - Elige Condimentos`;
                                           isFlavorSelection = true;
                                           currentSelectionStateKey = `${promo.nombre}_${itemType.toLowerCase()}Sabores`;
                                           selectedItemsOrOption = seleccion[currentSelectionStateKey] || [];
