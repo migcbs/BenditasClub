@@ -865,7 +865,7 @@ Número de orden: *#${ordenId}*
     }
 
     texto += `\n*Total estimado: $${total}*`;
-    texto += `\n\n¡Gracias por tu pedido!`;
+ 
 
     // Define el número de WhatsApp según la sucursal
     let telefonoWhatsApp = "";
@@ -884,7 +884,7 @@ Número de orden: *#${ordenId}*
         {/* --- Paso 1: Datos del cliente --- */}
         {step === 1 && (
           <div className="popup-step">
-            <h2>1. Tus datos</h2>
+            <h2>Tus datos</h2>
             <label>Nombre</label>
             <input
               name="nombre"
@@ -946,7 +946,7 @@ Número de orden: *#${ordenId}*
         {/* --- Paso 2: Selección de productos --- */}
         {step === 2 && (
           <div className="popup-step">
-            <h2>2. Tu pedido</h2>
+            <h2>Tu pedido</h2>
             {/* Mapea y renderiza las categorías en el orden definido en `orderedCategories` */}
             {orderedCategories.map((categoria) => {
               const datos = productosMenu[categoria];
@@ -1586,7 +1586,7 @@ Número de orden: *#${ordenId}*
         {/* --- Paso 3: Comentarios y Envío del Pedido --- */}
         {step === 3 && (
           <div className="popup-step">
-            <h2>3. Comentarios</h2>
+            <h2>Comentarios</h2>
             <label>Comentarios extra</label>
             <textarea
               name="comentario"
