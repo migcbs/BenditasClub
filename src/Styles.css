@@ -1886,10 +1886,35 @@ body {
 
 /* --- 2. SLIDER/CARRUSEL DE PRODUCTOS PRINCIPAL --- */
 .featured-products-slider {
-    text-align: center;
-    /* Usa section-spacing para márgenes y padding */
+  text-align: center;
+  width: 100%;         /* Ocupar todo el ancho */
+  max-width: 100vw;    /* Evita cortes horizontales */
+  overflow: hidden;    /* Oculta scroll horizontal si hay desbordes */
+  margin: 0 auto;      /* Centrado por si hay contenido más pequeño */
+  padding: 1rem 0;     /* Espaciado vertical */
+  box-sizing: border-box;
 }
 
+/* Móvil: usar ancho completo sin cortes */
+@media (max-width: 480px) {
+  .featured-products-slider {
+    padding: 0.5rem 0;
+  }
+}
+
+/* Tablet */
+@media (min-width: 481px) and (max-width: 1024px) {
+  .featured-products-slider {
+    padding: 0.8rem 0;
+  }
+}
+
+/* Escritorio: se puede ampliar */
+@media (min-width: 1025px) {
+  .featured-products-slider {
+    padding: 1.5rem 0;
+  }
+}
 .slider-placeholder {
     display: flex;
     justify-content: flex-start; /* Alinea los items al inicio */
