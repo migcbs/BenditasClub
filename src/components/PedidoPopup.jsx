@@ -15,9 +15,9 @@ const ChevronIcon = ({ isOpen, size = 24, color = '#e78fbb' }) => (
     style={{
       transition: 'transform 0.3s ease',
       transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-      marginRight: '8px', // Espacio entre el icono y el texto
-      minWidth: size,    // Asegura que el tamaño del icono se respete
-      minHeight: size,   // Asegura que el tamaño del icono se respete
+      marginRight: '8px',
+      minWidth: size,
+      minHeight: size,
     }}
   >
     <polyline points="9 18 15 12 9 6"></polyline>
@@ -28,19 +28,19 @@ const ChevronIcon = ({ isOpen, size = 24, color = '#e78fbb' }) => (
 // para que esté disponible antes de que el estado inicial de `seleccion` lo use.
 const productosMenu = {
     Snacks: [
-      { nombre: "Salchipulpos", precio: 30 },
-      { nombre: "Salchipapas", precio: 45 },
-      { nombre: "Happy Papas", precio: 60 },
-      { nombre: "Nachos", precio: 35 },
-      { nombre: "Happy Nachos", precio: 60 },
-      { nombre: "Nuggets", precio: 50 },
-      { nombre: "Dedos de Queso", precio: 50 },
-      { nombre: "Aros de Cebolla", precio: 50 },
+      { nombre: "Salchipulpos", precio: 30, isPromotion: false },
+      { nombre: "Salchipapas", precio: 45, isPromotion: false },
+      { nombre: "Happy Papas", precio: 60, isPromotion: false },
+      { nombre: "Nachos", precio: 35, isPromotion: false },
+      { nombre: "Happy Nachos", precio: 60, isPromotion: false },
+      { nombre: "Nuggets", precio: 50, isPromotion: false },
+      { nombre: "Dedos de Queso", precio: 50, isPromotion: false },
+      { nombre: "Aros de Cebolla", precio: 50, isPromotion: false },
     ],
     Papas: {
       items: [
-        { nombre: "Papas a la Francesa", precio: 35, maxSabores: 1 },
-        { nombre: "Papas en Gajo", precio: 40, maxSabores: 1 },
+        { nombre: "Papas a la Francesa", precio: 35, maxSabores: 1, isPromotion: false },
+        { nombre: "Papas en Gajo", precio: 40, maxSabores: 1, isPromotion: false },
       ],
       sabores: [
         "Ajo parmesano", "Pimienta limón", "Queso parmesano", "Paprika", "Naturales",
@@ -48,10 +48,10 @@ const productosMenu = {
     },
     Alitas: {
       items: [
-        { nombre: "8pzs (2 sabores)", precio: 72, maxSabores: 2 },
-        { nombre: "16pzs (2 sabores)", precio: 139, maxSabores: 2 },
-        { nombre: "25pzs (3 sabores)", precio: 209, maxSabores: 3 },
-        { nombre: "50pzs (5 sabores)", precio: 399, maxSabores: 5 },
+        { nombre: "8pzs (2 sabores)", precio: 72, maxSabores: 2, isPromotion: false },
+        { nombre: "16pzs (2 sabores)", precio: 139, maxSabores: 2, isPromotion: false },
+        { nombre: "25pzs (3 sabores)", precio: 209, maxSabores: 3, isPromotion: false },
+        { nombre: "50pzs (5 sabores)", precio: 399, maxSabores: 5, isPromotion: false },
       ],
       sabores: [
         "Ajo parmesano", "Pimienta limón", "Queso parmesano", "BBQ",
@@ -63,9 +63,9 @@ const productosMenu = {
     },
     Boneless: {
       items: [
-        { nombre: "250g", precio: 99, maxSabores: 2 },
-        { nombre: "500g", precio: 189, maxSabores: 2 },
-        { nombre: "1kg", precio: 369, maxSabores: 4 },
+        { nombre: "250g", precio: 99, maxSabores: 2, isPromotion: false },
+        { nombre: "500g", precio: 189, maxSabores: 2, isPromotion: false },
+        { nombre: "1kg", precio: 369, maxSabores: 4, isPromotion: false },
       ],
       sabores: [
         "Ajo parmesano", "Pimienta limón", "Queso parmesano", "BBQ",
@@ -76,35 +76,37 @@ const productosMenu = {
       ],
     },
     Burgys: [
-      { nombre: "Burgy Res", precio: 89 },
-      { nombre: "Burgy Pollo", precio: 89 },
-      { nombre: "Burgy West", precio: 89 },
-      { nombre: "Bonely", precio: 89 },
-      { nombre: "Burgy Mexa", precio: 109 },
-      { nombre: "Burgy Cheesy", precio: 109 },
-      { nombre: "Mega Res", precio: 109 },
-      { nombre: "Mega Pollo", precio: 109 },
-      { nombre: "Mega West", precio: 109 },
+      { nombre: "Burgy Res", precio: 89, isPromotion: false },
+      { nombre: "Burgy Pollo", precio: 89, isPromotion: false },
+      { nombre: "Burgy West", precio: 89, isPromotion: false },
+      { nombre: "Bonely", precio: 89, isPromotion: false },
+      { nombre: "Burgy Mexa", precio: 109, isPromotion: false },
+      { nombre: "Burgy Cheesy", precio: 109, isPromotion: false },
+      { nombre: "Mega Res", precio: 109, isPromotion: false },
+      { nombre: "Mega Pollo", precio: 109, isPromotion: false },
+      { nombre: "Mega West", precio: 109, isPromotion: false },
     ],
     Doggys: [
-      { nombre: "Doggy Club", precio: 99 },
-      { nombre: "Doggy", precio: 89 },
-      { nombre: "Doggy Wacamole", precio: 109 },
+      { nombre: "Doggy Club", precio: 99, isPromotion: false },
+      { nombre: "Doggy", precio: 89, isPromotion: false },
+      { nombre: "Doggy Wacamole", precio: 109, isPromotion: false },
     ],
     "Paquetes de Alitas": [
       {
         nombre: "Paquete 1 Alitas (12 alitas + papas)",
         precio: 139,
+        isPromotion: false,
         configurableItems: [
           { type: "Alitas", quantity: "12pzs", maxSabores: 2 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
-            options: () => productosMenu.Papas.items.map(p => p.nombre) // Usa una función para acceder lazy-load
+            options: () => productosMenu.Papas.items.map(p => p.nombre)
           },
         ],
       },
       {
         nombre: "Paquete 2 Alitas (30 alitas + papas)",
         precio: 289,
+        isPromotion: false,
         configurableItems: [
           { type: "Alitas", quantity: "30pzs", maxSabores: 3 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -115,6 +117,7 @@ const productosMenu = {
       {
         nombre: "Paquete 3 Alitas (50 alitas + papas + dedos de queso)",
         precio: 499,
+        isPromotion: false,
         configurableItems: [
           { type: "Alitas", quantity: "50pzs", maxSabores: 5 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -127,6 +130,7 @@ const productosMenu = {
       {
         nombre: "Paquete 1 Boneless (250gr + papas)",
         precio: 129,
+        isPromotion: false,
         configurableItems: [
           { type: "Boneless", quantity: "250g", maxSabores: 2 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -137,6 +141,7 @@ const productosMenu = {
       {
         nombre: "Paquete 2 Boneless (500gr + papas)",
         precio: 219,
+        isPromotion: false,
         configurableItems: [
           { type: "Boneless", quantity: "500g", maxSabores: 2 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -147,6 +152,7 @@ const productosMenu = {
       {
         nombre: "Paquete 3 Boneless (1.5kg + papas + dedos de queso)",
         precio: 649,
+        isPromotion: false,
         configurableItems: [
           { type: "Boneless", quantity: "1.5kg", maxSabores: 4 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -157,24 +163,25 @@ const productosMenu = {
     ],
     Boxes: [
       {
-        nombre: "Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)", // Mantener nombre completo para las claves
+        nombre: "Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)",
         precio: 99,
-        description: "Incluye: Papas a la Francesa (1 sabor), Jugo de Naranja y Paleta Payaso Mini.", // Descripción para el usuario
+        isPromotion: false,
+        description: "Incluye: Papas a la Francesa (1 sabor), Jugo de Naranja y Paleta Payaso Mini.",
         configurableItems: [
-          { type: "KidsMainOption", quantity: "Option", options: ["8 Nuggets", "6 Alitas", "Mini Burgy"] }, // Opción principal
+          { type: "KidsMainOption", quantity: "Option", options: ["8 Nuggets", "6 Alitas", "Mini Burgy"] },
           {
             type: "Papas",
-            quantity: "Papas a la Francesa", // Tipo de papa fijo en paquete Kids
+            quantity: "Papas a la Francesa",
             maxSabores: 1,
             isGeneric: true,
-            options: () => ["Papas a la Francesa"] // Solo Francesa para Kids
+            options: () => ["Papas a la Francesa"]
           },
-          // Jugo y Postre ya NO son configurables aquí, se asumen incluidos
         ],
       },
       {
         nombre: "Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)",
         precio: 349,
+        isPromotion: false,
         configurableItems: [
           { type: "Boneless", quantity: "500g", maxSabores: 2 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -185,6 +192,7 @@ const productosMenu = {
       {
         nombre: "Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)",
         precio: 249,
+        isPromotion: false,
         configurableItems: [
           { type: "Alitas", quantity: "5pzs", maxSabores: 1 },
           { type: "Boneless", quantity: "5pzs", maxSabores: 1 },
@@ -196,6 +204,7 @@ const productosMenu = {
       {
         nombre: "Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)",
         precio: 469,
+        isPromotion: false,
         configurableItems: [
           { type: "Alitas", quantity: "35pzs", maxSabores: 3 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -206,6 +215,7 @@ const productosMenu = {
       {
         nombre: "Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)",
         precio: 289,
+        isPromotion: false,
         configurableItems: [
           { type: "Alitas", quantity: "10pzs", maxSabores: 2 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -215,17 +225,18 @@ const productosMenu = {
       },
     ],
     Postres: [
-      { nombre: "Pan de Elote", precio: 30 },
-      { nombre: "Chocoflan", precio: 40 },
-      { nombre: "Elotty", precio: 50 },
-      { nombre: "Bruce Cake", precio: 50 },
-      { nombre: "Cookie Club", precio: 50 },
+      { nombre: "Pan de Elote", precio: 30, isPromotion: false },
+      { nombre: "Chocoflan", precio: 40, isPromotion: false },
+      { nombre: "Elotty", precio: 50, isPromotion: false },
+      { nombre: "Bruce Cake", precio: 50, isPromotion: false },
+      { nombre: "Cookie Club", precio: 50, isPromotion: false },
     ],
     Promociones: [
       {
         nombre: "Lunes: 10 Alitas + Papas + Bebida",
         precio: 149,
         dia: "Lunes",
+        isPromotion: true,
         configurableItems: [
           { type: "Alitas", quantity: "10pzs", maxSabores: 2 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -238,6 +249,7 @@ const productosMenu = {
         nombre: "Martes: 10% Descuento BURGY & DOGGY",
         precio: 0,
         dia: "Martes",
+        isPromotion: true,
         isDiscount: true,
         description: "Compra un DOGGY o BURGY y llévate un SHAKE por solo $49 (se aplica en tienda)",
       },
@@ -245,6 +257,7 @@ const productosMenu = {
         nombre: "Miércoles: 250gr Boneless + Papas + Bebida",
         precio: 159,
         dia: "Miércoles",
+        isPromotion: true,
         configurableItems: [
           { type: "Boneless", quantity: "250g", maxSabores: 2 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
@@ -257,12 +270,14 @@ const productosMenu = {
         nombre: "Jueves: 10% Descuento en cualquier BOX FAMILIAR",
         precio: 0,
         dia: "Jueves",
+        isPromotion: true,
         isDiscount: true,
       },
       {
         nombre: "Viernes: MICHELADA 1 LITRO $70",
         precio: 70,
         dia: "Viernes",
+        isPromotion: true,
         options: ["Con Clamato", "Sin Clamato"],
         isSpecialOffer: true,
       },
@@ -270,6 +285,7 @@ const productosMenu = {
         nombre: "Viernes: HAPPY HOUR DE SNACKS",
         precio: 0,
         dia: "Viernes",
+        isPromotion: true,
         isDiscount: true,
         timeSensitive: true,
         description: "10% DESCUENTO de 3pm a 5pm",
@@ -278,53 +294,55 @@ const productosMenu = {
         nombre: "Sábado: 20 Alitas + 2 Bebidas",
         precio: 209,
         dia: "Sábado",
+        isPromotion: true,
         configurableItems: [
           { type: "Alitas", quantity: "20pzs", maxSabores: 2 },
-          { type: "Bebida", quantity: "2 Bebidas", options: ["Agua de Jamaica", "Agua de Horchata", "Agua de Tamarindo", "Refresco"] } // Refresco 600ml
+          { type: "Bebida", quantity: "2 Bebidas", options: ["Agua de Jamaica", "Agua de Horchata", "Agua de Tamarindo", "Refresco"] }
         ],
       },
       {
         nombre: "Sábado: 30 Alitas + Papas + Refresco 2L",
         precio: 329,
         dia: "Sábado",
+        isPromotion: true,
         configurableItems: [
           { type: "Alitas", quantity: "30pzs", maxSabores: 3 },
           { type: "Papas", quantity: "Papas", maxSabores: 1, isGeneric: true,
             options: () => productosMenu.Papas.items.map(p => p.nombre)
           },
-          { type: "Bebida", quantity: "Refresco 2L", options: ["Coca Cola", "Pepsi", "Sprite", "Fanta"] } // Opciones de refresco 2L
+          { type: "Bebida", quantity: "Refresco 2L", options: ["Coca Cola", "Pepsi", "Sprite", "Fanta"] }
         ],
       },
     ],
     Bebidas: [
-      { nombre: "Agua Natural", precio: 20 },
-      { nombre: "Agua de Jamaica", precio: 25 },
-      { nombre: "Agua de Horchata", precio: 25 },
-      { nombre: "Agua de Tamarindo", precio: 25 },
-      { nombre: "Agua de Maracuya", precio: 25 },
-      { nombre: "Refresco", precio: 30 },
-      { nombre: "Limonada Natural", precio: 30 },
-      { nombre: "Limonada Mineral", precio: 35 },
-      { nombre: "Naranjada Natural", precio: 30 },
-      { nombre: "Naranjada Mineral", precio: 35 },
-      { nombre: "Michelada Sin Alcohol", precio: 40 },
+      { nombre: "Agua Natural", precio: 20, isPromotion: false },
+      { nombre: "Agua de Jamaica", precio: 25, isPromotion: false },
+      { nombre: "Agua de Horchata", precio: 25, isPromotion: false },
+      { nombre: "Agua de Tamarindo", precio: 25, isPromotion: false },
+      { nombre: "Agua de Maracuya", precio: 25, isPromotion: false },
+      { nombre: "Refresco", precio: 30, isPromotion: false },
+      { nombre: "Limonada Natural", precio: 30, isPromotion: false },
+      { nombre: "Limonada Mineral", precio: 35, isPromotion: false },
+      { nombre: "Naranjada Natural", precio: 30, isPromotion: false },
+      { nombre: "Naranjada Mineral", precio: 35, isPromotion: false },
+      { nombre: "Michelada Sin Alcohol", precio: 40, isPromotion: false },
     ],
     "Shakes (Malteadas)": [
-      { nombre: "Chocolate", precio: 55 },
-      { nombre: "Fresa", precio: 55 },
-      { nombre: "Vainilla", precio: 55 },
-      { nombre: "De Temporada", precio: 60 },
+      { nombre: "Chocolate", precio: 55, isPromotion: false },
+      { nombre: "Fresa", precio: 55, isPromotion: false },
+      { nombre: "Vainilla", precio: 55, isPromotion: false },
+      { nombre: "De Temporada", precio: 60, isPromotion: false },
     ],
     "Vino(187ml)": [
-      { nombre: "Riunite Lambrussco", precio: 89 },
+      { nombre: "Riunite Lambrussco", precio: 89, isPromotion: false },
     ],
     Drinks: [
-      { nombre: "Michelada 1L", precio: 80, options: ["Con Clamato", "Sin Clamato"] },
-      { nombre: "Michelada 500ml", precio: 50, options: ["Con Clamato", "Sin Clamato"] },
-      { nombre: "Blue Drink 1L", precio: 80 },
-      { nombre: "Blue Drink 500ml", precio: 50 },
-      { nombre: "Pinky Drink 1L", precio: 80 },
-      { nombre: "Pinky Drink 500ml", precio: 50 },
+      { nombre: "Michelada 1L", precio: 80, options: ["Con Clamato", "Sin Clamato"], isPromotion: false },
+      { nombre: "Michelada 500ml", precio: 50, options: ["Con Clamato", "Sin Clamato"], isPromotion: false },
+      { nombre: "Blue Drink 1L", precio: 80, isPromotion: false },
+      { nombre: "Blue Drink 500ml", precio: 50, isPromotion: false },
+      { nombre: "Pinky Drink 1L", precio: 80, isPromotion: false },
+      { nombre: "Pinky Drink 500ml", precio: 50, isPromotion: false },
     ],
 };
 
@@ -340,93 +358,80 @@ const PedidoPopup = ({ onClose }) => {
     comentario: "",
   });
 
-  // Estado para manejar las selecciones configurables de productos y paquetes.
-  // Las claves son dinámicas para soportar opciones dentro de diferentes paquetes.
   const [seleccion, setSeleccion] = useState({
     alitasPiezas: "",
     alitasSabores: [],
     bonelessGramaje: "",
     bonelessSabores: [],
-    papasPiezas: "", // Esto es para papas INDIVIDUALES
-    papasSabores: [], // Esto es para papas INDIVIDUALES
-    // Adecuaciones para selecciones de paquetes/cajas específicas,
-    // usando el nombre completo del producto como prefijo para la clave.
+    papasPiezas: "",
+    papasSabores: [],
     'Paquete 1 Alitas (12 alitas + papas)_alitasSabores': [],
-    'Paquete 1 Alitas (12 alitas + papas)_papasTipo': '', // Nuevo para tipo de papa
+    'Paquete 1 Alitas (12 alitas + papas)_papasTipo': '',
     'Paquete 1 Alitas (12 alitas + papas)_papasSabores': [],
     'Paquete 2 Alitas (30 alitas + papas)_alitasSabores': [],
-    'Paquete 2 Alitas (30 alitas + papas)_papasTipo': '', // Nuevo para tipo de papa
+    'Paquete 2 Alitas (30 alitas + papas)_papasTipo': '',
     'Paquete 2 Alitas (30 alitas + papas)_papasSabores': [],
     'Paquete 3 Alitas (50 alitas + papas + dedos de queso)_alitasSabores': [],
-    'Paquete 3 Alitas (50 alitas + papas + dedos de queso)_papasTipo': '', // Nuevo para tipo de papa
+    'Paquete 3 Alitas (50 alitas + papas + dedos de queso)_papasTipo': '',
     'Paquete 3 Alitas (50 alitas + papas + dedos de queso)_papasSabores': [],
     'Paquete 1 Boneless (250gr + papas)_bonelessSabores': [],
-    'Paquete 1 Boneless (250gr + papas)_papasTipo': '', // Nuevo para tipo de papa
+    'Paquete 1 Boneless (250gr + papas)_papasTipo': '',
     'Paquete 1 Boneless (250gr + papas)_papasSabores': [],
     'Paquete 2 Boneless (500gr + papas)_bonelessSabores': [],
-    'Paquete 2 Boneless (500gr + papas)_papasTipo': '', // Nuevo para tipo de papa
+    'Paquete 2 Boneless (500gr + papas)_papasTipo': '',
     'Paquete 2 Boneless (500gr + papas)_papasSabores': [],
     'Paquete 3 Boneless (1.5kg + papas + dedos de queso)_bonelessSabores': [],
-    'Paquete 3 Boneless (1.5kg + papas + dedos de queso)_papasTipo': '', // Nuevo para tipo de papa
+    'Paquete 3 Boneless (1.5kg + papas + dedos de queso)_papasTipo': '',
     'Paquete 3 Boneless (1.5kg + papas + dedos de queso)_papasSabores': [],
     'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_bonelessSabores': [],
-    'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_papasTipo': '', // Nuevo para tipo de papa
+    'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_papasTipo': '',
     'Boneless Box (500gr boneless + papas + dedos de queso + aros cebolla)_papasSabores': [],
     'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_alitasSabores': [],
     'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_bonelessSabores': [],
-    'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_papasTipo': '', // Nuevo para tipo de papa
+    'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_papasTipo': '',
     'Box Club (5 alitas + 5 boneless + 4 mini burgys + 4 aros cebolla + 4 dedos queso + papas)_papasSabores': [],
     'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_alitasSabores': [],
-    'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_papasTipo': '', // Nuevo para tipo de papa
+    'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_papasTipo': '',
     'Bendito Box (35 alitas + nuggets + papas + dedos queso + nachos)_papasSabores': [],
     'Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)_alitasSabores': [],
-    'Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)_papasTipo': '', // Nuevo para tipo de papa
+    'Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)_papasTipo': '',
     'Burgy/Doggy Box (2 burgy/doggy + 10 alitas + 250gr papas)_papasSabores': [],
-    // Nuevas promociones configurables
     'Lunes: 10 Alitas + Papas + Bebida_alitasSabores': [],
-    'Lunes: 10 Alitas + Papas + Bebida_papasTipo': '', // Nuevo para tipo de papa
+    'Lunes: 10 Alitas + Papas + Bebida_papasTipo': '',
     'Lunes: 10 Alitas + Papas + Bebida_papasSabores': [],
-    'Lunes: 10 Alitas + Papas + Bebida_bebidaBebida': [], // Para la bebida en promociones
+    'Lunes: 10 Alitas + Papas + Bebida_bebidaBebida': [],
     'Miércoles: 250gr Boneless + Papas + Bebida_bonelessSabores': [],
-    'Miércoles: 250gr Boneless + Papas + Bebida_papasTipo': '', // Nuevo para tipo de papa
+    'Miércoles: 250gr Boneless + Papas + Bebida_papasTipo': '',
     'Miércoles: 250gr Boneless + Papas + Bebida_papasSabores': [],
-    'Miércoles: 250gr Boneless + Papas + Bebida_bebidaBebida': [], // Para la bebida en promociones
+    'Miércoles: 250gr Boneless + Papas + Bebida_bebidaBebida': [],
     'Sábado: 20 Alitas + 2 Bebidas_alitasSabores': [],
-    'Sábado: 20 Alitas + 2 Bebidas_bebidaBebida': [], // Para la bebida en promociones
+    'Sábado: 20 Alitas + 2 Bebidas_bebidaBebida': [],
     'Sábado: 30 Alitas + Papas + Refresco 2L_alitasSabores': [],
-    'Sábado: 30 Alitas + Papas + Refresco 2L_papasTipo': '', // Nuevo para tipo de papa
+    'Sábado: 30 Alitas + Papas + Refresco 2L_papasTipo': '',
     'Sábado: 30 Alitas + Papas + Refresco 2L_papasSabores': [],
-    'Sábado: 30 Alitas + Papas + Refresco 2L_bebidaBebida': [], // Para la bebida en promociones
-
-    // ADECUACIONES PARA PAQUETE KIDS: NUEVOS ESTADOS DE SELECCIÓN
-    // Usamos el nombre completo del paquete para la clave
-    'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_kidsMainOption': '', // Para elegir entre Nuggets, Alitas o Mini Burgy
-    'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_papasTipo': '', // Para el tipo de papa de kids (siempre Francesa)
-    'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_papasSabores': [], // Para los sabores de las papas de kids
-    // Jugo y Postre NO están aquí porque no son seleccionables
+    'Sábado: 30 Alitas + Papas + Refresco 2L_bebidaBebida': [],
+    'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_kidsMainOption': '',
+    'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_papasTipo': '',
+    'Paquete Kids (Escoge 8 Nuggets, 6 Alitas o Mini Burgy)_papasSabores': [],
   });
 
-  // Estado para controlar qué categoría principal está abierta (Snacks, Papas, Paquetes, etc.)
   const [activeCategory, setActiveCategory] = useState(null);
-  // Estado para controlar qué paquete específico está abierto dentro de una categoría (ej. 'Paquete 1 Alitas')
   const [activePackage, setActivePackage] = useState(null);
 
   const [ordenId] = useState(Math.floor(Math.random() * 100000));
   const [errors, setErrors] = useState({});
-  const [micheladaOption, setMicheladaOption] = useState({}); // Para micheladas normales
-  const [micheladaPromoOption, setMicheladaPromoOption] = useState({}); // Para la michelada de promo del viernes
+  const [micheladaOption, setMicheladaOption] = useState({});
+  const [micheladaPromoOption, setMicheladaPromoOption] = useState({});
 
 
-  // Define el orden deseado de las categorías para la interfaz de usuario
   const orderedCategories = [
     "Snacks", "Papas", "Alitas", "Boneless",
     "Paquetes de Alitas", "Paquetes de Boneless", "Boxes",
-    "Promociones", // La categoría de promociones se muestra aquí
+    "Promociones",
     "Burgys", "Doggys", "Postres",
     "Bebidas", "Shakes (Malteadas)", "Vino(187ml)", "Drinks"
   ];
 
-  // Función auxiliar para obtener el nombre del día actual (útil para promociones)
   const getDayName = (date) => {
     const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
     return days[date.getDay()];
@@ -434,9 +439,7 @@ const PedidoPopup = ({ onClose }) => {
 
   const currentDay = getDayName(new Date());
 
-  // Función auxiliar para obtener el número máximo de sabores según el tipo de producto y la cantidad/tamaño
   const getMaxSabores = (type, quantity) => {
-    // Comprobar productos principales (Alitas, Boneless, Papas)
     if (type === "Alitas" && productosMenu.Alitas.items) {
       const item = productosMenu.Alitas.items.find(i => i.nombre === quantity);
       if (item) return item.maxSabores;
@@ -445,22 +448,15 @@ const PedidoPopup = ({ onClose }) => {
       const item = productosMenu.Boneless.items.find(i => i.nombre === quantity);
       if (item) return item.maxSabores;
     }
-    // NOTA: Para papas, siempre es 1 sabor, pero se necesita un tipo (Francesa/Gajo)
     if (type === "Papas" && productosMenu.Papas.items) {
       const item = productosMenu.Papas.items.find(i => i.nombre === quantity);
-      if (item) return item.maxSabores; // Esto siempre será 1 para Papas
+      if (item) return item.maxSabores;
     }
-    // ADECUACIONES PARA PAQUETE KIDS: getMaxSabores para Papas a la Francesa del Kids
     if (type === "Papas" && quantity === "Papas a la Francesa") {
-      return 1; // Papas a la francesa en paquete Kids siempre 1 sabor
+      return 1;
     }
-
-
-    // Comprobar los valores de cantidad dentro de los paquetes/cajas/promociones
-    // Esto se usa cuando la 'cantidad' no es directamente el nombre de un item principal,
-    // sino una descripción dentro de un paquete configurable.
     if (type === "Alitas") {
-        if (quantity.includes("8pzs") || quantity.includes("16pzs") || quantity.includes("12pzs") || quantity.includes("10pzs") || quantity.includes("20pzs") || quantity.includes("6 Alitas")) return 2; // Añadido "6 Alitas" para Paquete Kids
+        if (quantity.includes("8pzs") || quantity.includes("16pzs") || quantity.includes("12pzs") || quantity.includes("10pzs") || quantity.includes("20pzs") || quantity.includes("6 Alitas")) return 2;
         if (quantity.includes("25pzs") || quantity.includes("30pzs") || quantity.includes("35pzs")) return 3;
         if (quantity.includes("50pzs")) return 5;
         if (quantity.includes("5pzs")) return 1;
@@ -470,67 +466,54 @@ const PedidoPopup = ({ onClose }) => {
         if (quantity.includes("1kg") || quantity.includes("1.5kg")) return 4;
     }
     if (type === "Papas") {
-        return 1; // Cualquier artículo de Papas en un paquete/promo debe permitir 1 sabor
+        return 1;
     }
-
-    return 0; // Por defecto si no hay coincidencia específica
+    return 0;
   };
 
-  // Manejador para los campos de texto/selección de datos del cliente
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: undefined })); // Limpia errores al cambiar
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  // Manejador para la selección de opciones de productos (sabores, bebidas, tipos de papas, opciones kids, etc.)
   const handleSeleccionChange = (itemType, tipo, valor, parentProductName = null) => {
-    const keyBase = itemType.toLowerCase(); // 'alitas', 'boneless', 'papas', 'bebida', 'kidsmainoption'
-    let currentSelectionStateKey; // Clave para acceder al estado `seleccion`
+    const keyBase = itemType.toLowerCase();
+    let currentSelectionStateKey;
 
     setSeleccion((prev) => {
       const newSelection = { ...prev };
 
       if (parentProductName) {
-        // Si es una selección dentro de un producto configurable de un paquete/box/promoción
         if (tipo === "Sabor") {
           currentSelectionStateKey = `${parentProductName}_${keyBase}Sabores`;
         } else if (tipo === "Bebida") {
           currentSelectionStateKey = `${parentProductName}_${keyBase}Bebida`;
-        } else if (tipo === "Tipo") { // Nuevo: para seleccionar el tipo de papa
+        } else if (tipo === "Tipo") {
           currentSelectionStateKey = `${parentProductName}_${keyBase}Tipo`;
-        }
-        // ADECUACIONES PARA PAQUETE KIDS: Manejo de KidsMainOption
-        else if (itemType === "KidsMainOption") {
-          currentSelectionStateKey = `${parentProductName}_kidsMainOption`; // Clave para la opción principal
+        } else if (itemType === "KidsMainOption") {
+          currentSelectionStateKey = `${parentProductName}_kidsMainOption`;
           newSelection[currentSelectionStateKey] = valor;
-          return newSelection; // Retorna temprano para este tipo de selección única
+          return newSelection;
         }
-        // Jugo y Postre ya NO se gestionan aquí, son fijos en el paquete Kids
       } else if (tipo === "Sabor") {
-        // Para sabores de productos principales (Alitas, Boneless, Papas)
         currentSelectionStateKey = `${keyBase}Sabores`;
       } else {
-        // Para la selección inicial de cantidad/gramaje de productos principales
-        currentSelectionStateKey = `${keyBase}${tipo}`; // Ej. 'alitasPiezas', 'bonelessGramaje'
+        currentSelectionStateKey = `${keyBase}${tipo}`;
       }
 
       if (tipo === "Piezas" || tipo === "Gramaje" || tipo === "Tipo" || itemType === "KidsMainOption") {
         newSelection[currentSelectionStateKey] = valor;
-        // Si cambia el tipo de papa, se deben limpiar los sabores asociados a esa papa en el paquete.
         if (tipo === "Tipo" && parentProductName) {
             newSelection[`${parentProductName}_papasSabores`] = [];
-        } else if (tipo === "Piezas" || tipo === "Gramaje") { // Para productos principales
+        } else if (tipo === "Piezas" || tipo === "Gramaje") {
             newSelection[`${keyBase}Sabores`] = [];
         }
       } else if (tipo === "Sabor") {
-        // Lógica para añadir/quitar sabores, respetando el `maxSabores`
-        let quantityForFlavor = ""; // Esta es la "cantidad" de alitas/boneless/papas para calcular el maxSabores
+        let quantityForFlavor = "";
 
         if (parentProductName) {
-            // Determinar la cantidad/tipo para un elemento configurable dentro de un paquete
             let parentCategoryArray = [];
-            // Lógica para encontrar la configuración del paquete padre
             if (parentProductName.includes("Paquete ")) {
                 if (parentProductName.includes("Alitas")) parentCategoryArray = productosMenu["Paquetes de Alitas"];
                 else if (parentProductName.includes("Boneless")) parentCategoryArray = productosMenu["Paquetes de Boneless"];
@@ -545,44 +528,40 @@ const PedidoPopup = ({ onClose }) => {
             if (parentProduct && parentProduct.configurableItems) {
                 const itemConfig = parentProduct.configurableItems.find(item => item.type === itemType);
                 if (itemConfig) {
-                    quantityForFlavor = itemConfig.quantity; // Ej. "12pzs", "Papas"
+                    quantityForFlavor = itemConfig.quantity;
                 }
             }
         } else {
-            // Para Alitas, Boneless, Papas principales, se usa la cantidad ya seleccionada
             quantityForFlavor = newSelection[`${keyBase}${itemType === "Alitas" ? "Piezas" : itemType === "Boneless" ? "Gramaje" : "Piezas"}`];
         }
 
         const maxSabores = getMaxSabores(itemType, quantityForFlavor);
-        const currentFlavors = newSelection[currentSelectionStateKey] || []; // Usar currentSelectionStateKey
+        const currentFlavors = newSelection[currentSelectionStateKey] || [];
         const isSelected = currentFlavors.includes(valor);
 
         if (isSelected) {
-          // Si ya está seleccionado, lo quita
-          newSelection[currentSelectionStateKey] = currentFlavors.filter((s) => s !== valor); // Usar currentSelectionStateKey
+          newSelection[currentSelectionStateKey] = currentFlavors.filter((s) => s !== valor);
         } else {
-          // Si no está seleccionado y hay espacio, lo añade
           if (currentFlavors.length < maxSabores) {
-            newSelection[currentSelectionStateKey] = [...currentFlavors, valor]; // Usar currentSelectionStateKey
+            newSelection[currentSelectionStateKey] = [...currentFlavors, valor];
           } else {
             alert(`Ya seleccionaste el máximo de ${maxSabores} sabor(es) para este producto.`);
           }
         }
-      } else if (tipo === "Bebida") { // Lógica para seleccionar bebidas en promociones
-        const currentBebidas = newSelection[currentSelectionStateKey] || []; // Usar currentSelectionStateKey
+      } else if (tipo === "Bebida") {
+        const currentBebidas = newSelection[currentSelectionStateKey] || [];
         const isSelected = currentBebidas.includes(valor);
-        let maxBebidas = 1; // Por defecto, una bebida
+        let maxBebidas = 1;
 
-        // Ajusta el máximo de bebidas si la promoción lo especifica
         if (parentProductName && (parentProductName.includes("2 Bebidas") || parentProductName.includes("Sábado: 20 Alitas"))) {
             maxBebidas = 2;
         }
 
         if (isSelected) {
-            newSelection[currentSelectionStateKey] = currentBebidas.filter((b) => b !== valor); // Usar currentSelectionStateKey
+            newSelection[currentSelectionStateKey] = currentBebidas.filter((b) => b !== valor);
         } else {
             if (currentBebidas.length < maxBebidas) {
-                newSelection[currentSelectionStateKey] = [...currentBebidas, valor]; // Usar currentSelectionStateKey
+                newSelection[currentSelectionStateKey] = [...currentBebidas, valor];
             } else {
                 alert(`Ya seleccionaste el máximo de ${maxBebidas} bebida(s) para esta promoción.`);
             }
@@ -592,52 +571,55 @@ const PedidoPopup = ({ onClose }) => {
     });
   };
 
-  // Función para agregar productos "especiales" (Alitas, Boneless, Papas con selección de cantidad y sabores)
-// Función para agregar productos "especiales" (Alitas, Boneless, Papas con selección de cantidad y sabores)
   const agregarProductoEspecial = (categoria) => {
     const keyBase = categoria.toLowerCase();
     let cantidadNombre = "";
     let precio = 0;
     let sabores = [];
-    let medidaTipo = ""; // <--- ¡Declarar medidaTipo aquí!
+    let medidaTipo = "";
+    let isPromotion = false;
 
-    // Determina la cantidad seleccionada y el precio basado en la categoría
     if (categoria === "Boneless") {
       cantidadNombre = seleccion.bonelessGramaje;
       const item = productosMenu.Boneless.items.find(g => g.nombre === cantidadNombre);
-      if (item) precio = item.precio;
+      if (item) {
+        precio = item.precio;
+        isPromotion = item.isPromotion;
+      }
       sabores = seleccion.bonelessSabores;
-      medidaTipo = "Gramaje"; // Asignar aquí
+      medidaTipo = "Gramaje";
     } else if (categoria === "Alitas") {
       cantidadNombre = seleccion.alitasPiezas;
       const item = productosMenu.Alitas.items.find(g => g.nombre === cantidadNombre);
-      if (item) precio = item.precio;
+      if (item) {
+        precio = item.precio;
+        isPromotion = item.isPromotion;
+      }
       sabores = seleccion.alitasSabores;
-      medidaTipo = "Piezas"; // Asignar aquí
+      medidaTipo = "Piezas";
     } else if (categoria === "Papas") {
-      cantidadNombre = seleccion.papasPiezas; // Esto es para Papas INDIVIDUALES
+      cantidadNombre = seleccion.papasPiezas;
       const item = productosMenu.Papas.items.find(g => g.nombre === cantidadNombre);
-      if (item) precio = item.precio;
+      if (item) {
+        precio = item.precio;
+        isPromotion = item.isPromotion;
+      }
       sabores = seleccion.papasSabores;
-      medidaTipo = "Piezas"; // Asignar aquí (o "Tipo" si se quisiera especificar más, pero Piezas es consistente con el estado)
+      medidaTipo = "Piezas";
     }
 
     const maxSabores = getMaxSabores(categoria, cantidadNombre);
-
-    // Valida que se haya seleccionado una cantidad y el número correcto de sabores
-    // Para Papas individuales, siempre es 1 sabor, o ninguno si es "Naturales" o similar que no requiere selección.
     const isPapasButNoFlavorNeeded = categoria === "Papas" && (maxSabores === 0 || (cantidadNombre && sabores.length === 0 && maxSabores === 1 && productosMenu.Papas.sabores.includes("Naturales")));
 
     if (cantidadNombre && (sabores.length === maxSabores || isPapasButNoFlavorNeeded) && maxSabores >= 0) {
       const nombreCompleto = `${cantidadNombre} ${categoria}` + (sabores.length > 0 ? ` (${sabores.join(" + ")})` : "");
       setFormData((prev) => ({
         ...prev,
-        productos: [...prev.productos, { nombre: nombreCompleto, precio }],
+        productos: [...prev.productos, { nombre: nombreCompleto, precio, isPromotion }],
       }));
-      // Restablece la selección después de agregar
       setSeleccion((prev) => ({
         ...prev,
-        [`${keyBase}${medidaTipo}`]: "", // Ahora medidaTipo está definida
+        [`${keyBase}${medidaTipo}`]: "",
         [`${keyBase}Sabores`]: [],
       }));
     } else {
@@ -655,22 +637,20 @@ const PedidoPopup = ({ onClose }) => {
     }
   };
 
-  // Función para agregar un producto de tipo "paquete" o "box" con ítems configurables
   const agregarProductoPaquete = (paqueteProducto) => {
-    const { nombre, precio, configurableItems, description } = paqueteProducto; // Obtener también la descripción
+    const { nombre, precio, configurableItems, description, isPromotion } = paqueteProducto;
     let finalProductName = nombre;
     const itemDetails = [];
-    let allConfigured = true; // Flag para verificar si todas las opciones están seleccionadas
+    let allConfigured = true;
 
     if (configurableItems && configurableItems.length > 0) {
       configurableItems.forEach(itemConfig => {
         const itemType = itemConfig.type;
         let currentSelectionStateKey;
-        let selectedValueOrItems; // Usaremos esto para cualquier tipo de selección
+        let selectedValueOrItems;
         let maxCount;
 
         if (itemType === "Alitas" || itemType === "Boneless" || itemType === "Papas") {
-            // ADECUACIONES PARA PAQUETE KIDS: Manejo de Papas dentro de Kids
             if (nombre.includes("Paquete Kids") && itemType === "Papas") {
                 currentSelectionStateKey = `${nombre}_papasTipo`;
                 const papaTipoSeleccionada = seleccion[currentSelectionStateKey];
@@ -678,22 +658,19 @@ const PedidoPopup = ({ onClose }) => {
                     allConfigured = false;
                     return;
                 }
-                itemDetails.push(papaTipoSeleccionada); // Agrega el tipo de papa al nombre final
+                itemDetails.push(papaTipoSeleccionada);
 
-                // Luego, verifica los sabores si aplica al tipo de papa
-                currentSelectionStateKey = `${nombre}_papasSabores`; // Cambia la key para los sabores de papas
+                currentSelectionStateKey = `${nombre}_papasSabores`;
                 selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
-                maxCount = getMaxSabores(itemType, papaTipoSeleccionada); // Obtiene maxSabores para el tipo de papa elegido
+                maxCount = getMaxSabores(itemType, papaTipoSeleccionada);
                 if (maxCount > 0 && selectedValueOrItems.length !== maxCount) {
                     allConfigured = false;
                 }
                 if (selectedValueOrItems.length > 0) {
                     itemDetails.push(`(${selectedValueOrItems.join(" + ")})`);
                 }
-
-            } else { // Alitas, Boneless, o Papas en otros paquetes
-                currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}${itemType === "Papas" ? 'Tipo' : 'Sabores'}`; // Papas tienen Tipo y luego Sabores
-
+            } else {
+                currentSelectionStateKey = `${nombre}_${itemType.toLowerCase()}${itemType === "Papas" ? 'Tipo' : 'Sabores'}`;
                 if (itemType === "Papas") {
                     const papaTipoSeleccionada = seleccion[currentSelectionStateKey];
                     if (!papaTipoSeleccionada) {
@@ -711,7 +688,7 @@ const PedidoPopup = ({ onClose }) => {
                     if (selectedValueOrItems.length > 0) {
                         itemDetails.push(`(${selectedValueOrItems.join(" + ")})`);
                     }
-                } else { // Alitas o Boneless
+                } else {
                     selectedValueOrItems = seleccion[currentSelectionStateKey] || [];
                     maxCount = getMaxSabores(itemType, itemConfig.quantity);
                     if (maxCount > 0 && selectedValueOrItems.length !== maxCount) {
@@ -733,46 +710,37 @@ const PedidoPopup = ({ onClose }) => {
                 itemDetails.push(`${itemConfig.quantity} (${selectedValueOrItems.join(" + ")})`);
             }
         }
-        // ADECUACIONES PARA PAQUETE KIDS: Validaciones para KidsMainOption
         else if (itemType === "KidsMainOption") {
             currentSelectionStateKey = `${nombre}_kidsMainOption`;
             selectedValueOrItems = seleccion[currentSelectionStateKey];
-            if (!selectedValueOrItems) { // Si no se ha seleccionado la opción principal, no está configurado
+            if (!selectedValueOrItems) {
                 allConfigured = false;
             } else {
                 itemDetails.push(selectedValueOrItems);
             }
         }
-        // Jugo y Postre YA NO se gestionan aquí, son fijos en la descripción.
       });
 
-      // ADECUACIONES PARA PAQUETE KIDS: Añadir los elementos fijos a los detalles del nombre del producto
       if (nombre.includes("Paquete Kids")) {
         itemDetails.push("Jugo de Naranja");
         itemDetails.push("Paleta Payaso Mini");
-        // La descripción completa (el campo `description` del objeto `productosMenu`) NO se concatena aquí
-        // Su propósito es solo informativo en la vista de selección.
       }
 
-      // Construye el nombre final del producto incluyendo las opciones seleccionadas
       if (itemDetails.length > 0) {
         finalProductName = `${nombre} (${itemDetails.join(" y ")})`;
       }
     }
 
-    // Si no todas las opciones configurables están seleccionadas, muestra una alerta y no agrega el producto
     if (!allConfigured) {
       alert("Por favor, selecciona todas las opciones requeridas para este producto.");
       return;
     }
 
-    // Agrega el producto al pedido
     setFormData((prev) => ({
       ...prev,
-      productos: [...prev.productos, { nombre: finalProductName, precio }],
+      productos: [...prev.productos, { nombre: finalProductName, precio, isPromotion }],
     }));
 
-    // Restablece las selecciones para el paquete que acaba de ser agregado
     setSeleccion(prev => {
         const newState = { ...prev };
         if (configurableItems) {
@@ -781,31 +749,28 @@ const PedidoPopup = ({ onClose }) => {
                 if (itemType === "Alitas" || itemType === "Boneless") {
                     newState[`${nombre}_${itemType.toLowerCase()}Sabores`] = [];
                 } else if (itemType === "Papas") {
-                    newState[`${nombre}_papasTipo`] = ''; // Limpia el tipo de papa
-                    newState[`${nombre}_papasSabores`] = []; // Limpia los sabores de papa
+                    newState[`${nombre}_papasTipo`] = '';
+                    newState[`${nombre}_papasSabores`] = [];
                 } else if (itemType === "Bebida") {
                     newState[`${nombre}_bebidaBebida`] = [];
                 }
-                // ADECUACIONES PARA PAQUETE KIDS: Limpia solo la opción principal de Kids
                 else if (itemType === "KidsMainOption") {
                     newState[`${nombre}_kidsMainOption`] = '';
                 }
-                // Jugo y Postre ya no necesitan ser limpiados porque no son seleccionables
             });
         }
         return newState;
     });
   };
 
-  // Función genérica para agregar productos simples (sin opciones configurables)
   const agregarProducto = (producto) => {
+    const productoConTipo = { ...producto, isPromotion: producto.isPromotion || false };
     setFormData((prev) => ({
       ...prev,
-      productos: [...prev.productos, producto],
+      productos: [...prev.productos, productoConTipo],
     }));
   };
 
-  // Elimina un producto del resumen del pedido
   const handleEliminarProducto = (index) => {
     setFormData((prev) => {
       const productos = [...prev.productos];
@@ -814,7 +779,6 @@ const PedidoPopup = ({ onClose }) => {
     });
   };
 
-  // Valida los campos del primer paso del formulario (datos del cliente)
   const validateStep1 = () => {
     const newErrors = {};
     if (!formData.nombre.trim()) {
@@ -829,14 +793,15 @@ const PedidoPopup = ({ onClose }) => {
       newErrors.direccion = "La dirección es obligatoria para pedidos a domicilio.";
     }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Retorna true si no hay errores
+    return Object.keys(newErrors).length === 0;
   };
 
-  // Genera el mensaje de WhatsApp con el resumen del pedido
   const generarMensaje = () => {
     const { nombre, telefono, direccion, sucursal, tienda, productos, comentario } = formData;
 
-    const total = productos.reduce((acc, item) => acc + item.precio, 0).toFixed(2);
+    const total = productos.reduce((acc, item) => acc + item.precio, 0);
+
+    const contienePromocion = productos.some(item => item.isPromotion === true);
 
     const productosTexto = productos.map((p, i) =>
       `${i + 1}. ${p.nombre} - $${p.precio.toFixed(2)}`
@@ -864,16 +829,23 @@ Número de orden: *#${ordenId}*
       texto += `\n*Comentarios Adicionales:*\n${comentario.trim()}\n`;
     }
 
-    texto += `\n*Total estimado: $${total}*`;
- 
+    let totalFinal = total;
+    if (sucursal === "domicilio" && !contienePromocion) {
+      const descuento = 0.10;
+      totalFinal = total * (1 - descuento);
+      texto += `\n*Total estimado con descuento del 10% (más envío - por confirmar): $${totalFinal.toFixed(2)}*`;
+    } else {
+      texto += `\n*Total estimado (más envío - por confirmar): $${totalFinal.toFixed(2)}*`;
+    }
 
-    // Define el número de WhatsApp según la sucursal
     let telefonoWhatsApp = "";
-    if (tienda === "xico") telefonoWhatsApp = "522283544463"; // Número de Xico
-    else if (tienda === "coatepec") telefonoWhatsApp = "522284032836"; // Número de Coatepec
+    if (tienda === "xico") telefonoWhatsApp = "522283544463";
+    else if (tienda === "coatepec") telefonoWhatsApp = "522284032836";
 
     return `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(texto)}`;
   };
+  // ... resto del componente PedidoPopup, incluyendo el return del JSX
+
 
   return (
     <div className="pedido-overlay">

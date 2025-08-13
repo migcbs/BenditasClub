@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import "../Styles.css";
 
 const mensajes = [
-  "10% de descuento en pedidos a domicilio",
-  "Envío gratis en órdenes mayores a $500",
-  "¡Nuevo menú de temporada disponible ya!",
+  "10% DE DESCUENTO EN PEDIDOS A DOMICILIO TODO EL MES DE AGOSTO",
+  "10% DE DESCUENTO EN PEDIDOS A DOMICILIO TODO EL MES DE AGOSTO",
+  "10% DE DESCUENTO EN PEDIDOS A DOMICILIO TODO EL MES DE AGOSTO",
+  "10% DE DESCUENTO EN PEDIDOS A DOMICILIO TODO EL MES DE AGOSTO",
 ];
 
 const BannerAvisos = () => {

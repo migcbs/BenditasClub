@@ -938,6 +938,7 @@ body {
 }
 
 .categoria-productos h3 {
+  /* Propiedades que ya tenías */
   color: #e3a7c5;
   margin-bottom: 0.8rem;
   font-weight: 700;
@@ -948,10 +949,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  font-size: 1.5rem;
+  font-size: 1rem;
   transition: color 0.2s ease;
   width: 100%;
   letter-spacing: 1px;
+
+  
 }
 
 .categoria-productos h3:hover {
@@ -1658,7 +1661,7 @@ body {
   }
 
   .categoria-productos h3 {
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
 
   .categoria-productos {
