@@ -3152,3 +3152,48 @@ body {
       max-width: 480px;
   }
 }
+
+.slider-item {
+    position: relative;
+    /* Asegura que las etiquetas de stock se posicionen correctamente dentro del contenedor */
+    /* Aquí van los demás estilos que ya tenías para el slider-item */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.stock-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: white;
+    z-index: 10;
+}
+
+.low-stock {
+    background-color: #ff9100; /* Naranja para "casi agotado" */
+}
+
+.out-of-stock {
+    background-color: #d32f2f; /* Rojo para "agotado" */
+}
+
+/* Estilos para el botón de "Añadir al carrito" deshabilitado */
+.add-to-cart-btn.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.add-to-cart-btn.disabled:hover {
+    background-color: #ccc; /* Evita que cambie de color al pasar el ratón */
+}

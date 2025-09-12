@@ -1,9 +1,24 @@
 import "../Styles.css";
 
 const mensajesOriginales = [
-  "10% DE DESCUENTO EN PEDIDOS A DOMICILIO TODO EL MES DE AGOSTO (NO APLICA EN PROMOCIONES)",
-  "10% DE DESCUENTO EN PEDIDOS A DOMICILIO TODO EL MES DE AGOSTO (NO APLICA EN PROMOCIONES)",
-  "10% DE DESCUENTO EN PEDIDOS A DOMICILIO TODO EL MES DE AGOSTO (NO APLICA EN PROMOCIONES)",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+  "alitas n' more",
+
 
 ];
 

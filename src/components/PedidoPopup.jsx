@@ -1052,17 +1052,8 @@ Número de orden: *#${ordenId}*
     if (comentario.trim()) {
       texto += `\n*Comentarios Adicionales:*\n${comentario.trim()}\n`;
     }
-
-    let totalFinal = total;
-    if (sucursal === "domicilio" && !contienePromocion) {
-      const descuento = 0.10;
-      totalFinal = total * (1 - descuento);
-      texto += `\n*Total estimado con descuento del 10% (más envío - por confirmar): $${totalFinal.toFixed(2)}*`;
-      texto += `\n*NO APLICAN PROMOCIONES*`;
-    } else {
-      texto += `\n*Total estimado (más envío - por confirmar): $${totalFinal.toFixed(2)}*`;
-      texto += `\n*NO APLICAN PROMOCIONES*`;
-    }
+let totalFinal = total;
+    texto += `\n*Total estimado (más envío - por confirmar): $${totalFinal.toFixed(2)}*`;
 
     let telefonoWhatsApp = "";
     if (tienda === "xico") telefonoWhatsApp = "522283544463";
@@ -1070,7 +1061,6 @@ Número de orden: *#${ordenId}*
 
     return `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(texto)}`;
   };
-
 
   return (
     <div className="pedido-overlay">
