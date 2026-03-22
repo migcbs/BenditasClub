@@ -299,7 +299,6 @@ const ProductoCard = ({ producto, onAgregar }) => {
     producto.variantes.find(v => v.stock !== STOCK.AGOTADO) || producto.variantes[0]
   );
 
-  const stockGlobal    = stockProducto(producto);
   const stockCfg       = STOCK_CONFIG[varianteActiva.stock];
   const estaAgotada    = varianteActiva.stock === STOCK.AGOTADO;
   const tieneVariantes = producto.variantes.length > 1;
