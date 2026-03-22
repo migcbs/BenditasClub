@@ -1,0 +1,122 @@
+.footer {
+  background-color: #000;
+  color: #fff;
+  padding: 80px 20px 40px 20px;
+  position: relative;
+  border-top: 5px solid #e78fbb;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centrado horizontal de todo */
+  text-align: center;
+}
+
+/* SECCIÓN PRINCIPAL (LOGO Y REDES) */
+.footer-main {
+  margin-bottom: 50px;
+}
+
+.footer-logo-text {
+  font-family: 'Titan One', cursive;
+  font-size: 3rem;
+  color: #e78fbb;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.footer-tagline {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin: 10px 0 30px 0;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.social-link {
+  width: 50px;
+  height: 50px;
+  background: #1a1a1a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  border: 2px solid #000;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.social-link:hover {
+  transform: translateY(-5px) scale(1.1);
+  background: #e78fbb;
+  color: #fff; /* Aseguramos que el icono se vea blanco en hover */
+  box-shadow: 0 5px 20px rgba(231, 143, 187, 0.5);
+}
+
+/* SECCIÓN FINAL (LINKS HASTA ABAJO) */
+.footer-bottom {
+  width: 100%;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.footer-email {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+  transition: color 0.3s ease;
+}
+
+.footer-email:hover {
+  color: #e78fbb;
+}
+
+.footer-copyright {
+  font-size: 0.85rem;
+  opacity: 0.5;
+  margin: 0;
+}
+
+.footer-dev {
+  font-size: 0.75rem;
+  opacity: 0.3;
+  font-style: italic;
+  margin: 0;
+}
+
+.social-icons a:hover{
+    color: #fff;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+  .footer {
+    padding: 60px 15px 30px 15px;
+  }
+  .footer-logo-text {
+    font-size: 2.2rem;
+  }
+  .footer-tagline {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+  }
+}

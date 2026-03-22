@@ -1,0 +1,234 @@
+/* Contenedor Principal */
+.menu-container {
+  padding: 100px 20px;
+  background-color: none; /* Fondo negro sólido para contraste */
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.menu-title {
+  font-family: 'Titan One', cursive;
+  font-size: 3.2rem;
+  color: #e78fbb;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: -1px;
+  filter: drop-shadow(4px 4px 0px #000);
+}
+
+.menu-subtitle {
+  color: #fff;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: 1rem;
+  margin-top: 15px;
+}
+
+/* GRID ESTILO FEED INSTAGRAM */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.menu-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #111;
+  border: 2px solid rgba(231, 143, 187, 0.1);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.image-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.menu-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease, filter 0.4s ease;
+  filter: brightness(0.8) contrast(1.1);
+}
+
+/* Hover suave y limpio */
+.menu-item:hover {
+  border-color: #e78fbb;
+  box-shadow: 0 10px 30px rgba(231, 143, 187, 0.2);
+}
+
+.menu-item:hover img {
+  transform: scale(1.1);
+  filter: brightness(1.05) contrast(1);
+}
+
+/* BOTÓN "CONSULTA NUESTRO MENÚ" */
+.BotonMenu {
+  display: flex;
+  justify-content: center;
+  margin-top: 70px;
+}
+
+.open-menu-btn {
+  background-color: #e78fbb;
+  color: #fff;
+  border: 4px solid #000;
+  padding: 22px 60px;
+  border-radius: 60px;
+  font-family: 'Titan One', cursive;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 8px 8px 0px #000;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.open-menu-btn:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 12px 12px 0px #000;
+  background-color: #f191b8;
+}
+
+.open-menu-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0px #000;
+}
+
+/* POPUP DEL MENÚ (SCROLL INTERNO) */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.96);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+  backdrop-filter: blur(8px);
+}
+
+.popup-content {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 90vh; /* Altura controlada */
+  background: none;
+  border-radius: 25px;
+  border: 3px solid #e78fbb;
+  overflow: hidden; /* Importante para que el scroll sea interno */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 50px rgba(231, 143, 187, 0.3);
+}
+
+/* ÁREA DE SCROLL INDEPENDIENTE */
+.menu-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e78fbb #000;
+}
+
+.menu-scroll-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu-scroll-area::-webkit-scrollbar-thumb {
+  background: #e78fbb;
+  border-radius: 10px;
+}
+
+/* BOTÓN CERRAR (FLOTANTE ENCIMA DE TODO) */
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  width: 55px;
+  height: 55px;
+  background: #e78fbb;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 50%;
+  font-size: 2.5rem;
+  cursor: pointer;
+  z-index: 100; /* Siempre encima de las fotos */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 0px #000;
+  transition: all 0.3s ease;
+}
+
+.close-btn span {
+  margin-top: -4px;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg) scale(1.1);
+  background-color: #fff;
+}
+
+/* LISTA DE PÁGINAS DEL MENÚ */
+.menu-images-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.menu-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-page-img {
+  width: 100%;
+  height: auto;
+  border-radius: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
+  
+}
+
+.page-number {
+  color: #e78fbb;
+  font-family: 'Titan One', cursive;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+/* MÓVIL OPTIMIZADO */
+@media (max-width: 768px) {
+  .menu-container { padding: 60px 15px; }
+  
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0px;
+  }
+  
+  .menu-title { font-size: 2.2rem; }
+  
+  .popup-content {
+    height: 100vh;
+    border-radius: 20px;
+  }
+
+ 
+
+  .open-menu-btn {
+    width: 95%;
+    padding: 18px 20px;
+    font-size: 1.2rem;
+  }
+}

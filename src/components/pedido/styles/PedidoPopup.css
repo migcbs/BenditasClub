@@ -1,0 +1,206 @@
+/* ==========================================================================
+   PEDIDO POPUP — BENDITAS CLUB
+   Mobile-first. Breakpoints: 480px / 768px (iPad) / 992px (desktop)
+   ========================================================================== */
+
+/* ── Variables locales ── */
+:root {
+  --bp-pink:   #e78fbb;
+  --bp-black:  #000000;
+  --bp-white:  #ffffff;
+  --bp-border: 4px solid #000;
+  --bp-radius: 40px;
+  --bp-ease:   cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ─────────────────────────────────────────
+   OVERLAY
+───────────────────────────────────────── */
+.pedido-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;   /* Mobile: sube desde abajo */
+  z-index: 99999;
+  opacity: 0;
+  animation: fadeInOverlay 0.3s ease forwards;
+}
+
+/* ─────────────────────────────────────────
+   POPUP
+───────────────────────────────────────── */
+.pedido-popup {
+  width: 100%;
+  background: #ffffff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.4s var(--bp-ease);
+
+  /* Mobile: ocupa casi toda la pantalla desde abajo */
+  height: 93vh;
+  max-width: 100%;
+  padding: 56px 16px 24px;
+  border-top:   var(--bp-border);
+  border-left:  var(--bp-border);
+  border-right: var(--bp-border);
+  border-bottom: none;
+  border-top-left-radius:  30px;
+  border-top-right-radius: 30px;
+  box-shadow: 0 -10px 0 rgba(0,0,0,0.12);
+}
+
+/* ─────────────────────────────────────────
+   CONTENEDOR DEL PASO ACTIVO
+───────────────────────────────────────── */
+.pedido-paso-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Paso 2 maneja scroll internamente — no duplicar */
+.pedido-paso-container:has(.paso-productos) {
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────
+   BOTÓN CERRAR
+───────────────────────────────────────── */
+.btn-cerrar-popup {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 900;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+  z-index: 10000;
+  line-height: 0;
+  padding-bottom: 3px;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-cerrar-popup:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 #000;
+}
+
+.btn-cerrar-popup:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* ─────────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────────── */
+.pedido-paso-container::-webkit-scrollbar { width: 6px; }
+.pedido-paso-container::-webkit-scrollbar-track { background: transparent; }
+.pedido-paso-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+.pedido-paso-container::-webkit-scrollbar-thumb:hover {
+  background: #000;
+}
+
+/* ─────────────────────────────────────────
+   ANIMACIONES
+───────────────────────────────────────── */
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────
+   IPAD (768px+)
+───────────────────────────────────────── */
+@media (min-width: 768px) {
+  .pedido-overlay {
+    align-items: center;   /* iPad+: centrado */
+  }
+
+  .pedido-popup {
+    max-width: 720px;
+    height: 88vh;
+    padding: 60px 28px 28px;
+    border: var(--bp-border);
+    border-radius: 36px;
+    box-shadow: 12px 12px 0 rgba(0,0,0,0.2);
+    animation: scaleIn 0.35s var(--bp-ease);
+  }
+
+  @keyframes scaleIn {
+    from { transform: scale(0.95) translateY(20px); opacity: 0; }
+    to   { transform: scale(1) translateY(0);       opacity: 1; }
+  }
+}
+
+/* ─────────────────────────────────────────
+   DESKTOP (992px+)
+───────────────────────────────────────── */
+@media (min-width: 992px) {
+  .pedido-popup {
+    max-width: 960px;
+    height: 85vh;
+    padding: 65px 36px 32px;
+    border-radius: var(--bp-radius);
+    box-shadow: 16px 16px 0 rgba(0,0,0,0.22);
+  }
+
+  .btn-cerrar-popup {
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    font-size: 32px;
+  }
+}
+
+/* ─────────────────────────────────────────
+   MOBILE PEQUEÑO (< 380px)
+───────────────────────────────────────── */
+@media (max-width: 380px) {
+  .pedido-popup {
+    padding: 50px 12px 20px;
+    border-top-left-radius:  24px;
+    border-top-right-radius: 24px;
+  }
+
+  .btn-cerrar-popup {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    top: 12px;
+    right: 12px;
+  }
+}

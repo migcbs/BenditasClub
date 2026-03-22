@@ -1,0 +1,211 @@
+/* ==========================================================================
+   PASO 3: RESUMEN DE PEDIDO — BENDITAS CLUB
+   Mobile-first. Breakpoints: 480px / 768px / 992px
+   ========================================================================== */
+
+/* ─────────────────────────────────────────
+   CONTENEDOR
+───────────────────────────────────────── */
+.paso-resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 6px 2px 20px;
+  width: 100%;
+  animation: fadeIn 0.35s ease-out;
+}
+
+/* ─────────────────────────────────────────
+   SECCIONES (Cliente + Productos)
+───────────────────────────────────────── */
+.resumen-seccion {
+  background: #ffffff;
+  border: 3px solid #000;
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 5px 5px 0 #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resumen-seccion h3 {
+  font-family: 'Titan One', cursive;
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: #e78fbb;
+  border-bottom: 2px dashed #e78fbb;
+  padding-bottom: 7px;
+  margin: 0 0 4px;
+}
+
+.resumen-seccion p {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #000;
+  margin: 0;
+}
+
+.resumen-seccion strong {
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+/* ─────────────────────────────────────────
+   ITEMS DE PRODUCTOS
+───────────────────────────────────────── */
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  padding: 7px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 10px;
+}
+
+.resumen-item:last-child { border-bottom: none; }
+
+.resumen-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.resumen-item-nombre {
+  font-weight: 700;
+  color: #000;
+  line-height: 1.3;
+}
+
+.resumen-sabor {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #777;
+  line-height: 1.4;
+}
+
+.resumen-item-precio {
+  font-family: 'Titan One', cursive;
+  color: #000;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+/* ─────────────────────────────────────────
+   TOTAL
+───────────────────────────────────────── */
+.resumen-total {
+  background: #000;
+  color: #fff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  text-align: center;
+  box-shadow: 0 7px 0 #e78fbb;
+  margin: 4px 0;
+}
+
+.resumen-total h3 {
+  font-family: 'Titan One', cursive;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.resumen-envio-nota {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.65);
+  margin-top: 5px;
+}
+
+/* ─────────────────────────────────────────
+   ACCIONES
+───────────────────────────────────────── */
+.paso-resumen .acciones {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.paso-resumen .acciones button {
+  flex: 1;
+  height: 58px;
+  border: 3px solid #000;
+  border-radius: 50px;
+  font-family: 'Titan One', cursive;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.paso-resumen .acciones button:first-child {
+  background: #fff;
+  color: #000;
+}
+
+.paso-resumen .acciones button:first-child:active {
+  transform: translate(2px, 2px);
+}
+
+/* Botón WhatsApp */
+.paso-resumen .btn-primary {
+  background: #25d366 !important;
+  color: #fff !important;
+  border-color: #1aa04d !important;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.paso-resumen .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 4px 6px 0 #000;
+}
+
+.paso-resumen .btn-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.paso-resumen .btn-primary:disabled {
+  background: #ccc !important;
+  border-color: #aaa !important;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────
+   IPAD (768px+)
+───────────────────────────────────────── */
+@media (min-width: 768px) {
+  .paso-resumen { max-width: 560px; margin: 0 auto; gap: 16px; }
+  .resumen-seccion { padding: 20px; border-radius: 24px; }
+  .resumen-seccion h3 { font-size: 1.1rem; }
+  .resumen-seccion p { font-size: 0.95rem; }
+  .resumen-item { font-size: 0.95rem; }
+  .resumen-total h3 { font-size: 1.6rem; }
+  .paso-resumen .acciones button { height: 64px; font-size: 1rem; }
+}
+
+/* ─────────────────────────────────────────
+   MOBILE PEQUEÑO (< 380px)
+───────────────────────────────────────── */
+@media (max-width: 380px) {
+  .resumen-seccion { padding: 13px; border-radius: 18px; }
+  .resumen-total h3 { font-size: 1.2rem; }
+  .resumen-item { font-size: 0.82rem; }
+  .paso-resumen .acciones button { height: 52px; font-size: 0.82rem; }
+}
+
+/* ─────────────────────────────────────────
+   ANIMACIONES
+───────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

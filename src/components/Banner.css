@@ -1,0 +1,45 @@
+.banner-container {
+  width: 100%;
+  background-color: #f191b8; /* El rosa que se ve en tu captura */
+  overflow: hidden;
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  border-top: 3px solid #000;
+  border-bottom: 3px solid #000;
+  z-index: 5;
+  position: relative;
+  /* Eliminamos el transform rotate para evitar huecos */
+}
+
+.banner-track {
+  display: flex;
+  width: max-content;
+  animation: scroll-infinite 20s linear infinite;
+}
+
+.banner-group {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  padding-right: 50px;
+}
+
+.banner-text {
+  font-family: 'Titan One', cursive;
+  font-size: 1.5rem;
+  color: #fff;
+  text-transform: uppercase;
+  /* Borde negro para que resalte como en tu imagen */
+  text-shadow: 
+    -2px -2px 0 #000,  
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000;
+  white-space: nowrap;
+}
+
+@keyframes scroll-infinite {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

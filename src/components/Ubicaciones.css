@@ -1,0 +1,125 @@
+.ubicaciones-section {
+  padding: 100px 20px;
+  background-color: none; /* Un gris casi negro para separar de las otras secciones */
+  overflow: hidden;
+  position: relative;
+}
+
+.ubicaciones-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.ubicaciones-title {
+  font-family: 'Titan One', cursive;
+  font-size: 3.2rem;
+  color: #e78fbb;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: -1px;
+  filter: drop-shadow(4px 4px 0px #000);
+}
+
+.ubicaciones-tagline {
+  color: #e78fbb;
+  font-family: 'Titan One', cursive;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+/* CONTENEDOR DE CARDS */
+.mapas-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.mapa-card {
+  flex: 1;
+  background: none;
+  border: 3px solid #000;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 12px 12px 0px #e78fbb; /* Sombra sólida característica */
+  transition: transform 0.1s ease-out; /* Para el parallax suave */
+  display: flex;
+  flex-direction: column;
+}
+
+.mapa-info {
+  padding: 30px;
+  background: #fff;
+  color: #000;
+  border-bottom: 3px solid #000;
+}
+
+.mapa-info h4 {
+  font-family: 'Titan One', cursive;
+  font-size: 1.6rem;
+  margin: 0 0 10px 0;
+  color: #000;
+  text-transform: uppercase;
+}
+
+.mapa-info p {
+  margin: 0;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.horario {
+  display: inline-block;
+  margin-top: 15px;
+  background: #e78fbb;
+  color: #fff;
+  padding: 5px 15px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-family: 'Titan One', cursive;
+}
+
+/* CONTENEDOR DEL IFRAME */
+.mapa-frame-container {
+  width: 100%;
+  height: 350px;
+  background: none;
+}
+
+.mapa-frame-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+
+/* RESPONSIVO */
+@media (max-width: 968px) {
+  .mapas-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+  }
+
+  .mapa-card {
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 8px 8px 0px #e78fbb;
+  }
+
+  .ubicaciones-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mapa-info h4 {
+    font-size: 1.3rem;
+  }
+  .mapa-frame-container {
+    height: 280px;
+  }
+}

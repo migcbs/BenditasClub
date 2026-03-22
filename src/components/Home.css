@@ -1,0 +1,144 @@
+/* Home.css - Estabilidad Total */
+
+.home-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #000;
+  margin: 0;
+}
+
+/* El fondo ahora ocupa el 100% y el exceso de altura se gestiona internamente */
+.home-bg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: #000;
+}
+
+.home-bg-img {
+  position: absolute;
+  top: -10%; /* Compensación para que al hacer parallax hacia abajo no se vea negro */
+  left: 0;
+  width: 100%;
+  height: 120%; /* Un poco más alta para tener margen de movimiento */
+  object-fit: cover;
+  opacity: 0;
+  filter: brightness(0.4) contrast(1.1);
+  transition: opacity 1.2s ease-in-out;
+  will-change: transform;
+}
+
+.home-bg-img.active {
+  opacity: 1;
+}
+
+/* CENTRADO ABSOLUTO (Scrolleable) */
+.home-main-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.home-content-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 90%;
+  max-width: 500px;
+}
+
+.home-hero-logo {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin-bottom: 35px;
+  pointer-events: auto;
+  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
+  animation: entranceScale 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.home-order-btn {
+  pointer-events: auto;
+  background-color: #e78fbb; /* Rosa Benditas */
+  color: #fff;
+  border: 3px solid #000; /* Estilo sticker/comic */
+  padding: 18px 45px;
+  border-radius: 50px;
+  font-family: 'Titan One', cursive;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px #000; /* Sombra sólida tipo pop-art */
+  transition: all 0.2s ease;
+  animation: entranceUp 0.8s ease-out 0.6s backwards;
+}
+
+.home-order-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px #000;
+  background-color: #d382aa;
+}
+
+.home-order-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
+}
+
+/* INDICADORES */
+.home-nav-ui {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 20;
+}
+
+.home-dot {
+  width: 40px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.home-dot-progress {
+  height: 100%;
+  background: #e78fbb;
+  transition: width 0.1s linear;
+}
+
+@keyframes entranceScale {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes entranceUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+  .home-hero-logo { max-width: 280px; }
+  .home-order-btn {
+    font-size: 1.1rem;
+    padding: 15px 30px;
+    width: 100%;
+  }
+}

@@ -1,0 +1,179 @@
+/* ==========================================================================
+   CARRITO - BENDITAS CLUB (V. VISIBILIDAD TOTAL & ESPACIO)
+   ========================================================================== */
+
+.carrito-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--benditas-white);
+  border: 4px solid var(--benditas-black);
+  border-radius: 35px;
+  padding: 25px;
+  box-shadow: 10px 10px 0px var(--benditas-pink);
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.carrito-titulo {
+  font-family: 'Titan One', cursive;
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  color: var(--benditas-black);
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 5px dashed var(--benditas-pink);
+  padding-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.carrito-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 10px 15px 5px; /* Espacio extra a la derecha para el scrollbar */
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Aire generoso entre productos */
+}
+
+/* --- ITEM DEL CARRITO (ARREGLO DE VISIBILIDAD) --- */
+.carrito-item {
+  display: flex;
+  flex-direction: column; /* Cambiamos a columna para que el nombre tenga su propia línea */
+  padding: 18px;
+  background: white;
+  border: 3px solid var(--benditas-black);
+  border-radius: 22px;
+  gap: 12px;
+  position: relative;
+  box-shadow: 4px 4px 0px var(--benditas-black);
+  transition: all 0.2s ease;
+  min-height: fit-content; /* Asegura que no se corte el contenido */
+}
+
+.carrito-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 6px 6px 0px var(--benditas-pink);
+}
+
+/* Contenedor de Texto: Nombre y Precio */
+.carrito-info {
+  width: 100%;
+  display: flex;
+  justify-content: space-between; /* Nombre a la izquierda, precio a la derecha */
+  align-items: center;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.carrito-nombre {
+  font-family: 'Titan One', cursive;
+  font-size: 1.1rem; /* Más grande para que se lea */
+  color: var(--benditas-black);
+  text-transform: uppercase;
+  overflow: visible; /* Permitimos que se vea todo el nombre */
+  white-space: normal; /* Que baje a la siguiente línea si es muy largo */
+  flex: 1;
+}
+
+.carrito-precio {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  color: var(--benditas-pink);
+  font-size: 1rem;
+  margin-left: 10px;
+}
+
+/* --- CONTROLES (EN SU PROPIA LÍNEA ABAJO) --- */
+.carrito-controles-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.cantidad-control {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #fdfdfd;
+  padding: 6px 14px;
+  border-radius: 15px;
+  border: 2px solid var(--benditas-black);
+}
+
+.btn-cantidad {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 2px solid var(--benditas-black);
+  border-radius: 10px;
+  font-family: 'Titan One', cursive;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.btn-cantidad:hover {
+  background: var(--benditas-pink);
+  color: white;
+}
+
+.cantidad-numero {
+  min-width: 25px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+/* BOTÓN ELIMINAR */
+.btn-eliminar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--benditas-black);
+  background: #fff;
+  color: #ff4d4d;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- FOOTER DEL CARRITO --- */
+.carrito-footer {
+  margin-top: auto;
+  padding-top: 15px;
+}
+
+.carrito-total {
+  padding: 18px 25px;
+  background: var(--benditas-black);
+  color: white;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Titan One', cursive;
+  box-shadow: 0px 6px 0px var(--benditas-pink);
+  border: 2px solid var(--benditas-black);
+}
+
+.carrito-total span:last-child {
+  font-size: 1.5rem;
+}
+
+/* Scrollbar Neo-Pop */
+.carrito-scroll::-webkit-scrollbar { width: 8px; }
+.carrito-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--benditas-black);
+  border-radius: 10px;
+  border: 2px solid var(--benditas-white);
+}

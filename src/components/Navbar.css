@@ -1,0 +1,198 @@
+/* Variables de marca para consistencia */
+:root {
+  --primary-color: #ff4d00; /* Un naranja "buffalo" vibrante */
+  --bg-dark: #121212;
+  --text-light: #ffffff;
+  --font-brand: 'Titan One', cursive;
+  --font-body: 'Arimo', sans-serif;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Alineamos links a la derecha */
+  padding: 0 5%;
+  z-index: 1000;
+  transition: var(--transition);
+  background: transparent;
+}
+
+/* Efecto al hacer scroll */
+.navbar.scrolled {
+  height: 50px;
+  background: white;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Links Escritorio */
+.navbar-links-container {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navbar-links li a {
+  font-family: var(--font-brand);
+  color: var(--text-light);
+  text-decoration: none;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  transition: var(--transition);
+  text-transform: uppercase;
+}
+
+.navbar-links li a:hover {
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* Iconos Sociales */
+.social-icons {
+  display: flex;
+  gap: 1.2rem;
+  margin-left: 1.5rem;
+}
+
+.social-icons a {
+  color: var(--text-light);
+  font-size: 1.3rem;
+  transition: var(--transition);
+}
+
+.social-icons a:hover {
+  color: var(--primary-color);
+  transform: scale(1.2);
+}
+
+/* Hamburger Menu (Botón) */
+.hamburger {
+  display: none; /* Oculto en desktop */
+  cursor: pointer;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1100;
+  padding: 10px;
+}
+
+.hamburger div {
+  width: 30px;
+  height: 3px;
+  background-color: var(--text-light);
+  border-radius: 5px;
+  transition: var(--transition);
+}
+
+/* Animación a 'X' cuando está activo */
+.hamburger.active div:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+  background-color: var(--primary-color);
+}
+.hamburger.active div:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active div:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+  background-color: var(--primary-color);
+}
+
+/* Fullscreen Menu Mobile (PWA Focus) */
+.fullscreen-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  animation: fadeIn 0.4s ease;
+}
+
+.mobile-menu-links {
+  list-style: none;
+  text-align: center;
+  padding: 0;
+}
+
+.mobile-menu-links li {
+  margin: 2rem 0;
+  opacity: 0;
+  animation: slideUp 0.5s forwards ease;
+}
+
+/* Delay escalonado para los links del menú móvil */
+.mobile-menu-links li:nth-child(1) { animation-delay: 0.1s; }
+.mobile-menu-links li:nth-child(2) { animation-delay: 0.2s; }
+.mobile-menu-links li:nth-child(3) { animation-delay: 0.3s; }
+.mobile-menu-links li:nth-child(4) { animation-delay: 0.4s; }
+
+.mobile-menu-links li a {
+  font-family: var(--font-brand);
+  font-size: 2.5rem;
+  color: var(--text-light);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mobile-menu-links .social-icons {
+  margin-top: 3rem;
+  justify-content: center;
+  gap: 2rem;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media Queries para Responsividad */
+@media (max-width: 768px) {
+  .navbar-links-container {
+    display: none; /* Escondemos links normales */
+  }
+
+  .hamburger {
+    display: flex; /* Mostramos hamburguesa */
+  }
+
+  .navbar {
+    padding: 0 20px;
+    height: 70px;
+  }
+  
+  /* Aseguramos que el botón de cerrar esté bien ubicado en el overlay */
+  .fullscreen-menu-overlay .hamburger {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    display: flex;
+  }
+}
