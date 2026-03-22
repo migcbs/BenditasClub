@@ -147,14 +147,6 @@ const STOCK_CONFIG = {
   [STOCK.AGOTADO]:    { label: 'Agotado',        cls: 'stock-agotado'    },
 };
 
-// Stock global de un producto = peor caso de sus variantes disponibles
-const stockProducto = (producto) => {
-  const disponibles = producto.variantes.filter(v => v.stock !== STOCK.AGOTADO);
-  if (disponibles.length === 0) return STOCK.AGOTADO;
-  if (disponibles.some(v => v.stock === STOCK.POCO)) return STOCK.POCO;
-  return STOCK.DISPONIBLE;
-};
-
 // ─── Componente principal ─────────────────────────────────────
 const Shop = () => {
   const [filtro,          setFiltro]          = useState('Todas');
