@@ -61,12 +61,13 @@
   cursor: pointer;
   transition: all 0.15s;
   -webkit-tap-highlight-color: transparent;
+  color: black !important;
 }
 .categoria-btn:active { transform: translate(1px,1px); }
 
 .categoria-activa {
   background: var(--benditas-pink);
-  color: var(--benditas-white);
+  color: var(--benditas-white) !important;
   box-shadow: 3px 3px 0 var(--benditas-black);
   transform: translate(-1px,-1px);
 }
@@ -333,6 +334,7 @@
 
 .acciones button {
   flex: 1;
+  color: black;
   height: 44px;
   border: 3px solid var(--benditas-black);
   border-radius: 50px;

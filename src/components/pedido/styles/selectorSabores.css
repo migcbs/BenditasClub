@@ -1,47 +1,40 @@
-/* ==========================================================================
-   SELECTOR DE SABORES — BENDITAS CLUB
-   Mobile-first. Breakpoints: 480px / 768px / 992px
-   ========================================================================== */
+/* SELECTOR DE SABORES — BENDITAS CLUB */
 
-/* ─────────────────────────────────────────
-   OVERLAY
-───────────────────────────────────────── */
 .selector-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.72);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 999999;
-  animation: fadeInOverlay 0.2s ease;
+  z-index: 9999999;
+  /* Sin animation ni transform en el overlay — iOS Safari bug */
 }
 
-/* ─────────────────────────────────────────
-   MODAL
-───────────────────────────────────────── */
 .selector-modal {
+  position: relative;
   width: 100%;
   background: #fff;
   border: 4px solid #000;
   border-bottom: none;
-  border-top-left-radius:  28px;
-  border-top-right-radius: 28px;
-  padding: 22px 18px 30px;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+  padding: 22px 18px 32px;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-height: 90vh;
+  max-height: 100vh;
   overflow-y: auto;
-  animation: slideUpModal 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   -webkit-overflow-scrolling: touch;
+  margin-bottom: 50px
+  /* Sin transform ni animation — causa el bug en iOS */
 }
 
-/* ─────────────────────────────────────────
-   HEADER
-───────────────────────────────────────── */
 .selector-header {
   display: flex;
   justify-content: space-between;
@@ -61,13 +54,13 @@
 }
 
 .selector-cerrar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   border-radius: 50%;
-  border: 2px solid #000;
+  border: 3px solid #000;
   background: white;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   cursor: pointer;
   display: flex;
@@ -76,23 +69,9 @@
   line-height: 0;
   padding-bottom: 2px;
   box-shadow: 3px 3px 0 #000;
-  transition: all 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
-.selector-cerrar:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 #000;
-}
-
-.selector-cerrar:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
-}
-
-/* ─────────────────────────────────────────
-   INDICADOR DE RONDAS
-───────────────────────────────────────── */
 .selector-rondas {
   display: flex;
   gap: 8px;
@@ -106,21 +85,11 @@
   border-radius: 50%;
   border: 2px solid #000;
   background: white;
-  transition: all 0.2s;
 }
 
-.selector-ronda-dot.activa {
-  background: #e78fbb;
-  transform: scale(1.25);
-}
+.selector-ronda-dot.activa  { background: #e78fbb; }
+.selector-ronda-dot.completa { background: #000; }
 
-.selector-ronda-dot.completa {
-  background: #000;
-}
-
-/* ─────────────────────────────────────────
-   INSTRUCCIÓN
-───────────────────────────────────────── */
 .selector-instruccion {
   display: flex;
   justify-content: space-between;
@@ -141,7 +110,7 @@
 .selector-contador {
   font-family: 'Inter', sans-serif;
   font-weight: 800;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #e78fbb;
   background: #fff0f7;
   padding: 3px 10px;
@@ -150,9 +119,6 @@
   flex-shrink: 0;
 }
 
-/* ─────────────────────────────────────────
-   GRID DE SABORES
-───────────────────────────────────────── */
 .selector-sabores-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -164,7 +130,7 @@
 }
 
 .selector-sabor-btn {
-  padding: 10px 8px;
+  padding: 11px 9px;
   border: 2px solid #000;
   border-radius: 12px;
   background: white;
@@ -172,25 +138,13 @@
   font-weight: 700;
   font-size: 0.78rem;
   cursor: pointer;
-  transition: all 0.12s;
   text-align: left;
   display: flex;
   align-items: center;
   gap: 6px;
   box-shadow: 2px 2px 0 #000;
-  -webkit-tap-highlight-color: transparent;
   line-height: 1.3;
-}
-
-.selector-sabor-btn:hover:not(.deshabilitado) {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 #e78fbb;
-  border-color: #e78fbb;
-}
-
-.selector-sabor-btn:active:not(.deshabilitado) {
-  transform: translate(1px, 1px);
-  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .selector-sabor-btn.seleccionado {
@@ -198,32 +152,19 @@
   color: white;
   border-color: #000;
   box-shadow: 3px 3px 0 #000;
-  transform: translate(-1px, -1px);
 }
 
 .selector-sabor-btn.deshabilitado {
   opacity: 0.3;
   cursor: not-allowed;
   box-shadow: none;
-  transform: none;
 }
 
-.selector-check {
-  font-size: 0.72rem;
-  font-weight: 900;
-  flex-shrink: 0;
-}
+.selector-check { font-size: 0.72rem; font-weight: 900; flex-shrink: 0; }
 
-/* Scrollbar del grid */
 .selector-sabores-grid::-webkit-scrollbar { width: 5px; }
-.selector-sabores-grid::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 6px;
-}
+.selector-sabores-grid::-webkit-scrollbar-thumb { background: #ccc; border-radius: 6px; }
 
-/* ─────────────────────────────────────────
-   ACCIONES
-───────────────────────────────────────── */
 .selector-acciones {
   display: flex;
   gap: 10px;
@@ -233,7 +174,7 @@
 
 .selector-btn-atras {
   flex: 0 0 76px;
-  height: 48px;
+  height: 50px;
   border: 3px solid #000;
   border-radius: 50px;
   background: white;
@@ -241,17 +182,12 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.15s;
   -webkit-tap-highlight-color: transparent;
-}
-
-.selector-btn-atras:active {
-  transform: translate(2px, 2px);
 }
 
 .selector-btn-confirmar {
   flex: 1;
-  height: 48px;
+  height: 50px;
   border: 3px solid #000;
   border-radius: 50px;
   background: #000;
@@ -261,18 +197,7 @@
   text-transform: uppercase;
   cursor: pointer;
   box-shadow: 0 5px 0 #e78fbb;
-  transition: all 0.15s;
   -webkit-tap-highlight-color: transparent;
-}
-
-.selector-btn-confirmar:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 7px 0 #e78fbb;
-}
-
-.selector-btn-confirmar:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 2px 0 #e78fbb;
 }
 
 .selector-btn-confirmar:disabled {
@@ -282,12 +207,8 @@
   cursor: not-allowed;
 }
 
-/* ─────────────────────────────────────────
-   IPAD (768px+)
-───────────────────────────────────────── */
 @media (min-width: 768px) {
   .selector-overlay { align-items: center; }
-
   .selector-modal {
     max-width: 520px;
     border: 4px solid #000;
@@ -295,52 +216,16 @@
     max-height: 82vh;
     padding: 26px 24px 32px;
   }
-
-  .selector-sabores-grid {
-    grid-template-columns: repeat(3, 1fr);
-    max-height: 44vh;
-    gap: 9px;
-  }
-
-  .selector-titulo { font-size: 1.2rem; }
-  .selector-sabor-btn { font-size: 0.82rem; padding: 11px 10px; }
-  .selector-btn-confirmar { height: 52px; font-size: 0.9rem; }
+  .selector-sabores-grid { grid-template-columns: repeat(3, 1fr); max-height: 44vh; }
 }
 
-/* ─────────────────────────────────────────
-   DESKTOP (992px+)
-───────────────────────────────────────── */
 @media (min-width: 992px) {
   .selector-modal { max-width: 560px; }
-
-  .selector-sabores-grid {
-    grid-template-columns: repeat(3, 1fr);
-    max-height: 46vh;
-  }
-
-  .selector-sabor-btn { font-size: 0.85rem; }
+  .selector-sabores-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ─────────────────────────────────────────
-   MOBILE PEQUEÑO (< 380px)
-───────────────────────────────────────── */
 @media (max-width: 380px) {
-  .selector-modal { padding: 18px 14px 26px; gap: 12px; }
-  .selector-titulo { font-size: 1rem; }
+  .selector-modal { padding: 18px 14px 26px; }
   .selector-sabores-grid { max-height: 34vh; }
-  .selector-sabor-btn { font-size: 0.72rem; padding: 8px 7px; }
-  .selector-btn-confirmar { height: 44px; font-size: 0.8rem; }
-}
-
-/* ─────────────────────────────────────────
-   ANIMACIONES
-───────────────────────────────────────── */
-@keyframes fadeInOverlay {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes slideUpModal {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  .selector-sabor-btn { font-size: 0.72rem; padding: 9px 7px; }
 }

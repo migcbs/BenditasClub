@@ -1,6 +1,7 @@
 // src/components/pedido/components/SelectorSabores.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "../styles/selectorSabores.css";
 
 const SABORES_ALITAS = [
@@ -12,154 +13,155 @@ const SABORES_ALITAS = [
   "Pelón Pelo Rico","Takis Blue","Cheetos Flamin' Hot",
   "Takis Fuego","Doritos Cheddar","Naturales",
 ];
+const CONDIMENTOS_PAPAS = ["Naturales","Ajo parmesano","Pimienta limón","Queso parmesano","Paprika"];
+const TIPOS_PAPAS       = ["Papas a la Francesa","Papas en Gajos"];
 
-const CONDIMENTOS_PAPAS = [
-  "Naturales","Ajo parmesano","Pimienta limón",
-  "Queso parmesano","Paprika",
-];
+// ── Detectar tipo de producto de forma robusta ─────────────────
+const detectarTipo = (producto) => {
+  const n = (producto.nombre || "").toLowerCase().trim();
+  const cat = (producto.categoria || producto.category || "").toLowerCase();
 
-const TIPOS_PAPAS = ["Papas a la Francesa","Papas en Gajos"];
-
-const construirRondas = (producto) => {
-  const nombre = producto.nombre?.toLowerCase() || "";
-
-  // ── Alitas sueltas ──
-  if (nombre.includes("alita") && !nombre.includes("box")) {
-    return [{
-      id: "sabores_alitas",
-      label: "Sabores de Alitas",
-      tipo: "multi",
-      opciones: SABORES_ALITAS,
-      maxSabores: producto.maxSabores || 2,
-    }];
-  }
-
-  // ── Boneless suelto ──
-  if (nombre.includes("boneless") && !nombre.includes("box") && !nombre.includes("papas")) {
-    return [{
-      id: "sabores_boneless",
-      label: "Sabores de Boneless",
-      tipo: "multi",
-      opciones: SABORES_ALITAS,
-      maxSabores: producto.maxSabores || 2,
-    }];
-  }
-
-  // ── Papas sueltas ──
-  if ((nombre.includes("papas") || nombre.includes("papa")) &&
-      !nombre.includes("boneless") && !nombre.includes("box") &&
-      !nombre.includes("burgy") && !nombre.includes("doggy") &&
-      !nombre.includes("happy") && !nombre.includes("salchi")) {
-    return [
-      { id: "tipo_papas",      label: "Tipo de Papas",    tipo: "unico", opciones: TIPOS_PAPAS },
-      { id: "condimento_papas",label: "Condimento",        tipo: "unico", opciones: CONDIMENTOS_PAPAS },
-    ];
-  }
-
-  // ── Papas + Boneless (combo) ──
-  if (nombre.includes("papas") && nombre.includes("boneless")) {
-    return [
-      { id: "tipo_papas",       label: "Tipo de Papas",          tipo: "unico", opciones: TIPOS_PAPAS },
-      { id: "condimento_papas", label: "Condimento de Papas",     tipo: "unico", opciones: CONDIMENTOS_PAPAS },
-      { id: "sabores_boneless", label: "Sabores de Boneless",     tipo: "multi", opciones: SABORES_ALITAS, maxSabores: 2 },
-    ];
-  }
-
-  // ── Burgys ──
-  if ((nombre.includes("burgy") || nombre.includes("bonely")) && !nombre.includes("box")) {
-    return [
-      { id: "tipo_papas",       label: "Tipo de Papas",           tipo: "unico", opciones: TIPOS_PAPAS },
-      { id: "condimento_papas", label: "Condimento de las Papas", tipo: "unico", opciones: CONDIMENTOS_PAPAS },
-    ];
-  }
-
-  // ── Doggys ──
-  if (nombre.includes("doggy") && !nombre.includes("box")) {
-    const llevanPapas = !nombre.includes("club");
-    const rondas = [
-      { id: "salchicha", label: "Tipo de Salchicha", tipo: "unico", opciones: ["Salchicha de Res","Salchicha de Pavo"] },
-    ];
-    if (llevanPapas) {
-      rondas.push({ id: "tipo_papas",       label: "Tipo de Papas",           tipo: "unico", opciones: TIPOS_PAPAS });
-      rondas.push({ id: "condimento_papas", label: "Condimento de las Papas", tipo: "unico", opciones: CONDIMENTOS_PAPAS });
-    }
-    return rondas;
-  }
-
-  // ── Burgy / Doggy Box ──
-  if (nombre.includes("burgy") && nombre.includes("doggy")) {
-    return [
-      { id: "tipo_proteina",    label: "¿Burgy o Doggy?",         tipo: "unico", opciones: ["Burgy","Doggy"] },
-      { id: "tipo_papas",       label: "Tipo de Papas",           tipo: "unico", opciones: TIPOS_PAPAS },
-      { id: "condimento_papas", label: "Condimento de las Papas", tipo: "unico", opciones: CONDIMENTOS_PAPAS },
-      { id: "sabores_alitas",   label: "Sabores de las 10 Alitas",tipo: "multi", opciones: SABORES_ALITAS, maxSabores: 2 },
-    ];
-  }
-
-  // ── Resto de Boxes ──
-  if (nombre.includes("box")) {
-    let maxSabores = 2;
-    if (nombre.includes("box #2")) maxSabores = 3;
-    if (nombre.includes("box #3") || nombre.includes("bendito")) maxSabores = 5;
-
-    return [
-      { id: "proteina",         label: "¿Alitas o Boneless?",     tipo: "unico", opciones: ["Alitas","Boneless"] },
-      { id: "sabores_proteina", label: "Sabores",                  tipo: "multi", opciones: SABORES_ALITAS, maxSabores },
-      { id: "tipo_papas",       label: "Tipo de Papas",           tipo: "unico", opciones: TIPOS_PAPAS },
-      { id: "condimento_papas", label: "Condimento de las Papas", tipo: "unico", opciones: CONDIMENTOS_PAPAS },
-    ];
-  }
-
-  // ── Paquete Kids ──
-  if (nombre.includes("kids")) {
-    return [{
-      id: "proteina_kids",
-      label: "Elige el alimento principal",
-      tipo: "unico",
-      opciones: ["6 Alitas","8 Nuggets","1 Mini Burgy"],
-    }];
-  }
-
-  // ── Bebidas con opción ──
-  if (producto.opciones?.length > 0) {
-    return [{
-      id: "opcion_bebida",
-      label: "Elige una opción",
-      tipo: "unico",
-      opciones: producto.opciones,
-    }];
-  }
-
-  return [];
+  // Orden importante: más específico primero
+  if (cat === "boxes" || cat.includes("box")) return "box";
+  if (n === "box #1" || n === "box #2" || n === "box #3") return "box";
+  if (n.includes("bendito box"))   return "box";
+  if (n.includes("burgy") && n.includes("doggy")) return "burgy-doggy-box";
+  if (n.includes("box club"))      return "box";
+  if (n.includes("box"))           return "box";
+  if (n.includes("kids"))          return "kids";
+  if (n.includes("burgy") || n.includes("bonely")) return "burgy";
+  if (n.includes("doggy"))         return "doggy";
+  if (n.includes("alita"))         return "alitas";
+  if (n.includes("boneless") && !n.includes("papas")) return "boneless";
+  if (n.includes("papas") && n.includes("boneless")) return "papas-boneless";
+  if (n.includes("papas") || n.includes("papa")) return "papas";
+  if (producto.opciones?.length > 0) return "bebida";
+  return null;
 };
 
-// ─────────────────────────────────────────────────────────────
-const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
+const construirRondas = (producto) => {
+  const tipo = detectarTipo(producto);
+  const n = (producto.nombre || "").toLowerCase();
+
+  // DEBUG: log en consola para verificar detección
+  console.log("[SelectorSabores] producto:", producto.nombre, "→ tipo:", tipo);
+
+  switch (tipo) {
+    case "alitas":
+      return [{ id:"sabores_alitas", label:"Sabores de Alitas", tipo:"multi",
+        opciones: SABORES_ALITAS, maxSabores: producto.maxSabores || 2 }];
+
+    case "boneless":
+      return [{ id:"sabores_boneless", label:"Sabores de Boneless", tipo:"multi",
+        opciones: SABORES_ALITAS, maxSabores: producto.maxSabores || 2 }];
+
+    case "papas":
+      return [
+        { id:"tipo_papas",       label:"Tipo de Papas",  tipo:"unico", opciones: TIPOS_PAPAS },
+        { id:"condimento_papas", label:"Condimento",      tipo:"unico", opciones: CONDIMENTOS_PAPAS },
+      ];
+
+    case "papas-boneless":
+      return [
+        { id:"tipo_papas",       label:"Tipo de Papas",         tipo:"unico", opciones: TIPOS_PAPAS },
+        { id:"condimento_papas", label:"Condimento de Papas",    tipo:"unico", opciones: CONDIMENTOS_PAPAS },
+        { id:"sabores_boneless", label:"Sabores de Boneless",    tipo:"multi", opciones: SABORES_ALITAS, maxSabores:2 },
+      ];
+
+    case "burgy":
+      return [
+        { id:"tipo_papas",       label:"Tipo de Papas",           tipo:"unico", opciones: TIPOS_PAPAS },
+        { id:"condimento_papas", label:"Condimento de las Papas", tipo:"unico", opciones: CONDIMENTOS_PAPAS },
+      ];
+
+    case "doggy": {
+      const llevanPapas = !n.includes("club");
+      const rondas = [
+        { id:"salchicha", label:"Tipo de Salchicha", tipo:"unico",
+          opciones:["Salchicha de Res","Salchicha de Pavo"] }
+      ];
+      if (llevanPapas) {
+        rondas.push({ id:"tipo_papas",       label:"Tipo de Papas",           tipo:"unico", opciones: TIPOS_PAPAS });
+        rondas.push({ id:"condimento_papas", label:"Condimento de las Papas", tipo:"unico", opciones: CONDIMENTOS_PAPAS });
+      }
+      return rondas;
+    }
+
+    case "burgy-doggy-box":
+      return [
+        { id:"tipo_proteina",    label:"¿Burgy o Doggy?",          tipo:"unico", opciones:["Burgy","Doggy"] },
+        { id:"tipo_papas",       label:"Tipo de Papas",            tipo:"unico", opciones: TIPOS_PAPAS },
+        { id:"condimento_papas", label:"Condimento de las Papas",  tipo:"unico", opciones: CONDIMENTOS_PAPAS },
+        { id:"sabores_alitas",   label:"Sabores de las 10 Alitas", tipo:"multi", opciones: SABORES_ALITAS, maxSabores:2 },
+      ];
+
+    case "box": {
+      let maxSabores = 2;
+      if (n.includes("box #2")) maxSabores = 3;
+      if (n.includes("box #3") || n.includes("bendito")) maxSabores = 5;
+      return [
+        { id:"proteina",         label:"¿Alitas o Boneless?",     tipo:"unico", opciones:["Alitas","Boneless"] },
+        { id:"sabores_proteina", label:"Sabores",                  tipo:"multi", opciones: SABORES_ALITAS, maxSabores },
+        { id:"tipo_papas",       label:"Tipo de Papas",           tipo:"unico", opciones: TIPOS_PAPAS },
+        { id:"condimento_papas", label:"Condimento de las Papas", tipo:"unico", opciones: CONDIMENTOS_PAPAS },
+      ];
+    }
+
+    case "kids":
+      return [{ id:"proteina_kids", label:"Elige el alimento principal", tipo:"unico",
+        opciones:["6 Alitas","8 Nuggets","1 Mini Burgy"] }];
+
+    case "bebida":
+      return [{ id:"opcion_bebida", label:"Elige una opción", tipo:"unico",
+        opciones: producto.opciones }];
+
+    default:
+      console.warn("[SelectorSabores] tipo no reconocido para:", producto.nombre);
+      return [];
+  }
+};
+
+// ── Modal content ──────────────────────────────────────────────
+const ModalContent = ({ producto, onConfirmar, onCancelar }) => {
   const rondas = construirRondas(producto);
   const [rondaActual, setRondaActual] = useState(0);
-  const [selecciones, setSelecciones] = useState(rondas.map(r => ({ ...r, elegidos: [] })));
+  const [selecciones, setSelecciones] = useState(rondas.map(r => ({ ...r, elegidos:[] })));
 
-  if (rondas.length === 0) { onConfirmar([]); return null; }
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width    = "100%";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width    = "";
+    };
+  }, []);
 
-  const ronda    = selecciones[rondaActual];
-  const elegidos = ronda.elegidos;
-  const esMulti  = ronda.tipo === "multi";
+  // Si no hay rondas, agregar sin configuración
+  if (rondas.length === 0) {
+    console.warn("[SelectorSabores] Sin rondas para:", producto.nombre);
+    onConfirmar([]);
+    return null;
+  }
+
+  const ronda      = selecciones[rondaActual] || rondas[rondaActual] || {};
+  const elegidos   = ronda.elegidos || [];
+  const esMulti    = ronda.tipo === "multi";
   const maxSabores = ronda.maxSabores || 1;
-  const esUltimaRonda = rondaActual === rondas.length - 1;
-  const puedeAvanzar  = elegidos.length > 0;
+  const esUltima   = rondaActual === rondas.length - 1;
 
-  // Etiqueta dinámica: "Sabores de Alitas" o "Sabores de Boneless" según proteína elegida
   const getLabelRonda = (r, sels) => {
     if (r.id === "sabores_proteina") {
-      const proteina = sels.find(s => s.id === "proteina");
-      return `Sabores de ${proteina?.elegidos[0] || "Proteína"}`;
+      const prot = sels.find(s => s.id === "proteina");
+      return `Sabores de ${prot?.elegidos[0] || "Proteína"}`;
     }
     return r.label;
   };
 
   const toggleOpcion = (opcion) => {
     setSelecciones(prev => {
-      const nueva = [...prev];
+      const nueva  = [...prev];
       const actual = { ...nueva[rondaActual], elegidos: [...nueva[rondaActual].elegidos] };
       if (esMulti) {
         actual.elegidos = actual.elegidos.includes(opcion)
@@ -168,6 +170,7 @@ const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
             ? [...actual.elegidos, opcion]
             : actual.elegidos;
       } else {
+        // Selección única — solo actualizar, sin auto-avanzar
         actual.elegidos = [opcion];
       }
       nueva[rondaActual] = actual;
@@ -176,24 +179,22 @@ const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
   };
 
   const handleSiguiente = () => {
-    if (!esUltimaRonda) {
-      setRondaActual(prev => prev + 1);
+    if (!esUltima) {
+      setRondaActual(p => p + 1);
     } else {
       const configurables = selecciones.map(r => ({
         type:    r.id,
         label:   getLabelRonda(r, selecciones),
-        sabores: r.tipo === "multi"  ? r.elegidos : [],
-        opcion:  r.tipo === "unico"  ? r.elegidos[0] : undefined,
+        sabores: r.tipo === "multi" ? r.elegidos : [],
+        opcion:  r.tipo === "unico" ? r.elegidos[0] : undefined,
       }));
       onConfirmar(configurables);
     }
   };
 
-  const labelActual = getLabelRonda(ronda, selecciones);
-
   return (
     <div className="selector-overlay" onClick={e => e.target === e.currentTarget && onCancelar()}>
-      <div className="selector-modal">
+      <div className="selector-modal" onClick={e => e.stopPropagation()}>
 
         <div className="selector-header">
           <h3 className="selector-titulo">{producto.nombre}</h3>
@@ -203,17 +204,21 @@ const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
         {rondas.length > 1 && (
           <div className="selector-rondas">
             {rondas.map((_, i) => (
-              <div key={i} className={`selector-ronda-dot ${i === rondaActual ? "activa" : ""} ${i < rondaActual ? "completa" : ""}`} />
+              <div key={i} className={`selector-ronda-dot
+                ${i === rondaActual ? "activa" : ""}
+                ${i < rondaActual  ? "completa" : ""}`}
+              />
             ))}
           </div>
         )}
 
         <div className="selector-instruccion">
-          <span className="selector-label">{labelActual}</span>
-          {esMulti
-            ? <span className="selector-contador">{elegidos.length} / {maxSabores} sabor{maxSabores !== 1 ? "es" : ""}</span>
-            : <span className="selector-contador">Elige 1</span>
-          }
+          <span className="selector-label">{getLabelRonda(ronda, selecciones)}</span>
+          <span className="selector-contador">
+            {esMulti
+              ? `${elegidos.length} / ${maxSabores} sabor${maxSabores !== 1 ? "es" : ""}`
+              : "Elige 1"}
+          </span>
         </div>
 
         <div className="selector-sabores-grid">
@@ -223,9 +228,10 @@ const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
             return (
               <button
                 key={opcion}
-                className={`selector-sabor-btn ${seleccionado ? "seleccionado" : ""} ${deshabilitado ? "deshabilitado" : ""}`}
-                onClick={() => toggleOpcion(opcion)}
-                disabled={deshabilitado}
+                className={`selector-sabor-btn
+                  ${seleccionado  ? "seleccionado"  : ""}
+                  ${deshabilitado ? "deshabilitado" : ""}`}
+                onClick={() => !deshabilitado && toggleOpcion(opcion)}
               >
                 {seleccionado && <span className="selector-check">✓</span>}
                 {opcion}
@@ -236,21 +242,33 @@ const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
 
         <div className="selector-acciones">
           {rondaActual > 0 && (
-            <button className="selector-btn-atras" onClick={() => setRondaActual(p => p - 1)}>Atrás</button>
+            <button className="selector-btn-atras" onClick={() => setRondaActual(p => p - 1)}>
+              Atrás
+            </button>
           )}
           <button
             className="selector-btn-confirmar"
             onClick={handleSiguiente}
-            disabled={!puedeAvanzar}
+            disabled={elegidos.length === 0}
           >
-            {esUltimaRonda
-              ? "Agregar al carrito"
-              : `Siguiente: ${getLabelRonda(rondas[rondaActual + 1], selecciones)}`}
+            {esUltima ? "Agregar al carrito" : `Siguiente`}
           </button>
         </div>
 
       </div>
     </div>
+  );
+};
+
+// ── Wrapper con portal ─────────────────────────────────────────
+const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
+  return ReactDOM.createPortal(
+    <ModalContent
+      producto={producto}
+      onConfirmar={onConfirmar}
+      onCancelar={onCancelar}
+    />,
+    document.body
   );
 };
 

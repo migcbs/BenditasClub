@@ -1,14 +1,19 @@
-/* Variables de marca para consistencia */
+/* ================================================================
+   NAVBAR — BENDITAS CLUB
+   Desktop: barra fija arriba | Mobile: cápsula flotante
+   ================================================================ */
+
 :root {
-  --primary-color: #ff4d00; /* Un naranja "buffalo" vibrante */
-  --bg-dark: #121212;
-  --text-light: #ffffff;
-  --font-brand: 'Titan One', cursive;
-  --font-body: 'Arimo', sans-serif;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --primary-color: #ff4d00;
+  --bg-dark:       #121212;
+  --text-light:    #ffffff;
+  --font-brand:    'Titan One', cursive;
+  --transition:    all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --bp-pink:       #e78fbb;
+  --bp-black:      #000000;
 }
 
-/* Base Navbar */
+/* ── Desktop navbar ─────────────────────────────────────────── */
 .navbar {
   position: fixed;
   top: 0;
@@ -16,22 +21,20 @@
   height: 80px;
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Alineamos links a la derecha */
+  justify-content: flex-end;
   padding: 0 5%;
   z-index: 1000;
   transition: var(--transition);
   background: transparent;
 }
 
-/* Efecto al hacer scroll */
 .navbar.scrolled {
   height: 50px;
   background: white;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
-/* Links Escritorio */
 .navbar-links-container {
   display: flex;
   align-items: center;
@@ -42,6 +45,8 @@
   list-style: none;
   gap: 2rem;
   align-items: center;
+  margin: 0;
+  padding: 0;
 }
 
 .navbar-links li a {
@@ -54,12 +59,10 @@
   text-transform: uppercase;
 }
 
-.navbar-links li a:hover {
-  color: var(--primary-color);
-  transform: translateY(-2px);
-}
+.navbar.scrolled .navbar-links li a { color: var(--bp-black); }
 
-/* Iconos Sociales */
+.navbar-links li a:hover { color: var(--primary-color); }
+
 .social-icons {
   display: flex;
   gap: 1.2rem;
@@ -72,127 +75,183 @@
   transition: var(--transition);
 }
 
-.social-icons a:hover {
-  color: var(--primary-color);
-  transform: scale(1.2);
-}
+.navbar.scrolled .social-icons a { color: var(--bp-black); }
+.social-icons a:hover { color: var(--primary-color); transform: scale(1.2); }
 
-/* Hamburger Menu (Botón) */
-.hamburger {
-  display: none; /* Oculto en desktop */
-  cursor: pointer;
-  flex-direction: column;
-  gap: 6px;
+/* ── Mobile: cápsula flotante ───────────────────────────────── */
+.mobile-pill {
+  display: none; /* oculta en desktop */
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  left: auto;
+  bottom: auto;
+  transform: none;
   z-index: 1100;
-  padding: 10px;
+
+  /* Forma de cápsula */
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 50px;
+  border: 2.5px solid rgba(255,255,255,0.8);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+
+  display: none; /* sobreescrito en media query */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.hamburger div {
-  width: 30px;
-  height: 3px;
-  background-color: var(--text-light);
-  border-radius: 5px;
-  transition: var(--transition);
+.mobile-pill:active {
+  transform: scale(0.94);
 }
 
-/* Animación a 'X' cuando está activo */
-.hamburger.active div:nth-child(1) {
-  transform: translateY(9px) rotate(45deg);
-  background-color: var(--primary-color);
-}
-.hamburger.active div:nth-child(2) {
-  opacity: 0;
-}
-.hamburger.active div:nth-child(3) {
-  transform: translateY(-9px) rotate(-45deg);
-  background-color: var(--primary-color);
+.mobile-pill.scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--bp-black);
+  box-shadow: 3px 3px 0 var(--bp-black);
 }
 
-/* Fullscreen Menu Mobile (PWA Focus) */
+.mobile-pill.scrolled .pill-linea {
+  background: var(--bp-black);
+}
+
+/* Las tres líneas de la hamburguesa dentro de la cápsula */
+.pill-linea {
+  display: block;
+  width: 24px;
+  height: 2.5px;
+  background: #fff;
+  border-radius: 3px;
+  transition: all 0.25s ease;
+  pointer-events: none;
+}
+
+/* Animación a X cuando está abierto */
+.mobile-pill.abierto .pill-linea:nth-child(1) { transform: translateY(7.5px) rotate(45deg); background: var(--bp-pink); }
+.mobile-pill.abierto .pill-linea:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.mobile-pill.abierto .pill-linea:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); background: var(--bp-pink); }
+
+/* ── Fullscreen menu mobile ─────────────────────────────────── */
 .fullscreen-menu-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100vh;
-  background: var(--bg-dark);
+  background: rgba(18, 18, 18, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  animation: fadeIn 0.25s ease;
+  /* Clic en el fondo cierra */
+  cursor: pointer;
+}
+
+.fullscreen-menu-inner {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  z-index: 1050;
-  animation: fadeIn 0.4s ease;
+  width: 100%;
+  cursor: default;
 }
+
+/* Botón cerrar (X) arriba a la derecha */
+.mobile-menu-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  padding-bottom: 2px;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-menu-close:hover { background: var(--bp-pink); border-color: var(--bp-pink); }
 
 .mobile-menu-links {
   list-style: none;
   text-align: center;
   padding: 0;
+  margin: 0;
 }
 
 .mobile-menu-links li {
-  margin: 2rem 0;
+  margin: 1.6rem 0;
   opacity: 0;
-  animation: slideUp 0.5s forwards ease;
+  animation: slideUp 0.4s forwards ease;
 }
 
-/* Delay escalonado para los links del menú móvil */
-.mobile-menu-links li:nth-child(1) { animation-delay: 0.1s; }
-.mobile-menu-links li:nth-child(2) { animation-delay: 0.2s; }
-.mobile-menu-links li:nth-child(3) { animation-delay: 0.3s; }
-.mobile-menu-links li:nth-child(4) { animation-delay: 0.4s; }
+.mobile-menu-links li:nth-child(1) { animation-delay: 0.05s; }
+.mobile-menu-links li:nth-child(2) { animation-delay: 0.12s; }
+.mobile-menu-links li:nth-child(3) { animation-delay: 0.19s; }
+.mobile-menu-links li:nth-child(4) { animation-delay: 0.26s; }
+.mobile-menu-links li:nth-child(5) { animation-delay: 0.33s; }
 
 .mobile-menu-links li a {
   font-family: var(--font-brand);
-  font-size: 2.5rem;
+  font-size: 2.4rem;
   color: var(--text-light);
   text-decoration: none;
   text-transform: uppercase;
+  transition: color 0.2s;
 }
 
+.mobile-menu-links li a:hover { color: var(--bp-pink); }
+
 .mobile-menu-links .social-icons {
-  margin-top: 3rem;
+  margin-top: 2rem;
   justify-content: center;
   gap: 2rem;
 }
 
-/* Keyframes */
+.mobile-menu-links .social-icons a {
+  color: var(--text-light);
+  font-size: 1.6rem;
+}
+
+/* ── Media queries ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Ocultar navbar de desktop */
+  .navbar { display: none; }
+
+  /* Mostrar cápsula flotante */
+  .mobile-pill { display: flex; }
+}
+
+@media (min-width: 769px) {
+  /* Ocultar todo lo mobile en desktop */
+  .mobile-pill            { display: none !important; }
+  .fullscreen-menu-overlay{ display: none !important; }
+}
+
+/* ── Animaciones ────────────────────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Media Queries para Responsividad */
-@media (max-width: 768px) {
-  .navbar-links-container {
-    display: none; /* Escondemos links normales */
-  }
-
-  .hamburger {
-    display: flex; /* Mostramos hamburguesa */
-  }
-
-  .navbar {
-    padding: 0 20px;
-    height: 70px;
-  }
-  
-  /* Aseguramos que el botón de cerrar esté bien ubicado en el overlay */
-  .fullscreen-menu-overlay .hamburger {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    display: flex;
-  }
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
