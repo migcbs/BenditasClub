@@ -39,7 +39,7 @@ const Ubicaciones = () => {
           <div className="mapa-info">
             <h4>Sucursal Coatepec</h4>
             <p>Melchor Ocampo 14, Centro</p>
-            <span className="horario">Abierto: 1:00 PM - 10:30 PM</span>
+            <span className="horario">Abierto: 2:00 PM - 10:30 PM</span>
           </div>
           <div className="mapa-frame-container">
             <iframe
@@ -60,7 +60,7 @@ const Ubicaciones = () => {
           <div className="mapa-info">
             <h4>Sucursal Xico</h4>
             <p>Av. Hidalgo 212, Centro</p>
-            <span className="horario">Abierto: 1:00 PM - 10:30 PM</span>
+            <span className="horario">Abierto: 2:00 PM - 10:30 PM</span>
           </div>
           <div className="mapa-frame-container">
             <iframe
