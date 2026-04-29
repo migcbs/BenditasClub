@@ -62,11 +62,11 @@ const construirRondas = (producto) => {
       ];
 
     case "papas-boneless":
-      return [
-        { id:"tipo_papas",       label:"Tipo de Papas",         tipo:"unico", opciones: TIPOS_PAPAS },
-        { id:"condimento_papas", label:"Condimento de Papas",    tipo:"unico", opciones: CONDIMENTOS_PAPAS },
-        { id:"sabores_boneless", label:"Sabores de Boneless",    tipo:"multi", opciones: SABORES_ALITAS, maxSabores:2 },
-      ];
+  return [
+    { id:"queso_cheddar",    label:"¿Con queso cheddar?",   tipo:"unico", opciones: ["Con queso cheddar", "Sin queso cheddar"] },
+    { id:"tipo_papas",       label:"Tipo de Papas",         tipo:"unico", opciones: TIPOS_PAPAS },
+    { id:"sabores_boneless", label:"Elige 3 salsas",        tipo:"multi", opciones: SABORES_ALITAS, maxSabores:3 },
+  ];
 
     case "burgy":
       return [
