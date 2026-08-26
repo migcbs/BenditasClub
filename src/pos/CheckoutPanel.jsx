@@ -1,7 +1,7 @@
 // src/pos/CheckoutPanel.jsx
 import React, { useState } from 'react';
 import OrderDetailsForm from './OrderDetailsForm';
-import { createOrder, updateOrderEstado } from './api';
+import { createOrder, updateOrderEstado } from '../shared/staffApi';
 
 const DETALLES_INICIALES = {
   tipo: 'mesa',

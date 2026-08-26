@@ -1,6 +1,6 @@
 // src/pos/ProductGrid.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { getProducts } from './api';
+import { getProducts } from '../shared/staffApi';
 import SaboresPicker from './SaboresPicker';
 
 const ProductGrid = ({ onAgregar }) => {

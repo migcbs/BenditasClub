@@ -1,6 +1,6 @@
 // src/pos/OrdersList.jsx
 import React, { useCallback, useEffect, useState } from 'react';
-import { listOrders, updateOrderEstado } from './api';
+import { listOrders, updateOrderEstado } from '../shared/staffApi';
 
 const OrdersList = ({ refreshKey }) => {
   const [orders, setOrders] = useState([]);
