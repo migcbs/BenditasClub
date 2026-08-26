@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 const TEST_PREFIX = 'jest-orders';
 
 let empleadoXico, empleadoCoatepec, tokenXico, tokenCoatepec, productoAlitas, productoSnack;
+let cocinaXico, tokenCocinaXico;
 
 beforeAll(async () => {
   const hashedPin = await bcrypt.hash('1234', 10);
@@ -34,6 +35,15 @@ beforeAll(async () => {
 
   productoAlitas = await prisma.product.findFirst({ where: { nombre: '8 Alitas' } });
   productoSnack = await prisma.product.findFirst({ where: { nombre: 'Palomitas' } });
+
+  cocinaXico = await prisma.user.create({
+    data: { nombre: `${TEST_PREFIX}-cocina-xico`, role: 'cocina', sucursal: 'xico', pin: hashedPin },
+  });
+  tokenCocinaXico = jwt.sign(
+    { id: cocinaXico.id, role: cocinaXico.role, sucursal: cocinaXico.sucursal },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
 });
 
 afterAll(async () => {
@@ -138,6 +148,14 @@ describe('GET /api/orders', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.every((o) => o.estado === 'pagado')).toBe(true);
+  });
+
+  it('also allows the cocina role to list orders for its sucursal', async () => {
+    const res = await request(app).get('/api/orders').set('Authorization', `Bearer ${tokenCocinaXico}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.every((o) => o.sucursal === 'xico')).toBe(true);
+    expect(res.body[0]).toHaveProperty('estadoCocina');
   });
 });
 
