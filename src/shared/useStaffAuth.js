@@ -1,6 +1,6 @@
-// src/pos/useStaffAuth.js
+// src/shared/useStaffAuth.js
 import { useState, useCallback } from 'react';
-import { staffLogin } from './api';
+import { staffLogin } from './staffApi';
 
 const TOKEN_KEY = 'bc_staff_token';
 const USER_KEY = 'bc_staff_user';

@@ -1,4 +1,4 @@
-// src/pos/StaffLogin.jsx
+// src/shared/StaffLogin.jsx
 import React, { useState } from 'react';
 
 const SUCURSALES = [
@@ -6,7 +6,7 @@ const SUCURSALES = [
   { value: 'coatepec', label: 'Coatepec' },
 ];
 
-const StaffLogin = ({ onLogin }) => {
+const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
   const [sucursal, setSucursal] = useState('xico');
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
@@ -35,7 +35,7 @@ const StaffLogin = ({ onLogin }) => {
 
   return (
     <div className="pos-login">
-      <h2>BenditasClub POS</h2>
+      <h2>{title}</h2>
 
       <label className="pos-login-label">
         Sucursal

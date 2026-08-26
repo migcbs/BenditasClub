@@ -1,10 +1,10 @@
 // src/pos/PosApp.jsx
 import React, { useState } from 'react';
-import StaffLogin from './StaffLogin';
 import ProductGrid from './ProductGrid';
 import CheckoutPanel from './CheckoutPanel';
 import OrdersList from './OrdersList';
-import { useStaffAuth } from './useStaffAuth';
+import StaffLogin from '../shared/StaffLogin';
+import { useStaffAuth } from '../shared/useStaffAuth';
 import { usePosCarrito } from './usePosCarrito';
 import './pos.css';
 

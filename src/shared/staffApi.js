@@ -1,6 +1,6 @@
-// src/pos/api.js
-// Helpers HTTP para el POS de empleado. Habla con el backend de la fase 1/2
-// (index.js), corriendo en local en el puerto 3001.
+// src/shared/staffApi.js
+// Helpers HTTP compartidos por las pantallas de staff (/pos y /cocina).
+// Habla con el backend de las fases 1-3 (index.js), en local en el puerto 3001.
 const API_BASE = 'http://localhost:3001';
 
 export const authHeader = () => {
@@ -41,4 +41,11 @@ export const updateOrderEstado = (id, estado, metodoPago) =>
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...authHeader() },
     body: JSON.stringify({ estado, metodoPago }),
+  }).then(handle);
+
+export const updateOrderCocina = (id, estadoCocina) =>
+  fetch(`${API_BASE}/api/orders/${id}/cocina`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ estadoCocina }),
   }).then(handle);
