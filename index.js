@@ -355,6 +355,35 @@ app.put('/api/orders/:id/estado', verifyToken, requireRole('empleado'), async (r
   }
 });
 
+const ESTADOS_COCINA_VALIDOS = ['nueva', 'en_preparacion', 'lista', 'entregada'];
+
+app.put('/api/orders/:id/cocina', verifyToken, requireRole('empleado', 'cocina'), async (req, res) => {
+  try {
+    const { estadoCocina } = req.body;
+    if (!ESTADOS_COCINA_VALIDOS.includes(estadoCocina)) {
+      return res.status(400).json({ error: 'estadoCocina inválido' });
+    }
+    if (req.user.role === 'empleado' && estadoCocina !== 'entregada') {
+      return res.status(400).json({ error: 'Un empleado solo puede marcar un pedido como entregada' });
+    }
+
+    const orden = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!orden || orden.sucursal !== req.user.sucursal) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: req.params.id },
+      data: { estadoCocina },
+      include: { items: true },
+    });
+    res.json(updated);
+  } catch (e) {
+    console.error('❌ Error actualizando estado de cocina:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================

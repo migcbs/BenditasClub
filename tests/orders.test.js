@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 const TEST_PREFIX = 'jest-orders';
 
 let empleadoXico, empleadoCoatepec, tokenXico, tokenCoatepec, productoAlitas, productoSnack;
-let cocinaXico, tokenCocinaXico;
+let cocinaXico, tokenCocinaXico, cocinaCoatepec, tokenCocinaCoatepec;
 
 beforeAll(async () => {
   const hashedPin = await bcrypt.hash('1234', 10);
@@ -41,6 +41,15 @@ beforeAll(async () => {
   });
   tokenCocinaXico = jwt.sign(
     { id: cocinaXico.id, role: cocinaXico.role, sucursal: cocinaXico.sucursal },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+
+  cocinaCoatepec = await prisma.user.create({
+    data: { nombre: `${TEST_PREFIX}-cocina-coatepec`, role: 'cocina', sucursal: 'coatepec', pin: hashedPin },
+  });
+  tokenCocinaCoatepec = jwt.sign(
+    { id: cocinaCoatepec.id, role: cocinaCoatepec.role, sucursal: cocinaCoatepec.sucursal },
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
@@ -207,5 +216,66 @@ describe('PUT /api/orders/:id/estado', () => {
       .send({ estado: 'cancelado' });
 
     expect(res.status).toBe(404);
+  });
+});
+
+describe('PUT /api/orders/:id/cocina', () => {
+  let orden;
+
+  beforeEach(async () => {
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ tipo: 'para_llevar', items: [{ productId: productoSnack.id, cantidad: 1 }] });
+    orden = res.body;
+  });
+
+  it('lets cocina advance through nueva -> en_preparacion -> lista -> entregada', async () => {
+    for (const estadoCocina of ['en_preparacion', 'lista', 'entregada']) {
+      const res = await request(app)
+        .put(`/api/orders/${orden.id}/cocina`)
+        .set('Authorization', `Bearer ${tokenCocinaXico}`)
+        .send({ estadoCocina });
+
+      expect(res.status).toBe(200);
+      expect(res.body.estadoCocina).toBe(estadoCocina);
+    }
+  });
+
+  it('rejects an empleado setting anything other than entregada', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/cocina`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ estadoCocina: 'en_preparacion' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('lets an empleado mark entregada', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/cocina`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ estadoCocina: 'entregada' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.estadoCocina).toBe('entregada');
+  });
+
+  it('404s when the order belongs to another sucursal', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/cocina`)
+      .set('Authorization', `Bearer ${tokenCocinaCoatepec}`)
+      .send({ estadoCocina: 'en_preparacion' });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('rejects an invalid estadoCocina value', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/cocina`)
+      .set('Authorization', `Bearer ${tokenCocinaXico}`)
+      .send({ estadoCocina: 'volando' });
+
+    expect(res.status).toBe(400);
   });
 });
