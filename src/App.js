@@ -11,6 +11,7 @@ import Menu       from './components/Menu';
 import Ubicaciones from './components/Ubicaciones';
 import Footer     from './components/Footer';
 import Shop       from './components/Shop';
+import PosApp     from './pos/PosApp';
 
 import './Styles.css';
 
@@ -32,23 +33,40 @@ const ScrollHandler = () => {
   return null;
 };
 
+// El POS es una pantalla de staff para tablet — no lleva el navbar/footer del sitio.
+const SiteChrome = ({ children }) => {
+  const location = useLocation();
+  const esPos = location.pathname.startsWith('/pos');
+
+  if (esPos) return children;
+
+  return (
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
+  );
+};
+
 function App() {
   return (
     <Router>
       <ScrollHandler />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={
-          <>
-            <section id="home"><Home /></section>
-            <Banner />
-            <section id="menu"><Menu /></section>
-            <section id="ubicaciones"><Ubicaciones /></section>
-          </>
-        } />
-        <Route path="/shop" element={<Shop />} />
-      </Routes>
-      <Footer />
+      <SiteChrome>
+        <Routes>
+          <Route path="/" element={
+            <>
+              <section id="home"><Home /></section>
+              <Banner />
+              <section id="menu"><Menu /></section>
+              <section id="ubicaciones"><Ubicaciones /></section>
+            </>
+          } />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/pos" element={<PosApp />} />
+        </Routes>
+      </SiteChrome>
     </Router>
   );
 }
