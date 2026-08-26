@@ -1,6 +1,6 @@
 // src/pos/OrdersList.jsx
 import React, { useCallback, useEffect, useState } from 'react';
-import { listOrders, updateOrderEstado } from '../shared/staffApi';
+import { listOrders, updateOrderEstado, updateOrderCocina } from '../shared/staffApi';
 
 const OrdersList = ({ refreshKey }) => {
   const [orders, setOrders] = useState([]);
@@ -15,6 +15,11 @@ const OrdersList = ({ refreshKey }) => {
   useEffect(() => {
     cargar();
   }, [cargar, refreshKey]);
+
+  const marcarEntregado = async (orden) => {
+    await updateOrderCocina(orden.id, 'entregada');
+    cargar();
+  };
 
   const marcar = async (orden, estado) => {
     const metodoPago = estado === 'pagado' ? (orden.metodoPago || 'efectivo') : undefined;
@@ -40,6 +45,9 @@ const OrdersList = ({ refreshKey }) => {
             ))}
           </div>
           <div>Total: ${orden.total}</div>
+          {orden.estadoCocina === 'lista' && (
+            <button onClick={() => marcarEntregado(orden)}>Marcar entregado</button>
+          )}
           {orden.estado === 'pendiente' && (
             <div>
               <button onClick={() => marcar(orden, 'pagado')}>Marcar pagado</button>
