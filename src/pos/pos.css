@@ -176,3 +176,40 @@
   border-bottom-color: #e0a800;
   font-weight: bold;
 }
+.pos-order-details,
+.pos-checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.pos-order-details label,
+.pos-checkout label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+.pos-order-details input,
+.pos-order-details select,
+.pos-checkout select {
+  padding: 8px;
+}
+.pos-checkout label[for=""],
+.pos-checkout > label:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+}
+.pos-btn-cerrar-venta {
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #e0a800;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.pos-btn-cerrar-venta:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
