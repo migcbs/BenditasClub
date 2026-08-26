@@ -2,6 +2,7 @@
 import React from 'react';
 import StaffLogin from './StaffLogin';
 import ProductGrid from './ProductGrid';
+import CheckoutPanel from './CheckoutPanel';
 import { useStaffAuth } from './useStaffAuth';
 import { usePosCarrito } from './usePosCarrito';
 import './pos.css';
@@ -42,7 +43,7 @@ const PosApp = () => {
             <span>Total</span>
             <span>${carrito.total}</span>
           </div>
-          <p style={{ color: '#888' }}>Cerrar venta próximamente (Task 7).</p>
+          <CheckoutPanel carrito={carrito} onOrderCreated={() => {}} />
         </div>
       </main>
     </div>
