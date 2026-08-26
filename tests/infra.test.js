@@ -105,3 +105,80 @@ describe('Staff PIN auth', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('Products', () => {
+  let adminToken, clienteToken, categoryId, productId;
+
+  beforeAll(async () => {
+    const hashedPassword = await bcrypt.hash('TestPass123', 10);
+    const admin = await prisma.user.create({
+      data: { nombre: `${TEST_PREFIX}-admin`, email: `${TEST_PREFIX}-admin@benditas.local`, password: hashedPassword, role: 'admin' },
+    });
+    adminToken = jwt.sign({ id: admin.id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    const cliente = await prisma.user.create({
+      data: { nombre: `${TEST_PREFIX}-cliente2`, email: `${TEST_PREFIX}-cliente2@benditas.local`, password: hashedPassword, role: 'cliente' },
+    });
+    clienteToken = jwt.sign({ id: cliente.id, role: cliente.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    const category = await prisma.category.findFirst({ where: { nombre: 'Snacks' } });
+    categoryId = category.id;
+  });
+
+  it('lists active products publicly, no auth required', async () => {
+    const res = await request(app).get('/api/products');
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body[0]).toHaveProperty('nombre');
+    expect(res.body[0]).toHaveProperty('precio');
+  });
+
+  it('rejects product creation without a token', async () => {
+    const res = await request(app).post('/api/admin/products').send({ nombre: 'X', precio: 10, categoryId });
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects product creation from a non-admin role', async () => {
+    const res = await request(app)
+      .post('/api/admin/products')
+      .set('Authorization', `Bearer ${clienteToken}`)
+      .send({ nombre: 'X', precio: 10, categoryId });
+    expect(res.status).toBe(403);
+  });
+
+  it('lets an admin create a product', async () => {
+    const res = await request(app)
+      .post('/api/admin/products')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ nombre: `${TEST_PREFIX}-producto`, precio: 77, categoryId });
+
+    expect(res.status).toBe(201);
+    expect(res.body.nombre).toBe(`${TEST_PREFIX}-producto`);
+    productId = res.body.id;
+  });
+
+  it('lets an admin update a product', async () => {
+    const res = await request(app)
+      .put(`/api/admin/products/${productId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ precio: 88 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.precio).toBe(88);
+  });
+
+  it('lets an admin soft-delete a product', async () => {
+    const res = await request(app)
+      .delete(`/api/admin/products/${productId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+
+    const stillInDb = await prisma.product.findUnique({ where: { id: productId } });
+    expect(stillInDb.activo).toBe(false);
+
+    const publicList = await request(app).get('/api/products');
+    expect(publicList.body.find((p) => p.id === productId)).toBeUndefined();
+  });
+});
