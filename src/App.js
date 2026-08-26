@@ -12,6 +12,7 @@ import Ubicaciones from './components/Ubicaciones';
 import Footer     from './components/Footer';
 import Shop       from './components/Shop';
 import PosApp     from './pos/PosApp';
+import KitchenApp from './kitchen/KitchenApp';
 
 import './Styles.css';
 
@@ -33,12 +34,13 @@ const ScrollHandler = () => {
   return null;
 };
 
-// El POS es una pantalla de staff para tablet — no lleva el navbar/footer del sitio.
+// El POS y la pantalla de cocina son pantallas de staff para tablet —
+// no llevan el navbar/footer del sitio.
 const SiteChrome = ({ children }) => {
   const location = useLocation();
-  const esPos = location.pathname.startsWith('/pos');
+  const esPantallaStaff = location.pathname.startsWith('/pos') || location.pathname.startsWith('/cocina');
 
-  if (esPos) return children;
+  if (esPantallaStaff) return children;
 
   return (
     <>
@@ -65,6 +67,7 @@ function App() {
           } />
           <Route path="/shop" element={<Shop />} />
           <Route path="/pos" element={<PosApp />} />
+          <Route path="/cocina" element={<KitchenApp />} />
         </Routes>
       </SiteChrome>
     </Router>
