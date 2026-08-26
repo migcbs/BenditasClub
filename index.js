@@ -48,6 +48,65 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+app.post('/api/auth/register', authLimiter, async (req, res) => {
+  try {
+    const { nombre, email, password } = req.body;
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: 'Campos obligatorios: nombre, email, password' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+    }
+
+    const emailLimpio = email.toLowerCase().trim();
+    const existe = await prisma.user.findUnique({ where: { email: emailLimpio } });
+    if (existe) return res.status(409).json({ error: 'Ya existe una cuenta con ese email' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await prisma.user.create({
+      data: { nombre, email: emailLimpio, password: hashedPassword, role: 'cliente' },
+    });
+
+    const token = jwt.sign(
+      { id: newUser.id, email: newUser.email, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const { password: _, pin: __, ...safeUser } = newUser;
+    res.status(201).json({ success: true, token, user: safeUser });
+  } catch (e) {
+    console.error('❌ Error registro:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/auth/login', authLimiter, async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña requeridos' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+    if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const { password: _, pin: __, ...safeUser } = user;
+    res.json({ success: true, token, user: safeUser });
+  } catch (e) {
+    console.error('❌ Error login:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================
