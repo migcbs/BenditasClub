@@ -310,7 +310,7 @@ app.post('/api/orders', verifyToken, requireRole('empleado'), async (req, res) =
   }
 });
 
-app.get('/api/orders', verifyToken, requireRole('empleado'), async (req, res) => {
+app.get('/api/orders', verifyToken, requireRole('empleado', 'cocina'), async (req, res) => {
   try {
     const { estado } = req.query;
     const orders = await prisma.order.findMany({
