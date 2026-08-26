@@ -19,6 +19,23 @@ enum SucursalNombre {
   coatepec
 }
 
+enum TipoPedido {
+  mesa
+  para_llevar
+  domicilio
+}
+
+enum EstadoPedido {
+  pendiente
+  pagado
+  cancelado
+}
+
+enum MetodoPago {
+  tarjeta
+  efectivo
+}
+
 model User {
   id        String          @id @default(uuid())
   role      Role            @default(cliente)
@@ -34,6 +51,7 @@ model User {
 
   nombre    String
   activo    Boolean         @default(true)
+  pedidos   Order[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 }
@@ -54,6 +72,39 @@ model Product {
   maxSabores  Int?
   isPromotion Boolean  @default(false)
   activo      Boolean  @default(true)
+  orderItems  OrderItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  sucursal        SucursalNombre
+  tipo            TipoPedido
+  estado          EstadoPedido   @default(pendiente)
+  metodoPago      MetodoPago?
+  mesa            String?
+  clienteNombre   String?
+  clienteTelefono String?
+  direccion       String?
+  notas           String?
+  total           Int
+  empleadoId      String
+  empleado        User           @relation(fields: [empleadoId], references: [id])
+  items           OrderItem[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  nombre    String
+  precio    Int
+  cantidad  Int
+  sabores   String[]
+  subtotal  Int
 }
