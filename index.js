@@ -207,6 +207,50 @@ app.delete('/api/admin/products/:id', verifyToken, requireRole('admin'), async (
   }
 });
 
+app.get('/api/admin/users', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { sucursal } = req.query;
+    const users = await prisma.user.findMany({
+      where: {
+        role: { in: ['empleado', 'cocina'] },
+        ...(sucursal ? { sucursal } : {}),
+      },
+      select: { id: true, nombre: true, role: true, sucursal: true, activo: true, createdAt: true },
+    });
+    res.json(users);
+  } catch (e) {
+    console.error('❌ Error listando staff:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/admin/users', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { nombre, role, sucursal, pin } = req.body;
+
+    if (!nombre || !role || !sucursal || !pin) {
+      return res.status(400).json({ error: 'Campos obligatorios: nombre, role, sucursal, pin' });
+    }
+    if (!['empleado', 'cocina'].includes(role)) {
+      return res.status(400).json({ error: 'role debe ser empleado o cocina' });
+    }
+    if (!/^\d{4}$/.test(pin)) {
+      return res.status(400).json({ error: 'pin debe ser exactamente 4 dígitos' });
+    }
+
+    const hashedPin = await bcrypt.hash(pin, 10);
+    const user = await prisma.user.create({
+      data: { nombre, role, sucursal, pin: hashedPin },
+    });
+
+    const { password: _, pin: __, ...safeUser } = user;
+    res.status(201).json(safeUser);
+  } catch (e) {
+    console.error('❌ Error creando staff:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================
