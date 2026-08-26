@@ -144,6 +144,69 @@ app.post('/api/auth/staff-login', authLimiter, async (req, res) => {
   }
 });
 
+app.get('/api/products', async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: { activo: true },
+      include: { category: { select: { nombre: true, orden: true } } },
+      orderBy: [{ category: { orden: 'asc' } }, { nombre: 'asc' }],
+    });
+    res.json(products);
+  } catch (e) {
+    console.error('❌ Error listando productos:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { nombre, precio, categoryId, maxSabores, isPromotion } = req.body;
+    if (!nombre || precio === undefined || !categoryId) {
+      return res.status(400).json({ error: 'Campos obligatorios: nombre, precio, categoryId' });
+    }
+
+    const category = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (!category) return res.status(400).json({ error: 'categoryId no existe' });
+
+    const product = await prisma.product.create({
+      data: { nombre, precio, categoryId, maxSabores: maxSabores ?? null, isPromotion: isPromotion ?? false },
+    });
+    res.status(201).json(product);
+  } catch (e) {
+    console.error('❌ Error creando producto:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.put('/api/admin/products/:id', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { nombre, precio, categoryId, maxSabores, isPromotion, activo } = req.body;
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: { nombre, precio, categoryId, maxSabores, isPromotion, activo },
+    });
+    res.json(product);
+  } catch (e) {
+    if (e.code === 'P2025') return res.status(404).json({ error: 'Producto no encontrado' });
+    console.error('❌ Error actualizando producto:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.delete('/api/admin/products/:id', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: { activo: false },
+    });
+    res.json(product);
+  } catch (e) {
+    if (e.code === 'P2025') return res.status(404).json({ error: 'Producto no encontrado' });
+    console.error('❌ Error eliminando producto:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================
