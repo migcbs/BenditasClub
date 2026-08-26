@@ -251,6 +251,65 @@ app.post('/api/admin/users', verifyToken, requireRole('admin'), async (req, res)
   }
 });
 
+app.post('/api/orders', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const { tipo, mesa, clienteNombre, clienteTelefono, direccion, notas, items } = req.body;
+
+    if (!tipo || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'tipo e items (no vacío) son obligatorios' });
+    }
+
+    const productIds = items.map((i) => i.productId);
+    const products = await prisma.product.findMany({ where: { id: { in: productIds }, activo: true } });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    const orderItemsData = [];
+    for (const item of items) {
+      const product = productMap.get(item.productId);
+      if (!product) {
+        return res.status(400).json({ error: `Producto no encontrado: ${item.productId}` });
+      }
+      const cantidad = item.cantidad || 1;
+      const sabores = Array.isArray(item.sabores) ? item.sabores : [];
+      if (product.maxSabores !== null && sabores.length > product.maxSabores) {
+        return res.status(400).json({ error: `${product.nombre} admite máximo ${product.maxSabores} sabores` });
+      }
+      const subtotal = product.precio * cantidad;
+      orderItemsData.push({
+        productId: product.id,
+        nombre: product.nombre,
+        precio: product.precio,
+        cantidad,
+        sabores,
+        subtotal,
+      });
+    }
+
+    const total = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);
+
+    const order = await prisma.order.create({
+      data: {
+        sucursal: req.user.sucursal,
+        tipo,
+        mesa: mesa || null,
+        clienteNombre: clienteNombre || null,
+        clienteTelefono: clienteTelefono || null,
+        direccion: direccion || null,
+        notas: notas || null,
+        total,
+        empleadoId: req.user.id,
+        items: { create: orderItemsData },
+      },
+      include: { items: true },
+    });
+
+    res.status(201).json(order);
+  } catch (e) {
+    console.error('❌ Error creando pedido:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================
