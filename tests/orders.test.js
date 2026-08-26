@@ -140,3 +140,54 @@ describe('GET /api/orders', () => {
     expect(res.body.every((o) => o.estado === 'pagado')).toBe(true);
   });
 });
+
+describe('PUT /api/orders/:id/estado', () => {
+  let orden;
+
+  beforeEach(async () => {
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ tipo: 'mesa', mesa: '9', items: [{ productId: productoSnack.id, cantidad: 1 }] });
+    orden = res.body;
+  });
+
+  it('marks an order as pagado when metodoPago is provided', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/estado`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ estado: 'pagado', metodoPago: 'efectivo' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.estado).toBe('pagado');
+    expect(res.body.metodoPago).toBe('efectivo');
+  });
+
+  it('rejects marking pagado without metodoPago', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/estado`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ estado: 'pagado' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('marks an order as cancelado', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/estado`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ estado: 'cancelado' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.estado).toBe('cancelado');
+  });
+
+  it('404s when the order belongs to another sucursal', async () => {
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/estado`)
+      .set('Authorization', `Bearer ${tokenCoatepec}`)
+      .send({ estado: 'cancelado' });
+
+    expect(res.status).toBe(404);
+  });
+});

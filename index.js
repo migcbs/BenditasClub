@@ -328,6 +328,33 @@ app.get('/api/orders', verifyToken, requireRole('empleado'), async (req, res) =>
   }
 });
 
+app.put('/api/orders/:id/estado', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const { estado, metodoPago } = req.body;
+    if (!['pagado', 'cancelado'].includes(estado)) {
+      return res.status(400).json({ error: 'estado debe ser pagado o cancelado' });
+    }
+    if (estado === 'pagado' && !metodoPago) {
+      return res.status(400).json({ error: 'metodoPago es obligatorio para marcar como pagado' });
+    }
+
+    const orden = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!orden || orden.sucursal !== req.user.sucursal) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: req.params.id },
+      data: { estado, ...(metodoPago ? { metodoPago } : {}) },
+      include: { items: true },
+    });
+    res.json(updated);
+  } catch (e) {
+    console.error('❌ Error actualizando estado del pedido:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================
