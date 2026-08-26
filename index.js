@@ -107,6 +107,43 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   }
 });
 
+app.post('/api/auth/staff-login', authLimiter, async (req, res) => {
+  try {
+    const { sucursal, pin } = req.body;
+    if (!sucursal || !pin) {
+      return res.status(400).json({ error: 'sucursal y pin son obligatorios' });
+    }
+
+    const candidatos = await prisma.user.findMany({
+      where: { sucursal, role: { in: ['empleado', 'cocina'] }, activo: true },
+    });
+
+    let match = null;
+    for (const candidato of candidatos) {
+      if (candidato.pin && (await bcrypt.compare(pin, candidato.pin))) {
+        match = candidato;
+        break;
+      }
+    }
+
+    if (!match) {
+      return res.status(401).json({ error: 'PIN o sucursal incorrectos' });
+    }
+
+    const token = jwt.sign(
+      { id: match.id, role: match.role, sucursal: match.sucursal },
+      JWT_SECRET,
+      { expiresIn: '12h' }
+    );
+
+    const { password: _, pin: __, ...safeUser } = match;
+    res.json({ success: true, token, user: safeUser });
+  } catch (e) {
+    console.error('❌ Error staff-login:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================

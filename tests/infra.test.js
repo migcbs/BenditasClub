@@ -65,3 +65,43 @@ describe('Client auth', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('Staff PIN auth', () => {
+  const nombre = `${TEST_PREFIX}-empleado`;
+  const pin = '4321';
+
+  beforeAll(async () => {
+    const hashedPin = await bcrypt.hash(pin, 10);
+    await prisma.user.create({
+      data: { nombre, role: 'empleado', sucursal: 'xico', pin: hashedPin, activo: true },
+    });
+  });
+
+  it('logs a staff member in with the correct sucursal + PIN', async () => {
+    const res = await request(app)
+      .post('/api/auth/staff-login')
+      .send({ sucursal: 'xico', pin });
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeTruthy();
+    expect(res.body.user.role).toBe('empleado');
+    expect(res.body.user.sucursal).toBe('xico');
+    expect(res.body.user.pin).toBeUndefined();
+  });
+
+  it('rejects a correct PIN at the wrong sucursal', async () => {
+    const res = await request(app)
+      .post('/api/auth/staff-login')
+      .send({ sucursal: 'coatepec', pin });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects an incorrect PIN', async () => {
+    const res = await request(app)
+      .post('/api/auth/staff-login')
+      .send({ sucursal: 'xico', pin: '0000' });
+
+    expect(res.status).toBe(401);
+  });
+});
