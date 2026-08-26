@@ -108,3 +108,35 @@ describe('POST /api/orders', () => {
     expect(res.body.sucursal).toBe('coatepec');
   });
 });
+
+describe('GET /api/orders', () => {
+  let ordenXico;
+
+  beforeAll(async () => {
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ tipo: 'para_llevar', items: [{ productId: productoSnack.id, cantidad: 1 }] });
+    ordenXico = res.body;
+  });
+
+  it('rejects a non-staff role', async () => {
+    const res = await request(app).get('/api/orders');
+    expect(res.status).toBe(401);
+  });
+
+  it('only returns orders from the requesting employee\'s sucursal', async () => {
+    const res = await request(app).get('/api/orders').set('Authorization', `Bearer ${tokenXico}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.some((o) => o.id === ordenXico.id)).toBe(true);
+    expect(res.body.every((o) => o.sucursal === 'xico')).toBe(true);
+  });
+
+  it('filters by estado', async () => {
+    const res = await request(app).get('/api/orders?estado=pagado').set('Authorization', `Bearer ${tokenXico}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.every((o) => o.estado === 'pagado')).toBe(true);
+  });
+});

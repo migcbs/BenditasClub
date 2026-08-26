@@ -310,6 +310,24 @@ app.post('/api/orders', verifyToken, requireRole('empleado'), async (req, res) =
   }
 });
 
+app.get('/api/orders', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const { estado } = req.query;
+    const orders = await prisma.order.findMany({
+      where: {
+        sucursal: req.user.sucursal,
+        ...(estado ? { estado } : {}),
+      },
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(orders);
+  } catch (e) {
+    console.error('❌ Error listando pedidos:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ======================================================
 // 404 y errores no capturados
 // ======================================================
