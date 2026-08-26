@@ -182,3 +182,68 @@ describe('Products', () => {
     expect(publicList.body.find((p) => p.id === productId)).toBeUndefined();
   });
 });
+
+describe('Admin staff management', () => {
+  let adminToken, empleadoToken;
+
+  beforeAll(async () => {
+    const hashedPassword = await bcrypt.hash('TestPass123', 10);
+    const admin = await prisma.user.create({
+      data: { nombre: `${TEST_PREFIX}-admin2`, email: `${TEST_PREFIX}-admin2@benditas.local`, password: hashedPassword, role: 'admin' },
+    });
+    adminToken = jwt.sign({ id: admin.id, role: admin.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    const hashedPin = await bcrypt.hash('1111', 10);
+    const empleado = await prisma.user.create({
+      data: { nombre: `${TEST_PREFIX}-staff-existente`, role: 'empleado', sucursal: 'coatepec', pin: hashedPin },
+    });
+    empleadoToken = jwt.sign({ id: empleado.id, role: empleado.role, sucursal: empleado.sucursal }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  });
+
+  it('rejects listing staff from a non-admin role', async () => {
+    const res = await request(app).get('/api/admin/users').set('Authorization', `Bearer ${empleadoToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('lets an admin list staff, optionally filtered by sucursal', async () => {
+    const res = await request(app)
+      .get('/api/admin/users?sucursal=coatepec')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.every((u) => u.sucursal === 'coatepec')).toBe(true);
+    expect(res.body.every((u) => u.pin === undefined)).toBe(true);
+  });
+
+  it('lets an admin create a new staff member with a PIN', async () => {
+    const res = await request(app)
+      .post('/api/admin/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ nombre: `${TEST_PREFIX}-nuevo-cocinero`, role: 'cocina', sucursal: 'xico', pin: '2468' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.role).toBe('cocina');
+    expect(res.body.pin).toBeUndefined();
+
+    const canLogin = await request(app).post('/api/auth/staff-login').send({ sucursal: 'xico', pin: '2468' });
+    expect(canLogin.status).toBe(200);
+  });
+
+  it('rejects creating staff with an invalid role', async () => {
+    const res = await request(app)
+      .post('/api/admin/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ nombre: 'X', role: 'admin', sucursal: 'xico', pin: '9999' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects a non-4-digit pin', async () => {
+    const res = await request(app)
+      .post('/api/admin/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ nombre: 'X', role: 'empleado', sucursal: 'xico', pin: '12' });
+
+    expect(res.status).toBe(400);
+  });
+});
