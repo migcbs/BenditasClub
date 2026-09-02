@@ -33,6 +33,15 @@ router.post('/ingredients', async (req, res) => {
   res.status(201).json(ingredient);
 });
 
+router.put('/ingredients/:id', async (req, res) => {
+  const { nombre, sku, unit, costPerUnit, reorderPoint, activo } = req.body;
+  if (!nombre || !unit) return res.status(400).json({ error: 'Nombre y unidad son obligatorios' });
+  res.json(await prisma.ingredient.update({
+    where: { id: req.params.id },
+    data: { nombre, sku: sku || null, unit, costPerUnit: Number(costPerUnit || 0), reorderPoint: Number(reorderPoint || 0), ...(activo === undefined ? {} : { activo }) },
+  }));
+});
+
 router.post('/inventory/adjustments', async (req, res) => {
   const { ingredientId, sucursal, quantity, reason } = req.body;
   if (!ingredientId || !['xico', 'coatepec'].includes(sucursal) || !Number.isFinite(Number(quantity)) || !reason) {
@@ -48,6 +57,15 @@ router.post('/inventory/adjustments', async (req, res) => {
     return stock;
   });
   res.status(201).json(result);
+});
+
+router.get('/inventory/movements', async (req, res) => {
+  const { branch, ingredientId } = req.query;
+  res.json(await prisma.inventoryMovement.findMany({
+    where: { ...(branch && branch !== 'all' ? { sucursal: branch } : {}), ...(ingredientId ? { ingredientId } : {}) },
+    include: { ingredient: { select: { nombre: true, unit: true } } },
+    orderBy: { createdAt: 'desc' }, take: 100,
+  }));
 });
 
 router.get('/recipes', async (_req, res) => {
@@ -158,4 +176,3 @@ router.use((error, _req, res, _next) => {
 });
 
 module.exports = router;
-
