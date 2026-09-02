@@ -47,6 +47,51 @@ const authLimiter = rateLimit({
   message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
 });
 
+async function buildOrderItems(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    const error = new Error('tipo e items (no vacío) son obligatorios');
+    error.status = 400;
+    throw error;
+  }
+
+  const productIds = items.map((i) => i.productId);
+  const products = await prisma.product.findMany({ where: { id: { in: productIds }, activo: true } });
+  const productMap = new Map(products.map((p) => [p.id, p]));
+
+  const orderItemsData = [];
+  for (const item of items) {
+    const product = productMap.get(item.productId);
+    if (!product) {
+      const error = new Error(`Producto no encontrado: ${item.productId}`);
+      error.status = 400;
+      throw error;
+    }
+    const cantidad = item.cantidad || 1;
+    const sabores = Array.isArray(item.sabores) ? item.sabores : [];
+    if (product.maxSabores !== null && sabores.length > product.maxSabores) {
+      const error = new Error(`${product.nombre} admite máximo ${product.maxSabores} sabores`);
+      error.status = 400;
+      throw error;
+    }
+    const subtotal = product.precio * cantidad;
+    orderItemsData.push({
+      productId: product.id,
+      nombre: product.nombre,
+      precio: product.precio,
+      cantidad,
+      sabores,
+      subtotal,
+    });
+  }
+
+  return orderItemsData;
+}
+
+function safeCustomer(user) {
+  const { password: _, pin: __, ...safeUser } = user;
+  return safeUser;
+}
+
 app.get('/api/health', async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -167,6 +212,36 @@ app.get('/api/admin/session', verifyToken, requireRole('admin'), async (req, res
   }
 });
 
+app.get('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, nombre: true, email: true, telefono: true, role: true, activo: true, createdAt: true },
+    });
+    if (!user || !user.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
+    res.json({ user });
+  } catch (e) {
+    console.error('❌ Error perfil cliente:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.put('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const { nombre, telefono } = req.body;
+    if (!nombre?.trim()) return res.status(400).json({ error: 'El nombre es obligatorio' });
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { nombre: nombre.trim(), telefono: telefono?.trim() || null },
+      select: { id: true, nombre: true, email: true, telefono: true, role: true, activo: true, createdAt: true },
+    });
+    res.json({ user });
+  } catch (e) {
+    console.error('❌ Error actualizando perfil cliente:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 app.get('/api/admin/dashboard', verifyToken, requireRole('admin'), async (req, res) => {
   try {
     let filters;
@@ -217,6 +292,64 @@ app.get('/api/products', async (req, res) => {
     res.json(products);
   } catch (e) {
     console.error('❌ Error listando productos:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/customer/orders', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const { sucursal, tipo, direccion, notas, items } = req.body;
+    if (!['xico', 'coatepec'].includes(sucursal) || !['para_llevar', 'domicilio'].includes(tipo)) {
+      return res.status(400).json({ error: 'Sucursal y tipo de pedido válidos son obligatorios' });
+    }
+    if (tipo === 'domicilio' && !direccion?.trim()) {
+      return res.status(400).json({ error: 'La dirección es obligatoria para domicilio' });
+    }
+
+    const customer = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!customer || !customer.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
+
+    let orderItemsData;
+    try {
+      orderItemsData = await buildOrderItems(items);
+    } catch (error) {
+      return res.status(error.status || 500).json({ error: error.message });
+    }
+
+    const total = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);
+    const order = await prisma.order.create({
+      data: {
+        sucursal,
+        tipo,
+        clienteId: customer.id,
+        clienteNombre: customer.nombre,
+        clienteTelefono: customer.telefono,
+        direccion: direccion || null,
+        notas: notas || null,
+        total,
+        items: { create: orderItemsData },
+      },
+      include: { items: true },
+    });
+
+    res.status(201).json(order);
+  } catch (e) {
+    console.error('❌ Error creando pedido cliente:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.get('/api/customer/orders', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: { clienteId: req.user.id },
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    res.json(orders);
+  } catch (e) {
+    console.error('❌ Error historial cliente:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
@@ -318,34 +451,15 @@ app.post('/api/orders', verifyToken, requireRole('empleado'), async (req, res) =
   try {
     const { tipo, mesa, clienteNombre, clienteTelefono, direccion, notas, items } = req.body;
 
-    if (!tipo || !Array.isArray(items) || items.length === 0) {
+    if (!tipo) {
       return res.status(400).json({ error: 'tipo e items (no vacío) son obligatorios' });
     }
 
-    const productIds = items.map((i) => i.productId);
-    const products = await prisma.product.findMany({ where: { id: { in: productIds }, activo: true } });
-    const productMap = new Map(products.map((p) => [p.id, p]));
-
-    const orderItemsData = [];
-    for (const item of items) {
-      const product = productMap.get(item.productId);
-      if (!product) {
-        return res.status(400).json({ error: `Producto no encontrado: ${item.productId}` });
-      }
-      const cantidad = item.cantidad || 1;
-      const sabores = Array.isArray(item.sabores) ? item.sabores : [];
-      if (product.maxSabores !== null && sabores.length > product.maxSabores) {
-        return res.status(400).json({ error: `${product.nombre} admite máximo ${product.maxSabores} sabores` });
-      }
-      const subtotal = product.precio * cantidad;
-      orderItemsData.push({
-        productId: product.id,
-        nombre: product.nombre,
-        precio: product.precio,
-        cantidad,
-        sabores,
-        subtotal,
-      });
+    let orderItemsData;
+    try {
+      orderItemsData = await buildOrderItems(items);
+    } catch (error) {
+      return res.status(error.status || 500).json({ error: error.message });
     }
 
     const total = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);

@@ -21,6 +21,7 @@ const NavLinks = ({ onClose }) => (
     <li><Link to="/#menu"        onClick={onClose}>Menú</Link></li>
     <li><Link to="/#ubicaciones" onClick={onClose}>Ubicación</Link></li>
     <li><Link to="/shop"         onClick={onClose}>Shop</Link></li>
+    <li><Link to="/perfil"       onClick={onClose}>Cuenta</Link></li>
     <SocialIcons />
   </>
 );

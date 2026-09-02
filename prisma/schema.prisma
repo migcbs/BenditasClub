@@ -85,7 +85,8 @@ model User {
 
   nombre    String
   activo    Boolean  @default(true)
-  pedidos   Order[]
+  staffOrders    Order[] @relation("StaffOrders")
+  customerOrders Order[] @relation("CustomerOrders")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -122,11 +123,13 @@ model Order {
   mesa                String?
   clienteNombre       String?
   clienteTelefono     String?
+  clienteId           String?
+  cliente             User?          @relation("CustomerOrders", fields: [clienteId], references: [id])
   direccion           String?
   notas               String?
   total               Int
-  empleadoId          String
-  empleado            User           @relation(fields: [empleadoId], references: [id])
+  empleadoId          String?
+  empleado            User?          @relation("StaffOrders", fields: [empleadoId], references: [id])
   items               OrderItem[]
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt

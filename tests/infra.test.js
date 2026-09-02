@@ -25,6 +25,7 @@ describe('GET /api/health', () => {
 describe('Client auth', () => {
   const email = `${TEST_PREFIX}-cliente@benditas.local`;
   const password = 'TestPass123';
+  let token;
 
   it('registers a new client and returns a token', async () => {
     const res = await request(app)
@@ -37,6 +38,7 @@ describe('Client auth', () => {
     expect(res.body.user.email).toBe(email);
     expect(res.body.user.password).toBeUndefined();
     expect(res.body.user.role).toBe('cliente');
+    token = res.body.token;
   });
 
   it('rejects a duplicate email', async () => {
@@ -55,6 +57,38 @@ describe('Client auth', () => {
     expect(res.status).toBe(200);
     expect(res.body.token).toBeTruthy();
     expect(res.body.user.email).toBe(email);
+  });
+
+  it('returns and updates the authenticated client profile', async () => {
+    const profile = await request(app)
+      .get('/api/customer/me')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(profile.status).toBe(200);
+    expect(profile.body.user).toMatchObject({ email, role: 'cliente' });
+    expect(profile.body.user.password).toBeUndefined();
+
+    const updated = await request(app)
+      .put('/api/customer/me')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ nombre: 'Jest Cliente Actualizado', telefono: '2281234567' });
+
+    expect(updated.status).toBe(200);
+    expect(updated.body.user).toMatchObject({ nombre: 'Jest Cliente Actualizado', telefono: '2281234567' });
+  });
+
+  it('rejects customer profile access from staff tokens', async () => {
+    const hashedPin = await bcrypt.hash('9876', 10);
+    const staff = await prisma.user.create({
+      data: { nombre: `${TEST_PREFIX}-customer-staff`, role: 'empleado', sucursal: 'xico', pin: hashedPin },
+    });
+    const staffToken = jwt.sign({ id: staff.id, role: staff.role, sucursal: staff.sucursal }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    const res = await request(app)
+      .get('/api/customer/me')
+      .set('Authorization', `Bearer ${staffToken}`);
+
+    expect(res.status).toBe(403);
   });
 
   it('rejects login with the wrong password', async () => {

@@ -14,6 +14,8 @@ import Shop       from './components/Shop';
 import PosApp     from './pos/PosApp';
 import KitchenApp from './kitchen/KitchenApp';
 import AdminApp   from './admin/AdminApp';
+import CustomerAuth from './customer/CustomerAuth';
+import CustomerProfile from './customer/CustomerProfile';
 
 import './Styles.css';
 
@@ -67,6 +69,9 @@ function App() {
             </>
           } />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/login" element={<CustomerAuth mode="login" />} />
+          <Route path="/registro" element={<CustomerAuth mode="register" />} />
+          <Route path="/perfil" element={<CustomerProfile />} />
           <Route path="/pos" element={<PosApp />} />
           <Route path="/cocina" element={<KitchenApp />} />
           <Route path="/admin" element={<AdminApp />} />
