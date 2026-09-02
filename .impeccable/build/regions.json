@@ -1,0 +1,21 @@
+{
+  "regions": [
+    { "id": "app-background", "kind": "chrome", "grid": "A0:J9", "note": "Near-black plum operational canvas rendered with CSS color and layered transparency.", "codeDrawn": true, "container": true },
+    { "id": "masthead", "kind": "chrome", "grid": "A0:J0", "note": "Sticky glass masthead; logo, branch switcher and administrator avatar." },
+    { "id": "brand-lockup", "kind": "image", "grid": "A0:C0", "note": "Existing Benditas Club flame and wordmark; use the repository brand asset." },
+    { "id": "branch-switcher", "kind": "control", "grid": "D0:H0", "note": "Compact branch selector with Xico as the current branch." },
+    { "id": "account-avatar", "kind": "control", "grid": "I0:J0", "note": "Administrator account control with a clear touch target." },
+    { "id": "welcome", "kind": "text", "grid": "A1:G1", "note": "Personal greeting and concise shift context." },
+    { "id": "shift-hero", "kind": "chrome", "grid": "A2:J4", "note": "Primary pulso del turno surface; denser and more prominent than supporting cards.", "container": true },
+    { "id": "shift-title", "kind": "text", "grid": "A2:F2", "note": "Pulso del turno title and current comparison context." },
+    { "id": "shift-sales", "kind": "text", "grid": "A2:G3", "note": "Daily sales total, delta, average ticket and order count with tabular numerals." },
+    { "id": "shift-flame", "kind": "control", "grid": "G2:I3", "note": "Brand flame rendered from the existing icon system, not an emoji.", "codeDrawn": true },
+    { "id": "stock-warning", "kind": "control", "grid": "A4:J4", "note": "Persistent low-stock action row; severity, count and direct destination." },
+    { "id": "pulse-heading", "kind": "text", "grid": "A5:J5", "note": "Operational pulse heading and all-clear state." },
+    { "id": "alert-rail", "kind": "chrome", "grid": "A5:J7", "note": "Gate-board inspired alert rail ranked by urgency and age.", "container": true },
+    { "id": "alert-content", "kind": "text", "grid": "A5:J7", "note": "Kitchen, stock and cash alerts with owner, elapsed time and explicit action." },
+    { "id": "cash-summary", "kind": "chrome", "grid": "A8:E8", "note": "Open cash shift summary with expected cash and reconciliation status." },
+    { "id": "operation-summary", "kind": "chrome", "grid": "F8:J8", "note": "Kitchen and floor throughput summary." },
+    { "id": "mobile-navigation", "kind": "chrome", "grid": "A9:J9", "note": "Sticky five-destination bottom navigation for one-handed use." }
+  ]
+}

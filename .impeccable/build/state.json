@@ -1,0 +1,243 @@
+{
+  "tool": "build-phase",
+  "version": 2,
+  "startedAt": "2026-09-02T01:53:45.895Z",
+  "comp": ".impeccable/mocks/approved/admin-mobile.png",
+  "direction": null,
+  "breakpoint": "853x1844",
+  "artifact": null,
+  "phase": "hero",
+  "phases": {
+    "comps": {
+      "status": "skipped",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [
+        {
+          "at": "2026-09-02T01:53:45.895Z",
+          "text": "started with an approved comp; the comp round happened before this state (surface round or manual)"
+        }
+      ],
+      "gate": null,
+      "forced": null
+    },
+    "spec": {
+      "status": "closed",
+      "openedAt": "2026-09-02T01:53:45.895Z",
+      "closedAt": "2026-09-02T02:04:04.997Z",
+      "attempts": 4,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "17 regions, 1 plates, 5 text regions measured",
+        "at": "2026-09-02T02:04:04.997Z"
+      },
+      "forced": null
+    },
+    "plates": {
+      "status": "closed",
+      "openedAt": "2026-09-02T02:04:04.997Z",
+      "closedAt": "2026-09-02T02:05:37.057Z",
+      "attempts": 2,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "1/1 plates",
+        "at": "2026-09-02T02:05:37.057Z"
+      },
+      "forced": null
+    },
+    "hero": {
+      "status": "open",
+      "openedAt": "2026-09-02T02:05:37.057Z",
+      "closedAt": null,
+      "attempts": 2,
+      "notes": [],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "hero overall 52.8% < 72% (structure 49%, color 73%, detail 25%)",
+          "region branch-switcher is missing (detail 8%, structure 56%): the comp shows material the build does not",
+          "region account-avatar is missing (detail 0%, structure 30%): the comp shows material the build does not",
+          "region shift-title is missing (detail 4%, structure 32%): the comp shows material the build does not",
+          "region shift-flame is missing (detail 2%, structure 55%): the comp shows material the build does not",
+          "region pulse-heading is missing (detail 3%, structure 44%): the comp shows material the build does not",
+          "region alert-rail is missing (detail 15%, structure 54%): the comp shows material the build does not",
+          "region alert-content is missing (detail 11%, structure 47%): the comp shows material the build does not",
+          "region cash-summary is missing (detail 0%, structure 59%): the comp shows material the build does not",
+          "region operation-summary is missing (detail 0%, structure 75%): the comp shows material the build does not",
+          "region mobile-navigation is missing (detail 0%, structure 49%): the comp shows material the build does not",
+          "plate brand-lockup is placed but not at the comp's box: its ink spans 213x149px at (39,21) in the comp region and 254x184px at (0,0) in the build; size and position the <img> to the spec box (object-fit: cover), not to the surrounding layout",
+          "region welcome (text) is contradicted (structure 19%, detail added 15%): the composition of this text region differs from the comp; re-derive it from the spec box",
+          "region shift-sales (text) is contradicted (structure 40%, detail added 18%): the composition of this text region differs from the comp; re-derive it from the spec box",
+          "READINGS, each one CSS edit (8):",
+          "text welcome: cap height 17px in the build, 45.1px in the comp (-62%); set font-size so the cap height renders at 45.1px",
+          "text shift-title: cap height 10.1px in the build, 53.2px in the comp (-81%); set font-size so the cap height renders at 53.2px (font-match ranked Josefin Sans 700 at 76px)",
+          "text shift-sales: 2 lines in the build, 4 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape",
+          "text welcome: ink is #da7a9f in the build, #f6f6f6 in the comp; use the comp's colour",
+          "text shift-title: ink is #f5eff1 in the build, #e682a8 in the comp; use the comp's colour",
+          "text welcome: its first line starts 39px lower than in the comp (49px vs 10px into the region box); the spacing above it is too large",
+          "control branch-switcher: its ink is 34px tall in the build and 19px in the comp (+15px); match the height, not only the position",
+          "chrome mobile-navigation: its rule sits 36px into the box in the comp and 150px in the build (+114px), so the strip is taller than the comp's; match the height, not only the position",
+          "plate brand-lockup is clipped at the left and top and bottom: the comp's artwork keeps a margin there (ink box 213x149 at 39,21 in the region) and the build's runs to the edge (254x184 at 0,0); size the box to the artwork's aspect and use object-fit: contain, or place the <img> at the artwork's own size, never cover on a narrower box"
+        ],
+        "summary": "hero 53% (contradicted)",
+        "score": 0.5276,
+        "verdict": "contradicted",
+        "report": ".impeccable/review/diff/hero/report.json",
+        "sideBySide": ".impeccable/review/diff/hero/side-by-side.png",
+        "worst": [
+          "welcome contradicted 25%",
+          "mobile-navigation missing 28%",
+          "shift-flame missing 30%"
+        ],
+        "worstIds": [
+          "welcome",
+          "mobile-navigation",
+          "shift-flame"
+        ],
+        "worstCrops": [
+          {
+            "id": "welcome",
+            "verdict": "contradicted",
+            "score": {
+              "overall": 0.247,
+              "structure": 0.191,
+              "color": 0.2667,
+              "colorIntersection": 0.0463,
+              "paletteMatch": 0.3853,
+              "detail": 0.1526,
+              "detailRaw": 0.2256,
+              "detailAdded": 0.1458,
+              "bands": 0.6198
+            },
+            "file": ".impeccable/review/diff/hero/regions/welcome.png"
+          },
+          {
+            "id": "mobile-navigation",
+            "verdict": "missing",
+            "score": {
+              "overall": 0.2757,
+              "structure": 0.4879,
+              "color": 0.4196,
+              "colorIntersection": 0.1743,
+              "paletteMatch": 0.5517,
+              "detail": 0,
+              "detailRaw": 0.045,
+              "detailAdded": 0.125,
+              "bands": 0
+            },
+            "file": ".impeccable/review/diff/hero/regions/mobile-navigation.png"
+          },
+          {
+            "id": "shift-flame",
+            "verdict": "missing",
+            "score": {
+              "overall": 0.3017,
+              "structure": 0.5517,
+              "color": 0.1403,
+              "colorIntersection": 0.0123,
+              "paletteMatch": 0.2092,
+              "detail": 0.0216,
+              "detailRaw": 0.0216,
+              "detailAdded": 0,
+              "bands": 0.6
+            },
+            "file": ".impeccable/review/diff/hero/regions/shift-flame.png"
+          }
+        ],
+        "advisories": [
+          "(advisory, unchanged for 3+ attempts) text alert-content: ink is #f4f1f4 in the build, #492c18 in the comp; use the comp's colour",
+          "(advisory, unchanged for 3+ attempts) control account-avatar: its rule sits 28px into the box in the comp and 20px in the build (-8px), so the strip is shorter than the comp's; match the height, not only the position"
+        ],
+        "regionVerdicts": {
+          "app-background": "contradicted",
+          "masthead": "contradicted",
+          "brand-lockup": "drift",
+          "branch-switcher": "missing",
+          "account-avatar": "missing",
+          "welcome": "contradicted",
+          "shift-hero": "contradicted",
+          "shift-title": "missing",
+          "shift-sales": "contradicted",
+          "shift-flame": "missing",
+          "stock-warning": "drift",
+          "pulse-heading": "missing",
+          "alert-rail": "missing",
+          "alert-content": "missing",
+          "cash-summary": "missing",
+          "operation-summary": "missing",
+          "mobile-navigation": "missing"
+        },
+        "at": "2026-09-02T02:19:49.501Z"
+      },
+      "forced": null,
+      "records": 4,
+      "readingsSeen": {
+        "text welcome: cap height 5.2px in the build, 45.1px in the comp (-88%); set font-size so the cap height renders at 45.1px": 3,
+        "text shift-sales: cap height 9.9px in the build, 15.9px in the comp (-38%); set font-size so the cap height renders at 15.9px (font-match ranked Pontano Sans 700 at 23px)": 3,
+        "text pulse-heading: cap height 8.3px in the build, 16.1px in the comp (-48%); set font-size so the cap height renders at 16.1px": 3,
+        "text shift-sales: 1 line in the build, 4 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape": 3,
+        "text pulse-heading: 1 line in the build, 2 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape": 3,
+        "text shift-title: ink is #f5eff3 in the build, #e682a8 in the comp; use the comp's colour": 3,
+        "text alert-content: ink is #f4f1f4 in the build, #492c18 in the comp; use the comp's colour": 4,
+        "control account-avatar: its rule sits 28px into the box in the comp and 20px in the build (-8px), so the strip is shorter than the comp's; match the height, not only the position": 4,
+        "text welcome: cap height 17px in the build, 45.1px in the comp (-62%); set font-size so the cap height renders at 45.1px": 1,
+        "text shift-title: cap height 10.1px in the build, 53.2px in the comp (-81%); set font-size so the cap height renders at 53.2px (font-match ranked Josefin Sans 700 at 76px)": 1,
+        "text shift-sales: 2 lines in the build, 4 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape": 1,
+        "text welcome: ink is #da7a9f in the build, #f6f6f6 in the comp; use the comp's colour": 1,
+        "text shift-title: ink is #f5eff1 in the build, #e682a8 in the comp; use the comp's colour": 1,
+        "text welcome: its first line starts 39px lower than in the comp (49px vs 10px into the region box); the spacing above it is too large": 1,
+        "control branch-switcher: its ink is 34px tall in the build and 19px in the comp (+15px); match the height, not only the position": 1,
+        "chrome mobile-navigation: its rule sits 36px into the box in the comp and 150px in the build (+114px), so the strip is taller than the comp's; match the height, not only the position": 1
+      }
+    },
+    "sections": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "motion": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "responsive": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    },
+    "review": {
+      "status": "pending",
+      "openedAt": null,
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    }
+  },
+  "finish": null,
+  "plates": {
+    "brand-lockup": {
+      "status": "ok",
+      "score": 0.7968,
+      "size": "1491x1055"
+    }
+  }
+}
