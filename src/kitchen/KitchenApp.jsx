@@ -1,14 +1,17 @@
 // src/kitchen/KitchenApp.jsx
 import React, { useCallback, useEffect, useState } from 'react';
+import { ThemeProvider, Box, AppBar, Toolbar, Typography, IconButton, Card, Button, Alert, Chip } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LogOut } from 'lucide-react';
 import StaffLogin from '../shared/StaffLogin';
 import { useStaffAuth } from '../shared/useStaffAuth';
 import { listOrders, updateOrderCocina } from '../shared/staffApi';
-import './kitchen.css';
+import { theme, glassSx } from '../shared/theme';
 
 const COLUMNAS = [
-  { estado: 'nueva', titulo: 'Nueva', siguiente: 'en_preparacion', accion: 'Empezar' },
-  { estado: 'en_preparacion', titulo: 'En preparación', siguiente: 'lista', accion: 'Marcar lista' },
-  { estado: 'lista', titulo: 'Lista', siguiente: null, accion: null },
+  { estado: 'nueva', titulo: 'Nueva', siguiente: 'en_preparacion', accion: 'Empezar', color: 'warning' },
+  { estado: 'en_preparacion', titulo: 'En preparación', siguiente: 'lista', accion: 'Marcar lista', color: 'info' },
+  { estado: 'lista', titulo: 'Lista', siguiente: null, accion: null, color: 'success' },
 ];
 
 const describirPedido = (orden) => {
@@ -36,7 +39,11 @@ const KitchenApp = () => {
   }, [cargar]);
 
   if (!user) {
-    return <StaffLogin onLogin={login} title="BenditasClub Cocina" />;
+    return (
+      <ThemeProvider theme={theme}>
+        <StaffLogin onLogin={login} title="BenditasClub Cocina" />
+      </ThemeProvider>
+    );
   }
 
   const avanzar = async (orden, siguiente) => {
@@ -45,39 +52,58 @@ const KitchenApp = () => {
   };
 
   return (
-    <div className="kitchen-app">
-      <header className="kitchen-header">
-        <span>{user.nombre} · {user.sucursal}</span>
-        <button onClick={logout}>Cerrar sesión</button>
-      </header>
+    <ThemeProvider theme={theme}>
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+        <AppBar position="static" elevation={0} sx={{ ...glassSx, boxShadow: 'none' }}>
+          <Toolbar sx={{ justifyContent: 'space-between' }}>
+            <Typography sx={{ fontWeight: 700 }}>{user.nombre} · {user.sucursal}</Typography>
+            <IconButton onClick={logout} color="inherit" aria-label="Cerrar sesión">
+              <LogOut size={20} />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
 
-      {error && <p className="pos-error">{error}</p>}
+        {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
 
-      <div className="kitchen-board">
-        {COLUMNAS.map((col) => (
-          <div className="kitchen-column" key={col.estado}>
-            <h3>{col.titulo}</h3>
-            {orders.filter((o) => o.estadoCocina === col.estado).map((orden) => (
-              <div className="kitchen-card" key={orden.id}>
-                <strong>{describirPedido(orden)}</strong>
-                <ul>
-                  {orden.items.map((item) => (
-                    <li key={item.id}>
-                      {item.cantidad}× {item.nombre}
-                      {item.sabores.length > 0 && <div><small>{item.sabores.join(', ')}</small></div>}
-                    </li>
-                  ))}
-                </ul>
-                {orden.notas && <p><em>{orden.notas}</em></p>}
-                {col.siguiente && (
-                  <button onClick={() => avanzar(orden, col.siguiente)}>{col.accion}</button>
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
+        <Box sx={{ flex: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, p: 2, overflow: 'auto' }}>
+          {COLUMNAS.map((col) => (
+            <Box key={col.estado}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <Typography variant="h2" sx={{ fontSize: 17 }}>{col.titulo}</Typography>
+                <Chip size="small" color={col.color} label={orders.filter((o) => o.estadoCocina === col.estado).length} />
+              </Box>
+              <AnimatePresence initial={false}>
+                {orders.filter((o) => o.estadoCocina === col.estado).map((orden) => (
+                  <motion.div key={orden.id} layout initial={{ opacity: 0.6, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                    <Card elevation={0} sx={{ ...glassSx, borderRadius: 3, p: 2, mb: 1.5 }}>
+                      <Typography sx={{ fontWeight: 700, mb: 0.5 }}>{describirPedido(orden)}</Typography>
+                      {orden.items.map((item) => (
+                        <Typography key={item.id} variant="body2" color="text.secondary">
+                          {item.cantidad}× {item.nombre}
+                          {item.sabores.length > 0 && ` — ${item.sabores.join(', ')}`}
+                        </Typography>
+                      ))}
+                      {orden.notas && <Typography variant="caption" fontStyle="italic">{orden.notas}</Typography>}
+                      {col.siguiente && (
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          size="small"
+                          sx={{ mt: 1.5, background: 'linear-gradient(135deg, #e682a8, #f6b43b)', color: '#171217' }}
+                          onClick={() => avanzar(orden, col.siguiente)}
+                        >
+                          {col.accion}
+                        </Button>
+                      )}
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
 };
 

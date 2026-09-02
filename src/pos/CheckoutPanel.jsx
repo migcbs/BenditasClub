@@ -1,5 +1,7 @@
 // src/pos/CheckoutPanel.jsx
 import React, { useState } from 'react';
+import { Box, FormControlLabel, Checkbox, TextField, MenuItem, Alert, Button } from '@mui/material';
+import { motion } from 'framer-motion';
 import OrderDetailsForm from './OrderDetailsForm';
 import { createOrder, updateOrderEstado } from '../shared/staffApi';
 
@@ -54,38 +56,36 @@ const CheckoutPanel = ({ carrito, onOrderCreated }) => {
   };
 
   return (
-    <div className="pos-checkout">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
       <OrderDetailsForm detalles={detalles} setDetalles={setDetalles} />
 
-      <label>
-        <input
-          type="checkbox"
-          checked={dejarPendiente}
-          onChange={(e) => setDejarPendiente(e.target.checked)}
-        />
-        Cobrar al entregar (dejar pendiente)
-      </label>
+      <FormControlLabel
+        control={<Checkbox checked={dejarPendiente} onChange={(e) => setDejarPendiente(e.target.checked)} />}
+        label="Cobrar al entregar (dejar pendiente)"
+      />
 
       {!dejarPendiente && (
-        <label>
-          Método de pago
-          <select value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}>
-            <option value="efectivo">Efectivo</option>
-            <option value="tarjeta">Tarjeta (terminal física)</option>
-          </select>
-        </label>
+        <TextField select size="small" label="Método de pago" value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}>
+          <MenuItem value="efectivo">Efectivo</MenuItem>
+          <MenuItem value="tarjeta">Tarjeta (terminal física)</MenuItem>
+        </TextField>
       )}
 
-      {error && <p className="pos-error">{error}</p>}
+      {error && <Alert severity="error">{error}</Alert>}
 
-      <button
-        className="pos-btn-cerrar-venta"
-        onClick={handleCerrarVenta}
-        disabled={carrito.items.length === 0 || enviando}
-      >
-        {dejarPendiente ? 'Guardar pedido pendiente' : 'Cerrar venta'}
-      </button>
-    </div>
+      <motion.div whileTap={{ scale: 0.97 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          size="large"
+          onClick={handleCerrarVenta}
+          disabled={carrito.items.length === 0 || enviando}
+          sx={{ background: 'linear-gradient(135deg, #e682a8, #f6b43b)', color: '#171217' }}
+        >
+          {dejarPendiente ? 'Guardar pedido pendiente' : 'Cerrar venta'}
+        </Button>
+      </motion.div>
+    </Box>
   );
 };
 

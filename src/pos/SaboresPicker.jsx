@@ -1,5 +1,6 @@
 // src/pos/SaboresPicker.jsx
 import React, { useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Chip, Button, Box } from '@mui/material';
 
 const SABORES_ALITAS_BONELESS = [
   'Ajo parmesano', 'Pimienta limón', 'Queso parmesano',
@@ -28,30 +29,31 @@ const SaboresPicker = ({ producto, categoria, onConfirmar, onCancelar }) => {
   };
 
   return (
-    <div className="pos-sabores-overlay" onClick={(e) => e.target === e.currentTarget && onCancelar()}>
-      <div className="pos-sabores-modal">
-        <h3>{producto.nombre}</h3>
-        <p>Elige hasta {max} sabor{max !== 1 ? 'es' : ''} ({elegidos.length}/{max})</p>
-        <div className="pos-sabores-grid">
+    <Dialog open onClose={onCancelar} fullWidth maxWidth="xs">
+      <DialogTitle>{producto.nombre}</DialogTitle>
+      <DialogContent>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          Elige hasta {max} sabor{max !== 1 ? 'es' : ''} ({elegidos.length}/{max})
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {opciones.map((sabor) => (
-            <button
+            <Chip
               key={sabor}
-              type="button"
-              className={`pos-sabor-chip ${elegidos.includes(sabor) ? 'seleccionado' : ''}`}
+              label={sabor}
               onClick={() => toggle(sabor)}
-            >
-              {sabor}
-            </button>
+              color={elegidos.includes(sabor) ? 'primary' : 'default'}
+              variant={elegidos.includes(sabor) ? 'filled' : 'outlined'}
+            />
           ))}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button type="button" onClick={onCancelar}>Cancelar</button>
-          <button type="button" onClick={() => onConfirmar(elegidos)} disabled={elegidos.length === 0}>
-            Agregar
-          </button>
-        </div>
-      </div>
-    </div>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onCancelar}>Cancelar</Button>
+        <Button variant="contained" onClick={() => onConfirmar(elegidos)} disabled={elegidos.length === 0}>
+          Agregar
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
