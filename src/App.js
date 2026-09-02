@@ -13,6 +13,7 @@ import Footer     from './components/Footer';
 import Shop       from './components/Shop';
 import PosApp     from './pos/PosApp';
 import KitchenApp from './kitchen/KitchenApp';
+import AdminApp   from './admin/AdminApp';
 
 import './Styles.css';
 
@@ -38,7 +39,7 @@ const ScrollHandler = () => {
 // no llevan el navbar/footer del sitio.
 const SiteChrome = ({ children }) => {
   const location = useLocation();
-  const esPantallaStaff = location.pathname.startsWith('/pos') || location.pathname.startsWith('/cocina');
+  const esPantallaStaff = location.pathname.startsWith('/pos') || location.pathname.startsWith('/cocina') || location.pathname.startsWith('/admin');
 
   if (esPantallaStaff) return children;
 
@@ -68,6 +69,7 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/pos" element={<PosApp />} />
           <Route path="/cocina" element={<KitchenApp />} />
+          <Route path="/admin" element={<AdminApp />} />
         </Routes>
       </SiteChrome>
     </Router>

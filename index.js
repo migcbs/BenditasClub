@@ -10,6 +10,15 @@ const jwt = require('jsonwebtoken');
 
 const prisma = require('./lib/prisma');
 const { verifyToken, requireRole } = require('./middleware/auth');
+const {
+  parseDashboardFilters,
+  summarizeOrders,
+  groupTopProducts,
+  groupByBranch,
+  groupHourlySales,
+} = require('./server/admin/analytics');
+const adminRouter = require('./server/admin/router');
+const { applyInventoryForOrder } = require('./server/admin/inventory-service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
@@ -140,6 +149,60 @@ app.post('/api/auth/staff-login', authLimiter, async (req, res) => {
     res.json({ success: true, token, user: safeUser });
   } catch (e) {
     console.error('❌ Error staff-login:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.get('/api/admin/session', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, nombre: true, email: true, role: true, activo: true, createdAt: true },
+    });
+    if (!user || !user.activo) return res.status(401).json({ error: 'Cuenta administrativa inactiva' });
+    res.json({ user });
+  } catch (e) {
+    console.error('❌ Error validando sesión admin:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.get('/api/admin/dashboard', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    let filters;
+    try {
+      filters = parseDashboardFilters(req.query);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    const orders = await prisma.order.findMany({
+      where: {
+        createdAt: { gte: filters.from, lte: filters.to },
+        ...(filters.branch !== 'all' ? { sucursal: filters.branch } : {}),
+      },
+      include: {
+        items: true,
+        empleado: { select: { id: true, nombre: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({
+      filters: {
+        branch: filters.branch,
+        from: filters.from.toISOString(),
+        to: filters.to.toISOString(),
+      },
+      summary: summarizeOrders(orders),
+      byBranch: groupByBranch(orders),
+      topProducts: groupTopProducts(orders),
+      hourlySales: groupHourlySales(orders),
+      recentOrders: orders.slice(0, 8),
+      alerts: [],
+    });
+  } catch (e) {
+    console.error('❌ Error dashboard admin:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
@@ -343,10 +406,14 @@ app.put('/api/orders/:id/estado', verifyToken, requireRole('empleado'), async (r
       return res.status(404).json({ error: 'Pedido no encontrado' });
     }
 
-    const updated = await prisma.order.update({
-      where: { id: req.params.id },
-      data: { estado, ...(metodoPago ? { metodoPago } : {}) },
-      include: { items: true },
+    const updated = await prisma.$transaction(async (tx) => {
+      const orderUpdated = await tx.order.update({
+        where: { id: req.params.id },
+        data: { estado, ...(metodoPago ? { metodoPago } : {}) },
+        include: { items: true },
+      });
+      if (estado === 'pagado') await applyInventoryForOrder(tx, orderUpdated.id, req.user.id);
+      return tx.order.findUnique({ where: { id: orderUpdated.id }, include: { items: true } });
     });
     res.json(updated);
   } catch (e) {
@@ -383,6 +450,8 @@ app.put('/api/orders/:id/cocina', verifyToken, requireRole('empleado', 'cocina')
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
+
+app.use('/api/admin', adminRouter);
 
 // ======================================================
 // 404 y errores no capturados

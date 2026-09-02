@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Scaffold reference: admin-mobile.png</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@700&family=Pontano+Sans:wght@700&family=Alumni+Sans+Pinstripe:wght@400&display=swap">
+  <link rel="stylesheet" href="layout.css">
+  <style>html,body{margin:0}body{background:#131113}.region{box-sizing:border-box}.region.text p{white-space:pre-wrap}</style>
+</head>
+<body>
+<!-- Reference only. Every region sits at its measured box inside a comp-aspect frame. Take the boxes (layout.css), keep your own semantic structure. -->
+<main class="comp-frame" style="max-width:853px">
+  <div class="r-app-background region chrome" data-region="app-background"><!-- Near-black plum operational canvas rendered with CSS color and layered transparency. --></div>
+  <div class="r-masthead region chrome" data-region="masthead"><!-- Sticky glass masthead; logo, branch switcher and administrator avatar. --></div>
+  <figure class="r-brand-lockup region plate" data-region="brand-lockup"><img src="../../../assets/plates/brand-lockup.png" alt="" style="width:100%;height:100%;object-fit:contain;object-position:center"></figure>
+  <div class="r-branch-switcher region control" data-region="branch-switcher"><!-- Compact branch selector with Xico as the current branch.: rebuild the control's chrome from the crop (comp-spec.mjs --crop branch-switcher); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-account-avatar region control" data-region="account-avatar"><!-- Administrator account control with a clear touch target.: rebuild the control's chrome from the crop (comp-spec.mjs --crop account-avatar); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-welcome region text" data-region="welcome"><!-- Personal greeting and concise shift context. --><p style="font-size:var(--r-welcome-font);line-height:1.05;margin:0">welcome</p></div>
+  <div class="r-shift-hero region chrome" data-region="shift-hero"><!-- Primary pulso del turno surface; denser and more prominent than supporting cards. --></div>
+  <div class="r-shift-title region text" data-region="shift-title"><!-- Pulso del turno title and current comparison context. --><p style="font-size:var(--r-shift-title-font);font-family:var(--r-shift-title-family),sans-serif;font-weight:var(--r-shift-title-weight);line-height:1.05;margin:0">shift-title</p></div>
+  <div class="r-shift-sales region text" data-region="shift-sales"><!-- Daily sales total, delta, average ticket and order count with tabular numerals. --><p style="font-size:var(--r-shift-sales-font);font-family:var(--r-shift-sales-family),sans-serif;font-weight:var(--r-shift-sales-weight);line-height:1.05;margin:0">shift-sales</p></div>
+  <div class="r-shift-flame region control" data-region="shift-flame"><!-- Brand flame rendered from the existing icon system, not an emoji.: rebuild the control's chrome from the crop (comp-spec.mjs --crop shift-flame); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-stock-warning region control" data-region="stock-warning"><!-- Persistent low-stock action row; severity, count and direct destination.: rebuild the control's chrome from the crop (comp-spec.mjs --crop stock-warning); its ink box, border, fill, radius, and label size are the comp's --></div>
+  <div class="r-pulse-heading region text" data-region="pulse-heading"><!-- Operational pulse heading and all-clear state. --><p style="font-size:var(--r-pulse-heading-font);line-height:1.05;margin:0">pulse-heading</p></div>
+  <div class="r-alert-rail region chrome" data-region="alert-rail"><!-- Gate-board inspired alert rail ranked by urgency and age. --></div>
+  <div class="r-alert-content region text" data-region="alert-content"><!-- Kitchen, stock and cash alerts with owner, elapsed time and explicit action. --><p style="font-size:var(--r-alert-content-font);font-family:var(--r-alert-content-family),sans-serif;font-weight:var(--r-alert-content-weight);line-height:1.05;margin:0">alert-content</p></div>
+  <div class="r-cash-summary region chrome" data-region="cash-summary"><!-- Open cash shift summary with expected cash and reconciliation status. --></div>
+  <div class="r-operation-summary region chrome" data-region="operation-summary"><!-- Kitchen and floor throughput summary. --></div>
+  <div class="r-mobile-navigation region chrome" data-region="mobile-navigation"><!-- Sticky five-destination bottom navigation for one-handed use. --></div>
+</main>
+</body>
+</html>

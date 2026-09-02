@@ -1,0 +1,1130 @@
+{
+  "tool": "comp-spec",
+  "version": 1,
+  "createdAt": "2026-09-02T02:03:31.962Z",
+  "comp": ".impeccable/mocks/approved/admin-mobile.png",
+  "warnings": [
+    "region app-background: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region app-background: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
+    "region shift-hero: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
+    "region shift-flame: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region alert-rail: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)"
+  ],
+  "uncoveredInkCells": [],
+  "compSize": {
+    "width": 853,
+    "height": 1844
+  },
+  "aspect": 0.4626,
+  "orientation": "portrait",
+  "palette": [
+    {
+      "hex": "#131113",
+      "coverage": 0.8707
+    },
+    {
+      "hex": "#343434",
+      "coverage": 0.0542
+    },
+    {
+      "hex": "#2f2636",
+      "coverage": 0.0477
+    },
+    {
+      "hex": "#e682a8",
+      "coverage": 0.0151
+    },
+    {
+      "hex": "#f5f5f5",
+      "coverage": 0.0124
+    }
+  ],
+  "bands": [
+    {
+      "y": 0.0217,
+      "strength": 0.2631
+    },
+    {
+      "y": 0.0469,
+      "strength": 0.4492
+    },
+    {
+      "y": 0.1805,
+      "strength": 0.7085
+    },
+    {
+      "y": 0.2094,
+      "strength": 0.2123
+    },
+    {
+      "y": 0.2347,
+      "strength": 0.2098
+    },
+    {
+      "y": 0.2599,
+      "strength": 0.3105
+    },
+    {
+      "y": 0.2888,
+      "strength": 0.3914
+    },
+    {
+      "y": 0.3466,
+      "strength": 0.4019
+    },
+    {
+      "y": 0.3827,
+      "strength": 0.3316
+    },
+    {
+      "y": 0.4188,
+      "strength": 0.3915
+    },
+    {
+      "y": 0.4549,
+      "strength": 0.7359
+    },
+    {
+      "y": 0.4801,
+      "strength": 0.2886
+    },
+    {
+      "y": 0.5054,
+      "strength": 0.4295
+    },
+    {
+      "y": 0.5523,
+      "strength": 0.3481
+    },
+    {
+      "y": 0.6029,
+      "strength": 0.4322
+    },
+    {
+      "y": 0.657,
+      "strength": 0.313
+    },
+    {
+      "y": 0.704,
+      "strength": 0.3847
+    },
+    {
+      "y": 0.7617,
+      "strength": 0.2685
+    },
+    {
+      "y": 0.8592,
+      "strength": 0.2921
+    },
+    {
+      "y": 0.9025,
+      "strength": 0.3089
+    },
+    {
+      "y": 0.9278,
+      "strength": 0.3537
+    },
+    {
+      "y": 0.9675,
+      "strength": 0.2466
+    },
+    {
+      "y": 0.9892,
+      "strength": 0.939
+    }
+  ],
+  "regions": [
+    {
+      "id": "app-background",
+      "kind": "chrome",
+      "note": "Near-black plum operational canvas rendered with CSS color and layered transparency.",
+      "grid": "A0:J9",
+      "codeDrawn": true,
+      "container": true,
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 1
+      },
+      "px": {
+        "x": 0,
+        "y": 0,
+        "w": 853,
+        "h": 1844
+      },
+      "aspect": 0.4626,
+      "palette": [
+        {
+          "hex": "#131113",
+          "coverage": 0.8707
+        },
+        {
+          "hex": "#343434",
+          "coverage": 0.0542
+        },
+        {
+          "hex": "#2f2636",
+          "coverage": 0.0477
+        },
+        {
+          "hex": "#e682a8",
+          "coverage": 0.0151
+        },
+        {
+          "hex": "#f5f5f5",
+          "coverage": 0.0124
+        }
+      ],
+      "detail": {
+        "energy": 22.3475
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "masthead",
+      "kind": "chrome",
+      "note": "Sticky glass masthead; logo, branch switcher and administrator avatar.",
+      "grid": "A0:J0",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 0,
+        "w": 853,
+        "h": 184
+      },
+      "aspect": 4.6359,
+      "palette": [
+        {
+          "hex": "#0b0a0b",
+          "coverage": 0.9183
+        },
+        {
+          "hex": "#e483a8",
+          "coverage": 0.0431
+        },
+        {
+          "hex": "#3a3a3a",
+          "coverage": 0.0217
+        },
+        {
+          "hex": "#efefef",
+          "coverage": 0.0117
+        },
+        {
+          "hex": "#382333",
+          "coverage": 0.0051
+        }
+      ],
+      "detail": {
+        "energy": 23.3473
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "brand-lockup",
+      "kind": "image",
+      "note": "Existing Benditas Club flame and wordmark; use the repository brand asset.",
+      "grid": "A0:C0",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 0.3,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 184
+      },
+      "aspect": 1.3913,
+      "palette": [
+        {
+          "hex": "#090809",
+          "coverage": 0.829
+        },
+        {
+          "hex": "#e482a7",
+          "coverage": 0.1392
+        },
+        {
+          "hex": "#95576f",
+          "coverage": 0.0127
+        },
+        {
+          "hex": "#3a1e2d",
+          "coverage": 0.01
+        },
+        {
+          "hex": "#f0f0f0",
+          "coverage": 0.0092
+        }
+      ],
+      "detail": {
+        "energy": 20.4592
+      },
+      "medium": "raster",
+      "plate": "assets/plates/brand-lockup.png",
+      "text": null
+    },
+    {
+      "id": "branch-switcher",
+      "kind": "control",
+      "note": "Compact branch selector with Xico as the current branch.",
+      "grid": "D0:H0",
+      "coverBox": {
+        "x": 0.3,
+        "y": 0,
+        "w": 0.5,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.49,
+        "y": 0.0586,
+        "w": 0.3107,
+        "h": 0.0195
+      },
+      "px": {
+        "x": 418,
+        "y": 108,
+        "w": 265,
+        "h": 36
+      },
+      "aspect": 7.3611,
+      "palette": [
+        {
+          "hex": "#161117",
+          "coverage": 0.8231
+        },
+        {
+          "hex": "#615f65",
+          "coverage": 0.064
+        },
+        {
+          "hex": "#dedbde",
+          "coverage": 0.0508
+        },
+        {
+          "hex": "#a09fa0",
+          "coverage": 0.0405
+        },
+        {
+          "hex": "#37353e",
+          "coverage": 0.0216
+        }
+      ],
+      "detail": {
+        "energy": 56.5987
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "account-avatar",
+      "kind": "control",
+      "note": "Administrator account control with a clear touch target.",
+      "grid": "I0:J0",
+      "coverBox": {
+        "x": 0.8,
+        "y": 0,
+        "w": 0.2,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.8066,
+        "y": 0.0065,
+        "w": 0.1688,
+        "h": 0.0195
+      },
+      "px": {
+        "x": 688,
+        "y": 12,
+        "w": 144,
+        "h": 36
+      },
+      "aspect": 4,
+      "palette": [
+        {
+          "hex": "#08080a",
+          "coverage": 0.7343
+        },
+        {
+          "hex": "#f8f8f8",
+          "coverage": 0.1731
+        },
+        {
+          "hex": "#737174",
+          "coverage": 0.0524
+        },
+        {
+          "hex": "#c0c0c0",
+          "coverage": 0.0332
+        },
+        {
+          "hex": "#382c3c",
+          "coverage": 0.007
+        }
+      ],
+      "detail": {
+        "energy": 27.7034
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "welcome",
+      "kind": "text",
+      "note": "Personal greeting and concise shift context.",
+      "grid": "A1:G1",
+      "coverBox": {
+        "x": 0,
+        "y": 0.1,
+        "w": 0.7,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.1477,
+        "y": 0.1128,
+        "w": 0.3236,
+        "h": 0.0586
+      },
+      "px": {
+        "x": 126,
+        "y": 208,
+        "w": 276,
+        "h": 108
+      },
+      "aspect": 2.5556,
+      "palette": [
+        {
+          "hex": "#09080b",
+          "coverage": 0.7566
+        },
+        {
+          "hex": "#f6f6f6",
+          "coverage": 0.1807
+        },
+        {
+          "hex": "#38363a",
+          "coverage": 0.0239
+        },
+        {
+          "hex": "#8e8c8e",
+          "coverage": 0.0199
+        },
+        {
+          "hex": "#bdbcbe",
+          "coverage": 0.019
+        }
+      ],
+      "detail": {
+        "energy": 47.0506
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "type": {
+        "comp": {
+          "lines": 1,
+          "glyphs": 8,
+          "capHeightPx": 45.1,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.6424,
+          "advTall": 0.2215,
+          "advX": 0.6868,
+          "gap": 0.1329,
+          "xRatio": 0.6969,
+          "stemW": 0.2168,
+          "contrast": 1.1385,
+          "serif": 0.994,
+          "densTall": 0.8448,
+          "densX": 0.6129,
+          "weight": 0.8448
+        },
+        "widthClass": "normal",
+        "weightClass": "black"
+      }
+    },
+    {
+      "id": "shift-hero",
+      "kind": "chrome",
+      "note": "Primary pulso del turno surface; denser and more prominent than supporting cards.",
+      "grid": "A2:J4",
+      "container": true,
+      "box": {
+        "x": 0,
+        "y": 0.2,
+        "w": 1,
+        "h": 0.3
+      },
+      "px": {
+        "x": 0,
+        "y": 369,
+        "w": 853,
+        "h": 553
+      },
+      "aspect": 1.5425,
+      "palette": [
+        {
+          "hex": "#151215",
+          "coverage": 0.9436
+        },
+        {
+          "hex": "#e782a8",
+          "coverage": 0.0271
+        },
+        {
+          "hex": "#313133",
+          "coverage": 0.0152
+        },
+        {
+          "hex": "#f8b43c",
+          "coverage": 0.0082
+        },
+        {
+          "hex": "#75384a",
+          "coverage": 0.006
+        }
+      ],
+      "detail": {
+        "energy": 21.5496
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "shift-title",
+      "kind": "text",
+      "note": "Pulso del turno title and current comparison context.",
+      "grid": "A2:F2",
+      "coverBox": {
+        "x": 0,
+        "y": 0.2,
+        "w": 0.6,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.0633,
+        "y": 0.2294,
+        "w": 0.3447,
+        "h": 0.0683
+      },
+      "px": {
+        "x": 54,
+        "y": 423,
+        "w": 294,
+        "h": 126
+      },
+      "aspect": 2.3333,
+      "palette": [
+        {
+          "hex": "#171118",
+          "coverage": 0.762
+        },
+        {
+          "hex": "#e682a8",
+          "coverage": 0.2018
+        },
+        {
+          "hex": "#f1f1f1",
+          "coverage": 0.0165
+        },
+        {
+          "hex": "#60394b",
+          "coverage": 0.013
+        },
+        {
+          "hex": "#838384",
+          "coverage": 0.0067
+        }
+      ],
+      "detail": {
+        "energy": 29.5198
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "type": {
+        "comp": {
+          "lines": 1,
+          "glyphs": 6,
+          "capHeightPx": 53.2,
+          "inkIsDark": false,
+          "allCaps": true,
+          "advance": 0.7329,
+          "advTall": 0.7329,
+          "advX": null,
+          "gap": 0.2067,
+          "xRatio": null,
+          "stemW": 0.2273,
+          "contrast": 1.0868,
+          "serif": 1.5011,
+          "densTall": 0.6129,
+          "densX": null,
+          "weight": 0.6129
+        },
+        "widthClass": "normal",
+        "weightClass": "bold",
+        "chosen": {
+          "family": "Josefin Sans",
+          "weight": 700,
+          "fontSizePx": 76,
+          "source": "catalog",
+          "estimatedSize": true,
+          "stamp": "6e6ad167b565"
+        }
+      }
+    },
+    {
+      "id": "shift-sales",
+      "kind": "text",
+      "note": "Daily sales total, delta, average ticket and order count with tabular numerals.",
+      "grid": "A2:G3",
+      "coverBox": {
+        "x": 0,
+        "y": 0.2,
+        "w": 0.7,
+        "h": 0.2
+      },
+      "box": {
+        "x": 0.0141,
+        "y": 0.2001,
+        "w": 0.4994,
+        "h": 0.2001
+      },
+      "px": {
+        "x": 12,
+        "y": 369,
+        "w": 426,
+        "h": 369
+      },
+      "aspect": 1.1545,
+      "palette": [
+        {
+          "hex": "#171217",
+          "coverage": 0.9
+        },
+        {
+          "hex": "#e782a8",
+          "coverage": 0.0741
+        },
+        {
+          "hex": "#69676d",
+          "coverage": 0.0101
+        },
+        {
+          "hex": "#9d9d9d",
+          "coverage": 0.0096
+        },
+        {
+          "hex": "#f3f3f3",
+          "coverage": 0.0062
+        }
+      ],
+      "detail": {
+        "energy": 26.9129
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "type": {
+        "comp": {
+          "lines": 4,
+          "glyphs": 75,
+          "capHeightPx": 15.9,
+          "inkIsDark": false,
+          "allCaps": true,
+          "advance": 0.6391,
+          "advTall": 0.6469,
+          "advX": null,
+          "gap": 0.1612,
+          "xRatio": null,
+          "stemW": 0.1948,
+          "contrast": 1.1275,
+          "serif": 0.513,
+          "densTall": 0.5645,
+          "densX": null,
+          "weight": 0.5645
+        },
+        "widthClass": "normal",
+        "weightClass": "bold",
+        "chosen": {
+          "family": "Pontano Sans",
+          "weight": 700,
+          "fontSizePx": 23,
+          "source": "catalog",
+          "estimatedSize": true,
+          "stamp": "faf04085f8c2"
+        }
+      }
+    },
+    {
+      "id": "shift-flame",
+      "kind": "control",
+      "note": "Brand flame rendered from the existing icon system, not an emoji.",
+      "grid": "G2:I3",
+      "codeDrawn": true,
+      "coverBox": {
+        "x": 0.6,
+        "y": 0.2,
+        "w": 0.3,
+        "h": 0.2
+      },
+      "box": {
+        "x": 0.7339,
+        "y": 0.2587,
+        "w": 0.0914,
+        "h": 0.0521
+      },
+      "px": {
+        "x": 626,
+        "y": 477,
+        "w": 78,
+        "h": 96
+      },
+      "aspect": 0.8125,
+      "palette": [
+        {
+          "hex": "#171218",
+          "coverage": 0.6288
+        },
+        {
+          "hex": "#f8b43c",
+          "coverage": 0.3398
+        },
+        {
+          "hex": "#4f351f",
+          "coverage": 0.0145
+        },
+        {
+          "hex": "#c89038",
+          "coverage": 0.0121
+        },
+        {
+          "hex": "#986c34",
+          "coverage": 0.0048
+        }
+      ],
+      "detail": {
+        "energy": 6.4319
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "stock-warning",
+      "kind": "control",
+      "note": "Persistent low-stock action row; severity, count and direct destination.",
+      "grid": "A4:J4",
+      "coverBox": {
+        "x": 0,
+        "y": 0.4,
+        "w": 1,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.0211,
+        "y": 0.4002,
+        "w": 0.9566,
+        "h": 0.0586
+      },
+      "px": {
+        "x": 18,
+        "y": 738,
+        "w": 816,
+        "h": 108
+      },
+      "aspect": 7.5556,
+      "palette": [
+        {
+          "hex": "#171517",
+          "coverage": 0.9395
+        },
+        {
+          "hex": "#76384a",
+          "coverage": 0.0265
+        },
+        {
+          "hex": "#f6b43b",
+          "coverage": 0.0217
+        },
+        {
+          "hex": "#c08737",
+          "coverage": 0.007
+        },
+        {
+          "hex": "#493220",
+          "coverage": 0.0052
+        }
+      ],
+      "detail": {
+        "energy": 21.7528
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "pulse-heading",
+      "kind": "text",
+      "note": "Operational pulse heading and all-clear state.",
+      "grid": "A5:J5",
+      "coverBox": {
+        "x": 0,
+        "y": 0.5,
+        "w": 1,
+        "h": 0.1
+      },
+      "box": {
+        "x": 0.2181,
+        "y": 0.5456,
+        "w": 0.3236,
+        "h": 0.0358
+      },
+      "px": {
+        "x": 186,
+        "y": 1006,
+        "w": 276,
+        "h": 66
+      },
+      "aspect": 4.1818,
+      "palette": [
+        {
+          "hex": "#161418",
+          "coverage": 0.8226
+        },
+        {
+          "hex": "#afaeb0",
+          "coverage": 0.0547
+        },
+        {
+          "hex": "#efefef",
+          "coverage": 0.0512
+        },
+        {
+          "hex": "#706f74",
+          "coverage": 0.0427
+        },
+        {
+          "hex": "#3d3b44",
+          "coverage": 0.0288
+        }
+      ],
+      "detail": {
+        "energy": 57.1661
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "type": {
+        "comp": {
+          "lines": 2,
+          "glyphs": 35,
+          "capHeightPx": 16.1,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.6061,
+          "advTall": 0.6156,
+          "advX": 0.589,
+          "gap": 0.1394,
+          "xRatio": 0.707,
+          "stemW": 0.1844,
+          "contrast": 1.2127,
+          "serif": 0.4076,
+          "densTall": 0.526,
+          "densX": 0.5594,
+          "weight": 0.526
+        },
+        "widthClass": "normal",
+        "weightClass": "medium"
+      }
+    },
+    {
+      "id": "alert-rail",
+      "kind": "chrome",
+      "note": "Gate-board inspired alert rail ranked by urgency and age.",
+      "grid": "A5:J7",
+      "container": true,
+      "box": {
+        "x": 0,
+        "y": 0.5,
+        "w": 1,
+        "h": 0.3
+      },
+      "px": {
+        "x": 0,
+        "y": 922,
+        "w": 853,
+        "h": 553
+      },
+      "aspect": 1.5425,
+      "palette": [
+        {
+          "hex": "#161517",
+          "coverage": 0.9508
+        },
+        {
+          "hex": "#482d18",
+          "coverage": 0.0162
+        },
+        {
+          "hex": "#3f3f40",
+          "coverage": 0.0133
+        },
+        {
+          "hex": "#f4f4f4",
+          "coverage": 0.0115
+        },
+        {
+          "hex": "#c6c6c6",
+          "coverage": 0.0081
+        }
+      ],
+      "detail": {
+        "energy": 23.5852
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "alert-content",
+      "kind": "text",
+      "note": "Kitchen, stock and cash alerts with owner, elapsed time and explicit action.",
+      "grid": "A5:J7",
+      "coverBox": {
+        "x": 0,
+        "y": 0.5,
+        "w": 1,
+        "h": 0.3
+      },
+      "box": {
+        "x": 0.0586,
+        "y": 0.5,
+        "w": 0.5557,
+        "h": 0.2234
+      },
+      "px": {
+        "x": 50,
+        "y": 922,
+        "w": 474,
+        "h": 412
+      },
+      "aspect": 1.1505,
+      "palette": [
+        {
+          "hex": "#171618",
+          "coverage": 0.8934
+        },
+        {
+          "hex": "#492c18",
+          "coverage": 0.0396
+        },
+        {
+          "hex": "#bebebf",
+          "coverage": 0.0234
+        },
+        {
+          "hex": "#f5f5f5",
+          "coverage": 0.0233
+        },
+        {
+          "hex": "#808083",
+          "coverage": 0.0203
+        }
+      ],
+      "detail": {
+        "energy": 37.9325
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "type": {
+        "comp": {
+          "lines": 3,
+          "glyphs": 3,
+          "capHeightPx": 73.7,
+          "inkIsDark": false,
+          "allCaps": true,
+          "advance": 0.2578,
+          "advTall": 0.2578,
+          "advX": null,
+          "gap": 0,
+          "xRatio": null,
+          "stemW": 0.0215,
+          "contrast": 0.1548,
+          "serif": null,
+          "densTall": 0.1965,
+          "densX": null,
+          "weight": 0.1965
+        },
+        "widthClass": "compressed",
+        "weightClass": "light",
+        "chosen": {
+          "family": "Alumni Sans Pinstripe",
+          "weight": 400,
+          "fontSizePx": 105,
+          "source": "catalog",
+          "estimatedSize": true,
+          "stamp": "01e5369d242d"
+        }
+      }
+    },
+    {
+      "id": "cash-summary",
+      "kind": "chrome",
+      "note": "Open cash shift summary with expected cash and reconciliation status.",
+      "grid": "A8:E8",
+      "box": {
+        "x": 0,
+        "y": 0.8,
+        "w": 0.5,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 1475,
+        "w": 427,
+        "h": 184
+      },
+      "aspect": 2.3207,
+      "palette": [
+        {
+          "hex": "#161518",
+          "coverage": 0.9266
+        },
+        {
+          "hex": "#482918",
+          "coverage": 0.0303
+        },
+        {
+          "hex": "#442536",
+          "coverage": 0.0277
+        },
+        {
+          "hex": "#f4f4f4",
+          "coverage": 0.0085
+        },
+        {
+          "hex": "#c7c7c7",
+          "coverage": 0.0069
+        }
+      ],
+      "detail": {
+        "energy": 24.4086
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "operation-summary",
+      "kind": "chrome",
+      "note": "Kitchen and floor throughput summary.",
+      "grid": "F8:J8",
+      "box": {
+        "x": 0.5,
+        "y": 0.8,
+        "w": 0.5,
+        "h": 0.1
+      },
+      "px": {
+        "x": 427,
+        "y": 1475,
+        "w": 427,
+        "h": 184
+      },
+      "aspect": 2.3207,
+      "palette": [
+        {
+          "hex": "#161617",
+          "coverage": 0.9384
+        },
+        {
+          "hex": "#641d28",
+          "coverage": 0.0337
+        },
+        {
+          "hex": "#ed82a9",
+          "coverage": 0.0122
+        },
+        {
+          "hex": "#f0f0f0",
+          "coverage": 0.0082
+        },
+        {
+          "hex": "#818181",
+          "coverage": 0.0074
+        }
+      ],
+      "detail": {
+        "energy": 18.176
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    },
+    {
+      "id": "mobile-navigation",
+      "kind": "chrome",
+      "note": "Sticky five-destination bottom navigation for one-handed use.",
+      "grid": "A9:J9",
+      "box": {
+        "x": 0,
+        "y": 0.9,
+        "w": 1,
+        "h": 0.1
+      },
+      "px": {
+        "x": 0,
+        "y": 1660,
+        "w": 853,
+        "h": 184
+      },
+      "aspect": 4.6359,
+      "palette": [
+        {
+          "hex": "#333232",
+          "coverage": 0.3978
+        },
+        {
+          "hex": "#312838",
+          "coverage": 0.3229
+        },
+        {
+          "hex": "#131216",
+          "coverage": 0.252
+        },
+        {
+          "hex": "#f3f3f3",
+          "coverage": 0.0175
+        },
+        {
+          "hex": "#9c9c9c",
+          "coverage": 0.0098
+        }
+      ],
+      "detail": {
+        "energy": 19.2324
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null
+    }
+  ]
+}
