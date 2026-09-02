@@ -1,5 +1,7 @@
 // src/pos/ProductGrid.jsx
 import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Chip, Alert, Grid } from '@mui/material';
+import { motion } from 'framer-motion';
 import { getProducts } from '../shared/staffApi';
 import SaboresPicker from './SaboresPicker';
 
@@ -37,32 +39,49 @@ const ProductGrid = ({ onAgregar }) => {
   };
 
   return (
-    <div style={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {error && <p className="pos-error">{error}</p>}
-      <div className="pos-categorias">
+    <Box sx={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {error && <Alert severity="error" sx={{ m: 1.5 }}>{error}</Alert>}
+      <Box sx={{ display: 'flex', gap: 1, p: 1.5, overflowX: 'auto' }}>
         {categorias.map((cat) => (
-          <button
+          <Chip
             key={cat}
-            className={categoriaActiva === cat ? 'activa' : ''}
+            label={cat}
             onClick={() => setCategoriaActiva(cat)}
-          >
-            {cat}
-          </button>
+            color={categoriaActiva === cat ? 'primary' : 'default'}
+            variant={categoriaActiva === cat ? 'filled' : 'outlined'}
+            sx={{ fontWeight: 600 }}
+          />
         ))}
-      </div>
-      <div className="pos-productos-grid">
+      </Box>
+      <Grid container spacing={1.5} sx={{ p: 1.5, overflowY: 'auto' }}>
         {productosVisibles.map((producto) => (
-          <button
-            key={producto.id}
-            type="button"
-            className="pos-producto-card"
-            onClick={() => handleClickProducto(producto)}
-          >
-            <strong>{producto.nombre}</strong>
-            <div>${producto.precio}</div>
-          </button>
+          <Grid key={producto.id} size={{ xs: 6, sm: 4, md: 3 }}>
+            <motion.div whileTap={{ scale: 0.95 }} whileHover={{ y: -3 }}>
+              <Box
+                component="button"
+                type="button"
+                onClick={() => handleClickProducto(producto)}
+                sx={{
+                  width: '100%',
+                  textAlign: 'left',
+                  p: 1.75,
+                  borderRadius: 3,
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'text.primary',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5,
+                }}
+              >
+                <strong>{producto.nombre}</strong>
+                <span style={{ color: '#f6b43b', fontWeight: 700 }}>${producto.precio}</span>
+              </Box>
+            </motion.div>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
       {productoConSabores && (
         <SaboresPicker
@@ -75,7 +94,7 @@ const ProductGrid = ({ onAgregar }) => {
           onCancelar={() => setProductoConSabores(null)}
         />
       )}
-    </div>
+    </Box>
   );
 };
 
