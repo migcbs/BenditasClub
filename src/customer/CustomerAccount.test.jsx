@@ -70,6 +70,12 @@ test('shows customer profile, loyalty progress and order history', async () => {
       { id: 'order-123456', clienteId: 'u1', estado: 'pendiente', estadoCocina: 'en_preparacion', sucursal: 'xico', tipo: 'para_llevar', total: 177, createdAt: new Date('2026-09-02T18:00:00Z').toISOString(), items: [] },
     ]),
     updateProfile: jest.fn().mockResolvedValue({ user: { id: 'u1', role: 'cliente', nombre: 'Ana Club', email: 'ana@benditas.local', telefono: '2287654321' } }),
+    loyalty: jest.fn().mockResolvedValue({
+      stamps: 2,
+      stampsRequired: 6,
+      activeReward: { id: 'r1', label: '20% de descuento', type: 'discount_percent', value: 20 },
+      redemptions: [],
+    }),
   };
 
   render(
@@ -84,7 +90,8 @@ test('shows customer profile, loyalty progress and order history', async () => {
   expect(await screen.findByText('Ana')).toBeVisible();
   expect(screen.getByText(/en cocina/i)).toBeVisible();
   expect(screen.getByText('$177')).toBeVisible();
-  expect(screen.getByLabelText(/sellos de fidelidad/i)).toBeVisible();
+  expect(await screen.findByLabelText(/2 de 6 sellos de fidelidad/i)).toBeVisible();
+  expect(screen.getByText(/20% de descuento/i)).toBeVisible();
 
   await userEvent.clear(screen.getByLabelText(/^nombre/i));
   await userEvent.type(screen.getByLabelText(/^nombre/i), 'Ana Club');
@@ -93,4 +100,31 @@ test('shows customer profile, loyalty progress and order history', async () => {
   await userEvent.click(screen.getByRole('button', { name: /guardar datos/i }));
 
   await waitFor(() => expect(api.updateProfile).toHaveBeenCalledWith({ nombre: 'Ana Club', telefono: '2287654321' }, 'customer-token'));
+});
+
+test('shows a ready-to-redeem reward with its code and a wallet button', async () => {
+  const storage = memoryStorage();
+  storage.setItem(CUSTOMER_TOKEN_KEY, 'customer-token');
+  const api = {
+    profile: jest.fn().mockResolvedValue({ user: { id: 'u1', role: 'cliente', nombre: 'Ana', email: 'ana@benditas.local' } }),
+    orders: jest.fn().mockResolvedValue([]),
+    loyalty: jest.fn().mockResolvedValue({
+      stamps: 0,
+      stampsRequired: 6,
+      activeReward: { id: 'r1', label: 'Envío gratis', type: 'free_shipping' },
+      redemptions: [{ id: 'red1', code: 'AB12-CD34', redeemed: false, reward: { type: 'free_shipping' } }],
+    }),
+  };
+
+  render(
+    <MemoryRouter initialEntries={['/perfil']}>
+      <Routes>
+        <Route path="/perfil" element={<CustomerProfile api={api} storage={storage} />} />
+        <Route path="/login" element={<p>Login</p>} />
+      </Routes>
+    </MemoryRouter>
+  );
+
+  expect(await screen.findByText('AB12-CD34')).toBeVisible();
+  expect(screen.getByRole('button', { name: /agregar a apple wallet/i })).toBeVisible();
 });

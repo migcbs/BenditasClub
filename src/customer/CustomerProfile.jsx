@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { customerApi as defaultApi } from './customerApi';
 import { CUSTOMER_TOKEN_KEY } from './CustomerAuth';
@@ -18,6 +18,7 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
   const [token, setToken] = useState(() => storage.getItem(CUSTOMER_TOKEN_KEY));
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [loyalty, setLoyalty] = useState(null);
   const [form, setForm] = useState({ nombre: '', telefono: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -29,12 +30,13 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
     }
 
     let live = true;
-    Promise.all([api.profile(token), api.orders(token)])
-      .then(([profile, history]) => {
+    Promise.all([api.profile(token), api.orders(token), api.loyalty(token)])
+      .then(([profile, history, loyaltyStatus]) => {
         if (!live) return;
         setUser(profile.user);
         setForm({ nombre: profile.user.nombre || '', telefono: profile.user.telefono || '' });
         setOrders(history);
+        setLoyalty(loyaltyStatus);
       })
       .catch((requestError) => {
         if (!live) return;
@@ -45,10 +47,14 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
     return () => { live = false; };
   }, [api, navigate, storage, token]);
 
-  const stats = useMemo(() => ({
-    total: orders.reduce((sum, order) => sum + Number(order.total || 0), 0),
-    stamps: Math.min(8, orders.filter((order) => order.estado !== 'cancelado').length % 8),
-  }), [orders]);
+  const rewardDescription = (reward) => {
+    if (!reward) return '';
+    if (reward.type === 'discount_percent') return `${reward.value}% de descuento`;
+    if (reward.type === 'discount_fixed') return `${money.format(reward.value)} de descuento`;
+    if (reward.type === 'free_shipping') return 'Envío gratis';
+    if (reward.type === 'free_item') return `${reward.product?.nombre || 'Producto'} gratis`;
+    return reward.label;
+  };
 
   const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
 
@@ -104,11 +110,46 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
 
         <article className="customer-card customer-loyalty">
           <h2>Tarjeta de fidelidad</h2>
-          <p>{stats.stamps}/8 compras registradas</p>
-          <div className="customer-stamps" aria-label={`${stats.stamps} sellos de fidelidad`}>
-            {Array.from({ length: 8 }, (_, index) => <span key={index} className={index < stats.stamps ? 'is-filled' : ''} />)}
-          </div>
-          <small>La recompensa se activará desde admin cuando conectemos promociones.</small>
+          {loyalty ? (
+            loyalty.activeReward ? (
+              <>
+                <p>{loyalty.stamps}/{loyalty.stampsRequired} pedidos hacia: <b>{rewardDescription(loyalty.activeReward)}</b></p>
+                <div className="customer-stamps" aria-label={`${loyalty.stamps} de ${loyalty.stampsRequired} sellos de fidelidad`}>
+                  {Array.from({ length: loyalty.stampsRequired }, (_, index) => (
+                    <span key={index} className={index < loyalty.stamps ? 'is-filled' : ''} />
+                  ))}
+                </div>
+
+                {loyalty.redemptions.some((r) => !r.redeemed) ? (
+                  <div className="customer-reward-ready">
+                    <p><b>¡Tienes una recompensa lista!</b> {rewardDescription(loyalty.redemptions.find((r) => !r.redeemed).reward)}</p>
+                    <div className="customer-reward-code">{loyalty.redemptions.find((r) => !r.redeemed).code}</div>
+                    <small>Muestra este código al pagar en sucursal.</small>
+                    <button
+                      type="button"
+                      className="customer-ghost customer-wallet-btn"
+                      onClick={() => alert('Agregar a Apple Wallet estará disponible en cuanto configuremos el certificado Pass Type ID del restaurante con Apple.')}
+                    >
+                      Agregar a Apple Wallet
+                    </button>
+                  </div>
+                ) : null}
+
+                {loyalty.redemptions.some((r) => r.redeemed) && (
+                  <details className="customer-reward-history">
+                    <summary>Recompensas canjeadas ({loyalty.redemptions.filter((r) => r.redeemed).length})</summary>
+                    {loyalty.redemptions.filter((r) => r.redeemed).map((r) => (
+                      <p key={r.id}>{rewardDescription(r.reward)} · {new Date(r.redeemedAt).toLocaleDateString('es-MX')}</p>
+                    ))}
+                  </details>
+                )}
+              </>
+            ) : (
+              <small>Todavía no hay una recompensa activa configurada por el restaurante.</small>
+            )
+          ) : (
+            <small>Cargando tu tarjeta...</small>
+          )}
         </article>
       </section>
 
