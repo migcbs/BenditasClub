@@ -16,6 +16,33 @@
 }
 
 /* ─────────────────────────────────────────
+   NOTAS (mismo look que los inputs del paso 1)
+───────────────────────────────────────── */
+.paso-resumen textarea {
+  width: 100%;
+  padding: 12px 15px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 3px solid #000;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 3px 3px 0 #000;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+  resize: none;
+  min-height: 72px;
+  -webkit-appearance: none;
+}
+
+.paso-resumen textarea:focus {
+  border-color: #e78fbb;
+  box-shadow: 5px 5px 0 #e78fbb;
+  transform: translate(-2px, -2px);
+}
+
+/* ─────────────────────────────────────────
    SECCIONES (Cliente + Productos)
 ───────────────────────────────────────── */
 .resumen-seccion {

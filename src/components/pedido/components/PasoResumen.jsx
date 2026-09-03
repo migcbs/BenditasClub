@@ -9,7 +9,7 @@ import { calcularSubtotal, calcularSubtotalItem, formatearMoneda, guardarPedidoE
 import { TIPO_PEDIDO } from "../utils/constants";
 import "../styles/resumen.css";
 
-const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, onClose }) => {
+const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, onClose, handleChange }) => {
 
   const total       = useMemo(() => calcularSubtotal(carrito), [carrito]);
   const carritoVacio = !carrito || carrito.length === 0;
@@ -49,10 +49,6 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
           </>
         ) : (
           <p><strong>Tipo:</strong> 🏪 Para recoger</p>
-        )}
-
-        {cliente.comentarios && (
-          <p><strong>Comentarios:</strong> {cliente.comentarios}</p>
         )}
       </div>
 
@@ -111,6 +107,17 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
         {cliente.tipoPedido === TIPO_PEDIDO.DOMICILIO && (
           <p className="resumen-envio-nota">+ costo de envío por confirmar</p>
         )}
+      </div>
+
+      {/* ── Notas (se piden hasta el último paso, justo antes de enviar) ── */}
+      <div className="form-group resumen-notas">
+        <textarea
+          name="comentarios"
+          placeholder="Notas: sin cebolla, timbre descompuesto..."
+          value={cliente.comentarios || ""}
+          onChange={handleChange}
+          rows={2}
+        />
       </div>
 
       {/* ── Acciones ── */}
