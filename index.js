@@ -19,6 +19,7 @@ const {
 } = require('./server/admin/analytics');
 const adminRouter = require('./server/admin/router');
 const { applyInventoryForOrder } = require('./server/admin/inventory-service');
+const { classifyInventoryHealth } = require('./server/admin/inventory');
 const { awardStampForOrder } = require('./server/loyalty/loyalty-service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -264,6 +265,21 @@ app.get('/api/admin/dashboard', verifyToken, requireRole('admin'), async (req, r
       orderBy: { createdAt: 'desc' },
     });
 
+    // Alertas de inventario reales: un insumo cuenta como alerta si su stock
+    // está bajo/crítico en CUALQUIER sucursal cuando se ven "Todas", o en la
+    // sucursal filtrada específicamente.
+    const ingredients = await prisma.ingredient.findMany({
+      where: { activo: true },
+      include: {
+        stocks: filters.branch !== 'all' ? { where: { sucursal: filters.branch } } : true,
+      },
+    });
+    const alerts = ingredients
+      .filter((ingredient) =>
+        ingredient.stocks.some((stock) => classifyInventoryHealth(stock.quantity, ingredient.reorderPoint) !== 'healthy')
+      )
+      .map((ingredient) => ({ type: 'stock', ingredientId: ingredient.id, nombre: ingredient.nombre }));
+
     res.json({
       filters: {
         branch: filters.branch,
@@ -275,7 +291,7 @@ app.get('/api/admin/dashboard', verifyToken, requireRole('admin'), async (req, r
       topProducts: groupTopProducts(orders),
       hourlySales: groupHourlySales(orders),
       recentOrders: orders.slice(0, 8),
-      alerts: [],
+      alerts,
     });
   } catch (e) {
     console.error('❌ Error dashboard admin:', e);

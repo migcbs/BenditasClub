@@ -70,6 +70,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.order.deleteMany({ where: { empleado: { nombre: { contains: TEST_PREFIX } } } });
   await prisma.user.deleteMany({ where: { nombre: { contains: TEST_PREFIX } } });
+  await prisma.ingredient.deleteMany({ where: { nombre: { contains: TEST_PREFIX } } });
   await prisma.$disconnect();
 });
 
@@ -135,6 +136,31 @@ describe('Admin dashboard', () => {
       expect.objectContaining({ branch: 'xico', sales: 500 }),
       expect.objectContaining({ branch: 'coatepec', sales: 450 }),
     ]));
+  });
+
+  it('surfaces real low-stock ingredients as alerts, scoped by branch', async () => {
+    const ingredient = await prisma.ingredient.create({
+      data: {
+        nombre: `${TEST_PREFIX}-salsa-critica`,
+        unit: 'l',
+        reorderPoint: 10,
+        stocks: {
+          create: [
+            { sucursal: 'xico', quantity: 1 }, // <= 25% de 10 -> critical
+            { sucursal: 'coatepec', quantity: 50 }, // saludable
+          ],
+        },
+      },
+    });
+
+    const xico = await request(app).get('/api/admin/dashboard?branch=xico').set('Authorization', `Bearer ${adminToken}`);
+    expect(xico.body.alerts.some((a) => a.ingredientId === ingredient.id)).toBe(true);
+
+    const coatepec = await request(app).get('/api/admin/dashboard?branch=coatepec').set('Authorization', `Bearer ${adminToken}`);
+    expect(coatepec.body.alerts.some((a) => a.ingredientId === ingredient.id)).toBe(false);
+
+    const all = await request(app).get('/api/admin/dashboard?branch=all').set('Authorization', `Bearer ${adminToken}`);
+    expect(all.body.alerts.some((a) => a.ingredientId === ingredient.id)).toBe(true);
   });
 
   it('rejects invalid branch and date filters', async () => {

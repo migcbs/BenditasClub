@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Avatar, ButtonBase, Card, Chip, Typography } from '@mui/material';
+import { Alert, Avatar, ButtonBase, Card, Chip, Typography } from '@mui/material';
 import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Gauge, House, PackageSearch, ReceiptText, Sparkles, UsersRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AdminWorkspace from './AdminWorkspace';
@@ -22,7 +22,7 @@ function AlertRow({ icon: Icon, tone, title, detail, action, onClick }) {
   );
 }
 
-export default function AdminDashboard({ user, data, branch, onBranchChange, api, token }) {
+export default function AdminDashboard({ user, data, branch, onBranchChange, api, token, error }) {
   const [section, setSection] = useState('Inicio');
   const summary = data.summary;
   const stockAlerts = data.alerts?.filter((alert) => alert.type === 'stock').length || 0;
@@ -40,6 +40,8 @@ export default function AdminDashboard({ user, data, branch, onBranchChange, api
         </label>
         <Avatar aria-label={`Cuenta de ${user.nombre}`}>{user.nombre?.[0] || 'A'}</Avatar>
       </header>
+
+      {error && <Alert severity="error" sx={{ mx: 2, mt: 1 }}>{error}</Alert>}
 
       <div className={`admin-content ${section !== 'Inicio' ? 'admin-content--module' : ''}`}>
         {section !== 'Inicio' ? <AdminWorkspace section={section} api={api} token={token} branch={branch} dashboard={data} /> : <>
@@ -88,7 +90,7 @@ export default function AdminDashboard({ user, data, branch, onBranchChange, api
                 <AlertRow
                   icon={PackageSearch}
                   tone="pink"
-                  title={`${stockAlerts} insumo${stockAlerts !== 1 ? 's' : ''} están por agotarse`}
+                  title={`${stockAlerts} insumo${stockAlerts !== 1 ? 's' : ''} ${stockAlerts !== 1 ? 'están' : 'está'} por agotarse`}
                   detail="Inventario"
                   action="Revisar"
                   onClick={() => setSection('Inventario')}
