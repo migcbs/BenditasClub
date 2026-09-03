@@ -1,8 +1,8 @@
 // src/components/pedido/components/SelectorSabores.jsx
 
-import React, { useState, useEffect } from "react";
-import ReactDOM from "react-dom";
-import "../styles/selectorSabores.css";
+import React, { useState } from "react";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Chip, Button, IconButton } from "@mui/material";
+import { X } from "lucide-react";
 
 const SABORES_ALITAS = [
   "Ajo parmesano","Pimienta limón","Queso parmesano",
@@ -127,17 +127,6 @@ const ModalContent = ({ producto, onConfirmar, onCancelar }) => {
   const [rondaActual, setRondaActual] = useState(0);
   const [selecciones, setSelecciones] = useState(rondas.map(r => ({ ...r, elegidos:[] })));
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.width    = "100%";
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width    = "";
-    };
-  }, []);
-
   // Si no hay rondas, agregar sin configuración
   if (rondas.length === 0) {
     console.warn("[SelectorSabores] Sin rondas para:", producto.nombre);
@@ -193,83 +182,78 @@ const ModalContent = ({ producto, onConfirmar, onCancelar }) => {
   };
 
   return (
-    <div className="selector-overlay" onClick={e => e.target === e.currentTarget && onCancelar()}>
-      <div className="selector-modal" onClick={e => e.stopPropagation()}>
+    <Dialog open onClose={onCancelar} fullWidth maxWidth="xs">
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        {producto.nombre}
+        <IconButton size="small" onClick={onCancelar}><X size={18} /></IconButton>
+      </DialogTitle>
 
-        <div className="selector-header">
-          <h3 className="selector-titulo">{producto.nombre}</h3>
-          <button className="selector-cerrar" onClick={onCancelar}>×</button>
-        </div>
-
+      <DialogContent>
         {rondas.length > 1 && (
-          <div className="selector-rondas">
+          <Box sx={{ display: "flex", gap: 0.75, justifyContent: "center", mb: 1.5 }}>
             {rondas.map((_, i) => (
-              <div key={i} className={`selector-ronda-dot
-                ${i === rondaActual ? "activa" : ""}
-                ${i < rondaActual  ? "completa" : ""}`}
+              <Box
+                key={i}
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: i <= rondaActual ? "#e682a8" : "rgba(255,255,255,0.18)",
+                }}
               />
             ))}
-          </div>
+          </Box>
         )}
 
-        <div className="selector-instruccion">
-          <span className="selector-label">{getLabelRonda(ronda, selecciones)}</span>
-          <span className="selector-contador">
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
+          <Typography sx={{ fontWeight: 700 }}>{getLabelRonda(ronda, selecciones)}</Typography>
+          <Typography variant="body2" color="text.secondary">
             {esMulti
               ? `${elegidos.length} / ${maxSabores} sabor${maxSabores !== 1 ? "es" : ""}`
               : "Elige 1"}
-          </span>
-        </div>
+          </Typography>
+        </Box>
 
-        <div className="selector-sabores-grid">
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
           {ronda.opciones.map(opcion => {
             const seleccionado  = elegidos.includes(opcion);
             const deshabilitado = esMulti && !seleccionado && elegidos.length >= maxSabores;
             return (
-              <button
+              <Chip
                 key={opcion}
-                className={`selector-sabor-btn
-                  ${seleccionado  ? "seleccionado"  : ""}
-                  ${deshabilitado ? "deshabilitado" : ""}`}
+                label={opcion}
                 onClick={() => !deshabilitado && toggleOpcion(opcion)}
-              >
-                {seleccionado && <span className="selector-check">✓</span>}
-                {opcion}
-              </button>
+                color={seleccionado ? "primary" : "default"}
+                variant={seleccionado ? "filled" : "outlined"}
+                sx={{ opacity: deshabilitado ? 0.4 : 1 }}
+              />
             );
           })}
-        </div>
+        </Box>
+      </DialogContent>
 
-        <div className="selector-acciones">
-          {rondaActual > 0 && (
-            <button className="selector-btn-atras" onClick={() => setRondaActual(p => p - 1)}>
-              Atrás
-            </button>
-          )}
-          <button
-            className="selector-btn-confirmar"
-            onClick={handleSiguiente}
-            disabled={elegidos.length === 0}
-          >
-            {esUltima ? "Agregar al carrito" : `Siguiente`}
-          </button>
-        </div>
-
-      </div>
-    </div>
+      <DialogActions>
+        {rondaActual > 0 && (
+          <Button onClick={() => setRondaActual(p => p - 1)}>Atrás</Button>
+        )}
+        <Button
+          variant="contained"
+          onClick={handleSiguiente}
+          disabled={elegidos.length === 0}
+          sx={{ background: "linear-gradient(135deg, #e682a8, #f6b43b)", color: "#171217" }}
+        >
+          {esUltima ? "Agregar al carrito" : "Siguiente"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-// ── Wrapper con portal ─────────────────────────────────────────
-const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => {
-  return ReactDOM.createPortal(
-    <ModalContent
-      producto={producto}
-      onConfirmar={onConfirmar}
-      onCancelar={onCancelar}
-    />,
-    document.body
-  );
-};
+// ── Wrapper ──────────────────────────────────────────────────────
+// MUI Dialog ya se renderiza en un portal propio (document.body), así que
+// ya no hace falta un ReactDOM.createPortal manual aquí.
+const SelectorSabores = ({ producto, onConfirmar, onCancelar }) => (
+  <ModalContent producto={producto} onConfirmar={onConfirmar} onCancelar={onCancelar} />
+);
 
 export default SelectorSabores;

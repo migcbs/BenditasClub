@@ -1,21 +1,22 @@
 // src/components/pedido/components/CategoriaTabs.jsx
-
 import React from "react";
+import { Box, Chip } from "@mui/material";
 
 // Recibe categorias como prop para permitir filtrado externo (ej. domicilio)
 const CategoriaTabs = React.memo(({ categorias = [], categoriaActiva, setCategoriaActiva }) => {
   return (
-    <div className="categoria-tabs">
-      {categorias.map(cat => (
-        <button
+    <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 1 }}>
+      {categorias.map((cat) => (
+        <Chip
           key={cat}
-          className={`categoria-btn ${categoriaActiva === cat ? "categoria-activa" : ""}`}
+          label={cat}
           onClick={() => setCategoriaActiva(cat)}
-        >
-          {cat}
-        </button>
+          color={categoriaActiva === cat ? "primary" : "default"}
+          variant={categoriaActiva === cat ? "filled" : "outlined"}
+          sx={{ fontWeight: 600, flexShrink: 0 }}
+        />
       ))}
-    </div>
+    </Box>
   );
 });
 
