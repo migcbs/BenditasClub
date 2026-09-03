@@ -16,6 +16,7 @@ import KitchenApp from './kitchen/KitchenApp';
 import AdminApp   from './admin/AdminApp';
 import CustomerAuth from './customer/CustomerAuth';
 import CustomerProfile from './customer/CustomerProfile';
+import ErrorBoundary from './shared/ErrorBoundary';
 
 import './Styles.css';
 
@@ -71,10 +72,10 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/login" element={<CustomerAuth mode="login" />} />
           <Route path="/registro" element={<CustomerAuth mode="register" />} />
-          <Route path="/perfil" element={<CustomerProfile />} />
-          <Route path="/pos" element={<PosApp />} />
-          <Route path="/cocina" element={<KitchenApp />} />
-          <Route path="/admin" element={<AdminApp />} />
+          <Route path="/perfil" element={<ErrorBoundary label="Tu perfil tuvo un problema."><CustomerProfile /></ErrorBoundary>} />
+          <Route path="/pos" element={<ErrorBoundary label="El POS tuvo un problema."><PosApp /></ErrorBoundary>} />
+          <Route path="/cocina" element={<ErrorBoundary label="La pantalla de cocina tuvo un problema."><KitchenApp /></ErrorBoundary>} />
+          <Route path="/admin" element={<ErrorBoundary label="El panel admin tuvo un problema."><AdminApp /></ErrorBoundary>} />
         </Routes>
       </SiteChrome>
     </Router>

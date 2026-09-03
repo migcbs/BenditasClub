@@ -47,8 +47,13 @@ const KitchenApp = () => {
   }
 
   const avanzar = async (orden, siguiente) => {
-    await updateOrderCocina(orden.id, siguiente);
-    cargar();
+    setError('');
+    try {
+      await updateOrderCocina(orden.id, siguiente);
+      cargar();
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   return (
@@ -64,6 +69,11 @@ const KitchenApp = () => {
         </AppBar>
 
         {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
+        {user.role !== 'cocina' && (
+          <Alert severity="info" sx={{ m: 2, mb: 0 }}>
+            Estás viendo la cocina como empleado — solo el rol de cocina puede avanzar los pedidos entre columnas.
+          </Alert>
+        )}
 
         <Box sx={{ flex: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, p: 2, overflow: 'auto' }}>
           {COLUMNAS.map((col) => (
@@ -84,7 +94,7 @@ const KitchenApp = () => {
                         </Typography>
                       ))}
                       {orden.notas && <Typography variant="caption" fontStyle="italic">{orden.notas}</Typography>}
-                      {col.siguiente && (
+                      {col.siguiente && user.role === 'cocina' && (
                         <Button
                           fullWidth
                           variant="contained"
