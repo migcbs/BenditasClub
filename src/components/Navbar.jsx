@@ -2,8 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaFacebookF, FaInstagram, FaWhatsapp } from 'react-icons/fa';
+import { CircleUserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CUSTOMER_TOKEN_KEY } from '../customer/CustomerAuth';
 import './Navbar.css';
+
+// Lee el token en cada render (no via estado) para reflejar login/logout
+// que ocurren en otra pantalla (ej. CustomerProfile) sin necesitar un
+// contexto global — suficiente para un ícono que solo cambia de link.
+const clienteHaIniciadoSesion = () => Boolean(window.localStorage.getItem(CUSTOMER_TOKEN_KEY));
 
 const SocialIcons = () => (
   <li className="social-icons-item">
@@ -21,7 +28,15 @@ const NavLinks = ({ onClose }) => (
     <li><Link to="/#menu"        onClick={onClose}>Menú</Link></li>
     <li><Link to="/#ubicaciones" onClick={onClose}>Ubicación</Link></li>
     <li><Link to="/shop"         onClick={onClose}>Shop</Link></li>
-    <li><Link to="/perfil"       onClick={onClose}>Cuenta</Link></li>
+    <li className="navbar-cuenta-item">
+      {clienteHaIniciadoSesion() ? (
+        <Link to="/perfil" onClick={onClose} className="navbar-cuenta-icon" aria-label="Mi cuenta">
+          <CircleUserRound />
+        </Link>
+      ) : (
+        <Link to="/login" onClick={onClose}>Cuenta</Link>
+      )}
+    </li>
     <SocialIcons />
   </>
 );
