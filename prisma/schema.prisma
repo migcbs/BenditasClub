@@ -129,6 +129,7 @@ model Order {
   estadoCocina        EstadoCocina   @default(nueva)
   origen              OrigenPedido   @default(pos)
   recibidoEn          DateTime?
+  motivoRechazo       String?
   metodoPago          MetodoPago?
   mesa                String?
   clienteNombre       String?

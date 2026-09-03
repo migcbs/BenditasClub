@@ -579,9 +579,12 @@ app.get('/api/orders', verifyToken, requireRole('empleado', 'cocina'), async (re
 
 app.put('/api/orders/:id/recepcion', verifyToken, requireRole('empleado'), async (req, res) => {
   try {
-    const { aceptar } = req.body;
+    const { aceptar, motivo } = req.body;
     if (typeof aceptar !== 'boolean') {
       return res.status(400).json({ error: 'aceptar debe ser true o false' });
+    }
+    if (!aceptar && !motivo?.trim()) {
+      return res.status(400).json({ error: 'El motivo de rechazo es obligatorio' });
     }
 
     const orden = await prisma.order.findUnique({ where: { id: req.params.id } });
@@ -596,7 +599,7 @@ app.put('/api/orders/:id/recepcion', verifyToken, requireRole('empleado'), async
       where: { id: req.params.id },
       data: {
         recibidoEn: new Date(),
-        ...(aceptar ? {} : { estado: 'cancelado' }),
+        ...(aceptar ? {} : { estado: 'cancelado', motivoRechazo: motivo.trim() }),
       },
       include: { items: true },
     });

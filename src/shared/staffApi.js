@@ -41,11 +41,11 @@ export const listPendingReception = () =>
     headers: authHeader(),
   }).then(handle);
 
-export const resolveReception = (id, aceptar) =>
+export const resolveReception = (id, aceptar, motivo) =>
   fetch(`${API_BASE}/api/orders/${id}/recepcion`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...authHeader() },
-    body: JSON.stringify({ aceptar }),
+    body: JSON.stringify({ aceptar, motivo }),
   }).then(handle);
 
 export const updateOrderEstado = (id, estado, metodoPago) =>

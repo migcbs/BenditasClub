@@ -243,16 +243,27 @@ describe('Reception queue for online orders', () => {
     expect(feed.body.some((o) => o.id === orden.id)).toBe(true);
   });
 
-  it('rejecting a pending order cancels it and marks it processed', async () => {
+  it('rejects a rejection with no motivo', async () => {
     const { orden } = await crearPedidoOnline();
     const res = await request(app)
       .put(`/api/orders/${orden.id}/recepcion`)
       .set('Authorization', `Bearer ${tokenXico}`)
       .send({ aceptar: false });
 
+    expect(res.status).toBe(400);
+  });
+
+  it('rejecting a pending order cancels it, marks it processed, and stores the motivo', async () => {
+    const { orden } = await crearPedidoOnline();
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/recepcion`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ aceptar: false, motivo: 'Ya no tenemos ese producto disponible' });
+
     expect(res.status).toBe(200);
     expect(res.body.estado).toBe('cancelado');
     expect(res.body.recibidoEn).not.toBeNull();
+    expect(res.body.motivoRechazo).toBe('Ya no tenemos ese producto disponible');
   });
 
   it('rejects processing the same order twice', async () => {
