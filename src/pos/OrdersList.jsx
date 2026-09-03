@@ -38,7 +38,7 @@ const OrdersList = ({ refreshKey }) => {
       <AnimatePresence initial={false}>
         {orders.map((orden) => (
           <motion.div key={orden.id} layout initial={{ opacity: 0.6, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <Card elevation={0} sx={{ background: 'rgba(255,255,255,0.05)', borderRadius: 3, p: 2, mb: 1.5 }}>
+            <Card elevation={0} sx={{ background: 'rgba(36,26,32,0.05)', borderRadius: 3, p: 2, mb: 1.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                 <Typography sx={{ fontWeight: 700 }}>{orden.tipo === 'mesa' ? `Mesa ${orden.mesa || '-'}` : orden.tipo}</Typography>
                 <Chip size="small" label={orden.estado} color={CHIP_COLOR[orden.estado] || 'default'} />

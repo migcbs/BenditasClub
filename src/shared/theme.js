@@ -1,19 +1,19 @@
 // src/shared/theme.js
 // Tema MUI compartido por TODAS las pantallas de staff (/pos, /cocina) y el
-// panel admin (src/admin/adminTheme.js) — misma paleta de marca (rosa/dorado
-// sobre fondo oscuro) para que la plataforma completa se sienta como un solo
-// producto, no como pantallas construidas por separado.
+// popup de pedido del cliente — misma paleta de marca (rosa/dorado sobre
+// fondo claro, igual que el sitio) para que la plataforma completa se
+// sienta como un solo producto, no como pantallas construidas por separado.
 import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
   palette: {
-    mode: 'dark',
-    primary: { main: '#e682a8', contrastText: '#171217' },
-    secondary: { main: '#f6b43b', contrastText: '#171217' },
-    background: { default: '#131113', paper: '#211c22' },
-    text: { primary: '#f7f2f5', secondary: '#cbbfc7' },
-    error: { main: '#ff6b78' },
-    success: { main: '#5fd88f' },
+    mode: 'light',
+    primary: { main: '#d1477f', contrastText: '#fff8f0' },
+    secondary: { main: '#c98a1f', contrastText: '#fff8f0' },
+    background: { default: '#fff8f0', paper: '#ffffff' },
+    text: { primary: '#241a20', secondary: '#6e5c66' },
+    error: { main: '#c62838' },
+    success: { main: '#2e7d4f' },
   },
   shape: { borderRadius: 18 },
   typography: {
@@ -30,8 +30,8 @@ export const theme = createTheme({
 
 // Panel de vidrio (glassmorfismo) reutilizable vía sx={glassSx}.
 export const glassSx = {
-  background: 'rgba(33, 28, 34, 0.72)',
+  background: 'rgba(255, 255, 255, 0.72)',
   backdropFilter: 'blur(18px) saturate(160%)',
   WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-  border: '1px solid rgba(255,255,255,0.08)',
+  border: '1px solid rgba(36, 26, 32, 0.08)',
 };

@@ -48,7 +48,7 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
         // Fondo con capas de degradado radial (efecto de profundidad/parallax
         // suave, sin depender de scroll ya que esta pantalla no hace scroll).
         background:
-          'radial-gradient(circle at 20% 20%, rgba(230,130,168,0.25), transparent 55%), radial-gradient(circle at 80% 80%, rgba(246,180,59,0.18), transparent 55%), #131113',
+          'radial-gradient(circle at 20% 20%, rgba(209,71,127,0.16), transparent 55%), radial-gradient(circle at 80% 80%, rgba(201,138,31,0.14), transparent 55%), #fff8f0',
       }}
     >
       <motion.div
@@ -86,7 +86,7 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
                   width: 14,
                   height: 14,
                   borderRadius: '50%',
-                  background: i < pin.length ? '#e682a8' : 'rgba(255,255,255,0.18)',
+                  background: i < pin.length ? '#d1477f' : 'rgba(36,26,32,0.14)',
                 }}
               />
             ))}
@@ -105,8 +105,8 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
                     fontSize: 18,
                     fontWeight: 700,
                     color: 'text.primary',
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(36,26,32,0.05)',
+                    border: '1px solid rgba(36,26,32,0.1)',
                     borderRadius: 3,
                     cursor: 'pointer',
                   }}
@@ -131,8 +131,8 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
                   fontSize: 18,
                   fontWeight: 700,
                   color: 'text.primary',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(36,26,32,0.05)',
+                  border: '1px solid rgba(36,26,32,0.1)',
                   borderRadius: 3,
                   cursor: 'pointer',
                 }}
@@ -151,7 +151,7 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
                   height: '100%',
                   fontWeight: 800,
                   color: 'primary.contrastText',
-                  background: 'linear-gradient(135deg, #e682a8, #f6b43b)',
+                  background: 'linear-gradient(135deg, #d1477f, #c98a1f)',
                   border: 'none',
                   borderRadius: 3,
                   cursor: 'pointer',

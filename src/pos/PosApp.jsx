@@ -28,18 +28,18 @@ const PosApp = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
-        <AppBar position="static" elevation={0} sx={{ ...glassSx, boxShadow: 'none' }}>
+        <AppBar position="static" color="transparent" elevation={0} sx={{ ...glassSx, boxShadow: 'none' }}>
           <Toolbar sx={{ justifyContent: 'space-between' }}>
-            <Typography sx={{ fontWeight: 700 }}>{user.nombre} · {user.sucursal}</Typography>
-            <IconButton onClick={logout} color="inherit" aria-label="Cerrar sesión">
+            <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{user.nombre} · {user.sucursal}</Typography>
+            <IconButton onClick={logout} sx={{ color: 'text.primary' }} aria-label="Cerrar sesión">
               <LogOut size={20} />
             </IconButton>
           </Toolbar>
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
-            textColor="inherit"
-            sx={{ '& .MuiTabs-indicator': { background: 'linear-gradient(90deg, #e682a8, #f6b43b)', height: 3 } }}
+            textColor="primary"
+            sx={{ '& .MuiTabs-indicator': { background: 'linear-gradient(90deg, #d1477f, #c98a1f)', height: 3 } }}
           >
             <Tab value="tomar" label="Tomar pedido" />
             <Tab value="lista" label="Pedidos del turno" />
@@ -68,7 +68,7 @@ const PosApp = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                     >
-                      <Card elevation={0} sx={{ background: 'rgba(255,255,255,0.04)', borderRadius: 3, p: 1.5, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Card elevation={0} sx={{ background: 'rgba(36,26,32,0.04)', borderRadius: 3, p: 1.5, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
                           <Typography sx={{ fontWeight: 600 }}>{item.cantidad}× {item.nombre}</Typography>
                           {item.sabores.length > 0 && (
