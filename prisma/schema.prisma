@@ -87,6 +87,8 @@ model User {
   activo    Boolean  @default(true)
   staffOrders    Order[] @relation("StaffOrders")
   customerOrders Order[] @relation("CustomerOrders")
+  loyaltyCard    LoyaltyCard?
+  loyaltyRedemptions LoyaltyRedemption[] @relation("CustomerRedemptions")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -109,6 +111,7 @@ model Product {
   activo      Boolean     @default(true)
   orderItems  OrderItem[]
   recipe      Recipe?
+  loyaltyRewards LoyaltyReward[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
@@ -291,4 +294,51 @@ model Expense {
   occurredAt    DateTime       @default(now())
   createdById   String
   createdAt     DateTime       @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────
+// Tarjeta de fidelidad — 1 sello por pedido pagado y ligado a una
+// cuenta de cliente; al llegar a stampsRequired se genera un canje con
+// la recompensa activa en ese momento y la tarjeta reinicia en 0.
+// ─────────────────────────────────────────────────────────────
+
+enum LoyaltyRewardType {
+  discount_percent
+  discount_fixed
+  free_item
+  free_shipping
+}
+
+model LoyaltyReward {
+  id             String              @id @default(uuid())
+  label          String
+  type           LoyaltyRewardType
+  value          Int?
+  productId      String?
+  product        Product?            @relation(fields: [productId], references: [id])
+  stampsRequired Int                 @default(6)
+  activo         Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  redemptions    LoyaltyRedemption[]
+}
+
+model LoyaltyCard {
+  id         String   @id @default(uuid())
+  customerId String   @unique
+  customer   User     @relation(fields: [customerId], references: [id])
+  stamps     Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+model LoyaltyRedemption {
+  id         String    @id @default(uuid())
+  customerId String
+  customer   User      @relation("CustomerRedemptions", fields: [customerId], references: [id])
+  rewardId   String
+  reward     LoyaltyReward @relation(fields: [rewardId], references: [id])
+  code       String    @unique
+  redeemed   Boolean   @default(false)
+  redeemedAt DateTime?
+  createdAt  DateTime  @default(now())
 }
