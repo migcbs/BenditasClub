@@ -21,14 +21,24 @@ const OrdersList = ({ refreshKey }) => {
   }, [cargar, refreshKey]);
 
   const marcarEntregado = async (orden) => {
-    await updateOrderCocina(orden.id, 'entregada');
-    cargar();
+    setError('');
+    try {
+      await updateOrderCocina(orden.id, 'entregada');
+      cargar();
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   const marcar = async (orden, estado) => {
-    const metodoPago = estado === 'pagado' ? (orden.metodoPago || 'efectivo') : undefined;
-    await updateOrderEstado(orden.id, estado, metodoPago);
-    cargar();
+    setError('');
+    try {
+      const metodoPago = estado === 'pagado' ? (orden.metodoPago || 'efectivo') : undefined;
+      await updateOrderEstado(orden.id, estado, metodoPago);
+      cargar();
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   return (
