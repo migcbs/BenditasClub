@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 const TEST_PREFIX = 'jest-infra';
 
 afterAll(async () => {
+  await prisma.product.deleteMany({ where: { nombre: { contains: TEST_PREFIX } } });
   await prisma.user.deleteMany({ where: { OR: [{ email: { contains: TEST_PREFIX } }, { nombre: { contains: TEST_PREFIX } }] } });
   await prisma.$disconnect();
 });
