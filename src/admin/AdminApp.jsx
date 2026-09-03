@@ -59,6 +59,7 @@ export default function AdminApp({ api = defaultApi, storage = window.localStora
   const [branch, setBranch] = useState('all');
   const [restoring, setRestoring] = useState(Boolean(token));
   const [viewApi, setViewApi] = useState(api);
+  const [branchError, setBranchError] = useState('');
 
   const loadDashboard = async (activeToken, activeBranch = branch) => {
     const next = await api.dashboard({ branch: activeBranch }, activeToken);
@@ -75,8 +76,13 @@ export default function AdminApp({ api = defaultApi, storage = window.localStora
       await loadDashboard(token, branch);
     }).catch(() => { storage.removeItem(TOKEN_KEY); setToken(null); }).finally(() => live && setRestoring(false));
     return () => { live = false; };
+    // `user` se actualiza DENTRO de este efecto (setUser) — si estuviera en las
+    // dependencias, el cambio de `user` re-dispara el efecto, lo que ejecuta el
+    // cleanup (live = false) de la ejecución anterior ANTES de que su propio
+    // .finally() corra, dejando `restoring` atascado en true para siempre en
+    // cada recarga con sesión guardada. Solo `token` debe re-disparar esto.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, user]);
+  }, [token]);
 
   const login = async (email, password) => {
     const result = await api.login(email, password);
@@ -90,7 +96,12 @@ export default function AdminApp({ api = defaultApi, storage = window.localStora
   const changeBranch = async (nextBranch) => {
     setBranch(nextBranch);
     if (token === 'demo-local') return;
-    await loadDashboard(token, nextBranch);
+    setBranchError('');
+    try {
+      await loadDashboard(token, nextBranch);
+    } catch (requestError) {
+      setBranchError(requestError.message);
+    }
   };
 
   const openDemo = () => {
@@ -104,7 +115,7 @@ export default function AdminApp({ api = defaultApi, storage = window.localStora
     <ThemeProvider theme={adminTheme}>
       {restoring ? <div className="admin-loading"><CircularProgress /><span>Recuperando tu turno…</span></div>
         : !user ? <AdminLogin onLogin={login} onDemo={openDemo} />
-          : dashboard ? <AdminDashboard user={user} data={dashboard} branch={branch} onBranchChange={changeBranch} api={viewApi} token={token} />
+          : dashboard ? <AdminDashboard user={user} data={dashboard} branch={branch} onBranchChange={changeBranch} api={viewApi} token={token} error={branchError} />
             : <div className="admin-loading"><CircularProgress /><span>Preparando el panel…</span></div>}
     </ThemeProvider>
   );

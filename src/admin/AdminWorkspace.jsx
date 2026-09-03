@@ -122,7 +122,7 @@ function Inventory({ api, token, branch }) {
   });
   return <section className="admin-module">
     {error ? <Alert severity="error" onClose={() => setError('')}>{error}</Alert> : null}
-    <header><div><Typography component="h1">Inventario y recetas</Typography><Typography>Existencias reales descontadas desde cada pedido.</Typography></div><div className="admin-header-actions"><Chip label={`${low.length} alertas`} color={low.length ? 'warning' : 'success'} /><Button variant="outlined" startIcon={<ClipboardList size={18}/>} onClick={openMovements}>Movimientos</Button><Button variant="contained" startIcon={<Plus size={18}/>} onClick={() => openProduct()}>Agregar producto</Button></div></header>
+    <header><div><Typography component="h1">Inventario y recetas</Typography><Typography>Existencias reales descontadas desde cada pedido.</Typography></div><div className="admin-header-actions"><Chip label={`${low.length} alerta${low.length !== 1 ? 's' : ''}`} color={low.length ? 'warning' : 'success'} /><Button variant="outlined" startIcon={<ClipboardList size={18}/>} onClick={openMovements}>Movimientos</Button><Button variant="contained" startIcon={<Plus size={18}/>} onClick={() => openProduct()}>Agregar producto</Button></div></header>
     <div className="admin-module-stats">
       <article><PackageCheck /><span><b>{data.ingredients.length}</b><small>Ingredientes activos</small></span></article>
       <article><ShoppingBasket /><span><b>{data.recipes.length}</b><small>Productos con receta</small></span></article>
@@ -170,7 +170,15 @@ function Operation({ dashboard }) {
 
 function Finance({ api, token, branch, dashboard }) {
   const [data, setData] = useState(null);
-  useEffect(() => { Promise.all([api.cashShifts(branch, token), api.expenses(branch, token)]).then(([shifts, expenses]) => setData({ shifts, expenses })); }, [api, token, branch]);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let live = true;
+    Promise.all([api.cashShifts(branch, token), api.expenses(branch, token)])
+      .then(([shifts, expenses]) => live && setData({ shifts, expenses }))
+      .catch((requestError) => live && setError(requestError.message));
+    return () => { live = false; };
+  }, [api, token, branch]);
+  if (error) return <Alert severity="error">{error}</Alert>;
   if (!data) return <Loading />;
   const expenses = data.expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
   return <section className="admin-module"><header><div><Typography component="h1">Finanzas y caja</Typography><Typography>Venta, efectivo esperado, gastos y diferencias de cierre.</Typography></div><Chip label={`${data.shifts.filter((item) => item.status === 'open').length} cajas abiertas`} color="secondary" /></header><div className="admin-module-stats"><article><CircleDollarSign/><span><b>{money.format(dashboard.summary.sales)}</b><small>Venta neta</small></span></article><article><Banknote/><span><b>{money.format(dashboard.summary.cashSales)}</b><small>Venta en efectivo</small></span></article><article><ReceiptText/><span><b>{money.format(expenses)}</b><small>Gastos registrados</small></span></article></div><div className="admin-two-columns"><div className="admin-data-panel"><div className="admin-data-heading"><h2>Turnos de caja</h2><span>Últimos 30</span></div>{data.shifts.length ? data.shifts.map((shift) => <div className="admin-list-row" key={shift.id}><span><b>{shift.sucursal} · {shift.status === 'open' ? 'Abierta' : 'Cerrada'}</b><small>Fondo {money.format(Number(shift.openingAmount))}{shift.difference != null ? ` · diferencia ${money.format(Number(shift.difference))}` : ''}</small></span><Chip size="small" color={shift.status === 'open' ? 'success' : 'default'} label={shift.status} /></div>) : <Empty>No hay turnos de caja registrados.</Empty>}</div><div className="admin-data-panel"><div className="admin-data-heading"><h2>Gastos</h2><span>Comprobación</span></div>{data.expenses.length ? data.expenses.map((expense) => <div className="admin-list-row" key={expense.id}><span><b>{expense.concept}</b><small>{expense.category} · {expense.paymentMethod}</small></span><b>{money.format(Number(expense.amount))}</b></div>) : <Empty>Sin gastos en el periodo.</Empty>}</div></div></section>;
@@ -178,7 +186,13 @@ function Finance({ api, token, branch, dashboard }) {
 
 function Team({ api, token }) {
   const [users, setUsers] = useState(null);
-  useEffect(() => { api.users(token).then(setUsers); }, [api, token]);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let live = true;
+    api.users(token).then((result) => live && setUsers(result)).catch((requestError) => live && setError(requestError.message));
+    return () => { live = false; };
+  }, [api, token]);
+  if (error) return <Alert severity="error">{error}</Alert>;
   if (!users) return <Loading />;
   return <section className="admin-module"><header><div><Typography component="h1">Equipo y permisos</Typography><Typography>Accesos operativos separados para piso y cocina.</Typography></div><Chip label={`${users.filter((user) => user.activo).length} activos`} /></header><div className="admin-data-panel"><div className="admin-data-heading"><h2>Personal</h2><span>PIN individual</span></div>{users.map((user) => <div className="admin-list-row" key={user.id}><span><b>{user.nombre}</b><small>{user.sucursal} · {user.role}</small></span><Chip size="small" color={user.activo ? 'success' : 'default'} label={user.activo ? 'Activo' : 'Inactivo'} /></div>)}</div></section>;
 }
@@ -212,9 +226,14 @@ function Loyalty({ api, token }) {
   useEffect(() => { load().catch((e) => setError(e.message)); }, [api, token]);
 
   const openForm = async () => {
-    if (!products.length) setProducts(await api.products());
-    setForm({ label: '', type: 'discount_percent', value: '', productId: '', stampsRequired: '6' });
-    setOpen(true);
+    setError('');
+    try {
+      if (!products.length) setProducts(await api.products());
+      setForm({ label: '', type: 'discount_percent', value: '', productId: '', stampsRequired: '6' });
+      setOpen(true);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
   const saveReward = async () => {
