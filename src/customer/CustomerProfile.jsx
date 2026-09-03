@@ -13,6 +13,15 @@ const kitchenLabel = {
   entregada: 'Entregado',
 };
 
+// El estado de cocina por sí solo no basta: un pedido en línea puede seguir
+// esperando revisión en Recepción (todavía no "recibido" de verdad), y uno
+// cancelado no debe seguir mostrando su estadoCocina viejo.
+const orderStatusLabel = (order) => {
+  if (order.estado === 'cancelado') return 'Cancelado';
+  if (order.origen === 'online' && !order.recibidoEn) return 'En revisión';
+  return kitchenLabel[order.estadoCocina] || order.estadoCocina;
+};
+
 export default function CustomerProfile({ api = defaultApi, storage = window.localStorage }) {
   const navigate = useNavigate();
   const [token, setToken] = useState(() => storage.getItem(CUSTOMER_TOKEN_KEY));
@@ -161,8 +170,11 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
         {orders.length ? orders.map((order) => (
           <article className="customer-order" key={order.id}>
             <span>
-              <b>#{order.id.slice(0, 6).toUpperCase()} · {kitchenLabel[order.estadoCocina] || order.estadoCocina}</b>
+              <b>#{order.id.slice(0, 6).toUpperCase()} · {orderStatusLabel(order)}</b>
               <small>{new Date(order.createdAt).toLocaleString('es-MX')} · {order.sucursal} · {order.tipo}</small>
+              {order.estado === 'cancelado' && order.motivoRechazo && (
+                <small className="customer-order-reason">Motivo: {order.motivoRechazo}</small>
+              )}
             </span>
             <strong>{money.format(order.total)}</strong>
           </article>
