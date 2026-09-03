@@ -3,7 +3,7 @@
   color: #fff;
   padding: 80px 20px 40px 20px;
   position: relative;
-  border-top: 5px solid #e78fbb;
+  border-top: 5px solid #E765B7;
 }
 
 .footer-container {
@@ -23,7 +23,7 @@
 .footer-logo-text {
   font-family: 'Titan One', cursive;
   font-size: 3rem;
-  color: #e78fbb;
+  color: #E765B7;
   margin: 0;
   letter-spacing: -1px;
 }
@@ -58,7 +58,7 @@
 
 .social-link:hover {
   transform: translateY(-5px) scale(1.1);
-  background: #e78fbb;
+  background: #E765B7;
   color: #fff; /* Aseguramos que el icono se vea blanco en hover */
   box-shadow: 0 5px 20px rgba(231, 143, 187, 0.5);
 }
@@ -87,7 +87,7 @@
 }
 
 .footer-email:hover {
-  color: #e78fbb;
+  color: #E765B7;
 }
 
 .footer-copyright {

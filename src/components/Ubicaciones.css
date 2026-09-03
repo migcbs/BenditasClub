@@ -13,7 +13,7 @@
 .ubicaciones-title {
   font-family: 'Titan One', cursive;
   font-size: 3.2rem;
-  color: #e78fbb;
+  color: #E765B7;
   text-transform: uppercase;
   margin: 0;
   letter-spacing: -1px;
@@ -21,7 +21,7 @@
 }
 
 .ubicaciones-tagline {
-  color: #e78fbb;
+  color: #E765B7;
   font-family: 'Titan One', cursive;
   font-size: 1.2rem;
   margin-top: 10px;
@@ -43,7 +43,7 @@
   border: 3px solid #000;
   border-radius: 30px;
   overflow: hidden;
-  box-shadow: 12px 12px 0px #e78fbb; /* Sombra sólida característica */
+  box-shadow: 12px 12px 0px #E765B7; /* Sombra sólida característica */
   transition: transform 0.1s ease-out; /* Para el parallax suave */
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
 .horario {
   display: inline-block;
   margin-top: 15px;
-  background: #e78fbb;
+  background: #E765B7;
   color: #fff;
   padding: 5px 15px;
   border-radius: 50px;
@@ -107,7 +107,7 @@
   .mapa-card {
     width: 100%;
     max-width: 500px;
-    box-shadow: 8px 8px 0px #e78fbb;
+    box-shadow: 8px 8px 0px #E765B7;
   }
 
   .ubicaciones-title {

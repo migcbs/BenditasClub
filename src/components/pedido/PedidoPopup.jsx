@@ -52,7 +52,7 @@ const PedidoPopup = ({ onClose }) => {
               // Fondo con capas de degradado radial: sensación de profundidad
               // detrás del vidrio, sutil parallax visual sin depender de scroll.
               backgroundImage:
-                "radial-gradient(circle at 15% 0%, rgba(230,130,168,0.18), transparent 45%), radial-gradient(circle at 100% 100%, rgba(246,180,59,0.12), transparent 45%)",
+                "radial-gradient(circle at 15% 0%, rgba(231,101,183,0.18), transparent 45%), radial-gradient(circle at 100% 100%, rgba(231,101,183,0.1), transparent 45%)",
             }}
           >
             <IconButton

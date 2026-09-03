@@ -99,7 +99,7 @@ const KitchenApp = () => {
                           fullWidth
                           variant="contained"
                           size="small"
-                          sx={{ mt: 1.5, background: 'linear-gradient(135deg, #d1477f, #c98a1f)', color: '#171217' }}
+                          sx={{ mt: 1.5, background: '#E765B7', color: '#241a20' }}
                           onClick={() => avanzar(orden, col.siguiente)}
                         >
                           {col.accion}

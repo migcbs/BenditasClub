@@ -81,7 +81,7 @@ const ProductoCard = React.memo(({ producto, agregarProducto }) => {
             <Typography variant="body2" color="text.secondary">{producto.descripcion}</Typography>
           )}
 
-          <Typography sx={{ color: "#c98a1f", fontWeight: 700 }}>${producto.precio}</Typography>
+          <Typography sx={{ color: "#C43D8F", fontWeight: 700 }}>${producto.precio}</Typography>
 
           <Button
             variant="outlined"

@@ -86,7 +86,7 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
                   width: 14,
                   height: 14,
                   borderRadius: '50%',
-                  background: i < pin.length ? '#d1477f' : 'rgba(36,26,32,0.14)',
+                  background: i < pin.length ? '#E765B7' : 'rgba(36,26,32,0.14)',
                 }}
               />
             ))}
@@ -151,7 +151,7 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
                   height: '100%',
                   fontWeight: 800,
                   color: 'primary.contrastText',
-                  background: 'linear-gradient(135deg, #d1477f, #c98a1f)',
+                  background: '#E765B7',
                   border: 'none',
                   borderRadius: 3,
                   cursor: 'pointer',

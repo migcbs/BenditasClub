@@ -198,7 +198,7 @@ const ModalContent = ({ producto, onConfirmar, onCancelar }) => {
                   width: 8,
                   height: 8,
                   borderRadius: "50%",
-                  background: i <= rondaActual ? "#d1477f" : "rgba(36,26,32,0.18)",
+                  background: i <= rondaActual ? "#E765B7" : "rgba(36,26,32,0.18)",
                 }}
               />
             ))}
@@ -240,7 +240,7 @@ const ModalContent = ({ producto, onConfirmar, onCancelar }) => {
           variant="contained"
           onClick={handleSiguiente}
           disabled={elegidos.length === 0}
-          sx={{ background: "linear-gradient(135deg, #d1477f, #c98a1f)", color: "#171217" }}
+          sx={{ background: "#E765B7", color: "#241a20" }}
         >
           {esUltima ? "Agregar al carrito" : "Siguiente"}
         </Button>
