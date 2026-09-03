@@ -170,6 +170,64 @@ router.post('/expenses', async (req, res) => {
   res.status(201).json(await prisma.expense.create({ data: { sucursal, category, concept, amount, paymentMethod, supplierId: supplierId || null, receiptRef: receiptRef || null, occurredAt: occurredAt ? new Date(occurredAt) : new Date(), createdById: req.user.id } }));
 });
 
+const LOYALTY_REWARD_TYPES = ['discount_percent', 'discount_fixed', 'free_item', 'free_shipping'];
+
+router.get('/loyalty/rewards', async (_req, res) => {
+  res.json(await prisma.loyaltyReward.findMany({ include: { product: true }, orderBy: { createdAt: 'desc' } }));
+});
+
+router.post('/loyalty/rewards', async (req, res) => {
+  const { label, type, value, productId, stampsRequired = 6 } = req.body;
+  if (!label || !LOYALTY_REWARD_TYPES.includes(type)) {
+    return res.status(400).json({ error: 'label y type (uno de: ' + LOYALTY_REWARD_TYPES.join(', ') + ') son obligatorios' });
+  }
+  if (type === 'free_item' && !productId) return res.status(400).json({ error: 'free_item requiere productId' });
+  if (Number(stampsRequired) <= 0) return res.status(400).json({ error: 'stampsRequired debe ser mayor a cero' });
+
+  const reward = await prisma.$transaction(async (tx) => {
+    // Solo una recompensa activa a la vez — es la que se otorga cuando una
+    // tarjeta llega a su umbral de sellos.
+    await tx.loyaltyReward.updateMany({ where: { activo: true }, data: { activo: false } });
+    return tx.loyaltyReward.create({
+      data: { label, type, value: value ?? null, productId: type === 'free_item' ? productId : null, stampsRequired: Number(stampsRequired), activo: true },
+      include: { product: true },
+    });
+  });
+  res.status(201).json(reward);
+});
+
+router.put('/loyalty/rewards/:id', async (req, res) => {
+  const { label, type, value, productId, stampsRequired, activo } = req.body;
+  if (type && !LOYALTY_REWARD_TYPES.includes(type)) return res.status(400).json({ error: 'type inválido' });
+
+  const reward = await prisma.$transaction(async (tx) => {
+    if (activo === true) await tx.loyaltyReward.updateMany({ where: { activo: true, id: { not: req.params.id } }, data: { activo: false } });
+    return tx.loyaltyReward.update({
+      where: { id: req.params.id },
+      data: {
+        ...(label !== undefined ? { label } : {}),
+        ...(type !== undefined ? { type } : {}),
+        ...(value !== undefined ? { value } : {}),
+        ...(productId !== undefined ? { productId: productId || null } : {}),
+        ...(stampsRequired !== undefined ? { stampsRequired: Number(stampsRequired) } : {}),
+        ...(activo !== undefined ? { activo } : {}),
+      },
+      include: { product: true },
+    });
+  });
+  res.json(reward);
+});
+
+router.get('/loyalty/redemptions', async (req, res) => {
+  const where = req.query.redeemed !== undefined ? { redeemed: req.query.redeemed === 'true' } : {};
+  res.json(await prisma.loyaltyRedemption.findMany({
+    where,
+    include: { reward: true, customer: { select: { nombre: true, email: true } } },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  }));
+});
+
 router.use((error, _req, res, _next) => {
   console.error('Error en módulo administrativo:', error);
   res.status(500).json({ error: 'No pudimos completar la operación administrativa' });
