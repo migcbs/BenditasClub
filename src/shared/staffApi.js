@@ -36,6 +36,18 @@ export const listOrders = (estado) =>
     headers: authHeader(),
   }).then(handle);
 
+export const listPendingReception = () =>
+  fetch(`${API_BASE}/api/orders?pendientes=true`, {
+    headers: authHeader(),
+  }).then(handle);
+
+export const resolveReception = (id, aceptar) =>
+  fetch(`${API_BASE}/api/orders/${id}/recepcion`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ aceptar }),
+  }).then(handle);
+
 export const updateOrderEstado = (id, estado, metodoPago) =>
   fetch(`${API_BASE}/api/orders/${id}/estado`, {
     method: 'PUT',

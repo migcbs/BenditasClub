@@ -344,6 +344,10 @@ app.post('/api/customer/orders', verifyToken, requireRole('cliente'), async (req
         direccion: direccion || null,
         notas: notas || null,
         total,
+        origen: 'online',
+        // recibidoEn queda null a propósito: un pedido en línea entra primero
+        // a la cola de Recepción (POS) y solo aparece en cocina/POS una vez
+        // que el staff lo acepta vía PUT /api/orders/:id/recepcion.
         items: { create: orderItemsData },
       },
       include: { items: true },
@@ -537,6 +541,8 @@ app.post('/api/orders', verifyToken, requireRole('empleado'), async (req, res) =
         notas: notas || null,
         total,
         empleadoId: req.user.id,
+        origen: 'pos',
+        recibidoEn: new Date(), // un pedido tomado en caja/mesa ya pasó por una persona, no necesita Recepción
         items: { create: orderItemsData },
       },
       include: { items: true },
@@ -551,11 +557,15 @@ app.post('/api/orders', verifyToken, requireRole('empleado'), async (req, res) =
 
 app.get('/api/orders', verifyToken, requireRole('empleado', 'cocina'), async (req, res) => {
   try {
-    const { estado } = req.query;
+    const { estado, pendientes } = req.query;
     const orders = await prisma.order.findMany({
       where: {
         sucursal: req.user.sucursal,
         ...(estado ? { estado } : {}),
+        // Por default solo se listan pedidos ya recibidos (tomados en caja o
+        // aceptados en Recepción). ?pendientes=true expone la cola de
+        // Recepción: pedidos en línea que todavía no ha filtrado nadie.
+        ...(pendientes === 'true' ? { recibidoEn: null } : { recibidoEn: { not: null } }),
       },
       include: { items: true },
       orderBy: { createdAt: 'desc' },
@@ -563,6 +573,36 @@ app.get('/api/orders', verifyToken, requireRole('empleado', 'cocina'), async (re
     res.json(orders);
   } catch (e) {
     console.error('❌ Error listando pedidos:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.put('/api/orders/:id/recepcion', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const { aceptar } = req.body;
+    if (typeof aceptar !== 'boolean') {
+      return res.status(400).json({ error: 'aceptar debe ser true o false' });
+    }
+
+    const orden = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!orden || orden.sucursal !== req.user.sucursal) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+    if (orden.recibidoEn) {
+      return res.status(400).json({ error: 'Este pedido ya fue procesado en recepción' });
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: req.params.id },
+      data: {
+        recibidoEn: new Date(),
+        ...(aceptar ? {} : { estado: 'cancelado' }),
+      },
+      include: { items: true },
+    });
+    res.json(updated);
+  } catch (e) {
+    console.error('❌ Error procesando recepción:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });

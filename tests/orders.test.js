@@ -126,6 +126,17 @@ describe('POST /api/orders', () => {
     expect(res.status).toBe(201);
     expect(res.body.sucursal).toBe('coatepec');
   });
+
+  it('marks a POS order as already received (no reception queue needed)', async () => {
+    const res = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ tipo: 'mesa', mesa: '3', items: [{ productId: productoSnack.id, cantidad: 1 }] });
+
+    expect(res.status).toBe(201);
+    expect(res.body.origen).toBe('pos');
+    expect(res.body.recibidoEn).not.toBeNull();
+  });
 });
 
 describe('GET /api/orders', () => {
@@ -165,6 +176,101 @@ describe('GET /api/orders', () => {
     expect(res.status).toBe(200);
     expect(res.body.every((o) => o.sucursal === 'xico')).toBe(true);
     expect(res.body[0]).toHaveProperty('estadoCocina');
+  });
+});
+
+describe('Reception queue for online orders', () => {
+  const crearPedidoOnline = async (overrides = {}) => {
+    const cliente = await prisma.user.create({
+      data: {
+        nombre: `${TEST_PREFIX}-cliente-online`,
+        email: `${TEST_PREFIX}-${Date.now()}-${Math.random()}@benditas.local`,
+        password: await bcrypt.hash('ClientePass123', 10),
+        role: 'cliente',
+      },
+    });
+    const clienteToken = jwt.sign({ id: cliente.id, email: cliente.email, role: 'cliente' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const res = await request(app)
+      .post('/api/customer/orders')
+      .set('Authorization', `Bearer ${clienteToken}`)
+      .send({
+        sucursal: 'xico',
+        tipo: 'para_llevar',
+        items: [{ productId: productoSnack.id, cantidad: 1 }],
+        ...overrides,
+      });
+    return { cliente, orden: res.body };
+  };
+
+  afterAll(async () => {
+    await prisma.order.deleteMany({ where: { cliente: { nombre: { contains: `${TEST_PREFIX}-cliente-online` } } } });
+    await prisma.user.deleteMany({ where: { nombre: { contains: `${TEST_PREFIX}-cliente-online` } } });
+  });
+
+  it('creates online orders as unreceived, hidden from the normal staff/kitchen feed', async () => {
+    const { orden } = await crearPedidoOnline();
+    expect(orden.origen).toBe('online');
+    expect(orden.recibidoEn).toBeNull();
+
+    const feed = await request(app).get('/api/orders').set('Authorization', `Bearer ${tokenXico}`);
+    expect(feed.body.some((o) => o.id === orden.id)).toBe(false);
+
+    const cocinaFeed = await request(app).get('/api/orders').set('Authorization', `Bearer ${tokenCocinaXico}`);
+    expect(cocinaFeed.body.some((o) => o.id === orden.id)).toBe(false);
+  });
+
+  it('lists pending online orders only with ?pendientes=true, scoped by sucursal', async () => {
+    const { orden } = await crearPedidoOnline();
+    const pendientes = await request(app).get('/api/orders?pendientes=true').set('Authorization', `Bearer ${tokenXico}`);
+    expect(pendientes.body.some((o) => o.id === orden.id)).toBe(true);
+
+    const otraSucursal = await request(app).get('/api/orders?pendientes=true').set('Authorization', `Bearer ${tokenCoatepec}`);
+    expect(otraSucursal.body.some((o) => o.id === orden.id)).toBe(false);
+  });
+
+  it('accepting a pending order marks it received and makes it visible to staff/kitchen', async () => {
+    const { orden } = await crearPedidoOnline();
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/recepcion`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ aceptar: true });
+
+    expect(res.status).toBe(200);
+    expect(res.body.recibidoEn).not.toBeNull();
+    expect(res.body.estado).toBe('pendiente');
+
+    const feed = await request(app).get('/api/orders').set('Authorization', `Bearer ${tokenXico}`);
+    expect(feed.body.some((o) => o.id === orden.id)).toBe(true);
+  });
+
+  it('rejecting a pending order cancels it and marks it processed', async () => {
+    const { orden } = await crearPedidoOnline();
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/recepcion`)
+      .set('Authorization', `Bearer ${tokenXico}`)
+      .send({ aceptar: false });
+
+    expect(res.status).toBe(200);
+    expect(res.body.estado).toBe('cancelado');
+    expect(res.body.recibidoEn).not.toBeNull();
+  });
+
+  it('rejects processing the same order twice', async () => {
+    const { orden } = await crearPedidoOnline();
+    await request(app).put(`/api/orders/${orden.id}/recepcion`).set('Authorization', `Bearer ${tokenXico}`).send({ aceptar: true });
+    const res = await request(app).put(`/api/orders/${orden.id}/recepcion`).set('Authorization', `Bearer ${tokenXico}`).send({ aceptar: true });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('404s when accepting an order from another sucursal', async () => {
+    const { orden } = await crearPedidoOnline();
+    const res = await request(app)
+      .put(`/api/orders/${orden.id}/recepcion`)
+      .set('Authorization', `Bearer ${tokenCoatepec}`)
+      .send({ aceptar: true });
+
+    expect(res.status).toBe(404);
   });
 });
 
