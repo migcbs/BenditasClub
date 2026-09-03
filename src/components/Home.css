@@ -96,7 +96,7 @@
 .home-order-btn {
   pointer-events: auto;
   background-color: #E765B7;
-  color: #241a20;
+  color: #fff;
   border: 2px solid #241a20;
   padding: 18px 45px;
   border-radius: 999px;
@@ -109,7 +109,7 @@
 
 .home-order-btn:hover {
   background-color: #C43D8F;
-  color: #fff8f0;
+  color: #fff;
   transform: translateY(-2px);
   box-shadow: 0 14px 36px rgba(36,26,32,0.3);
 }
