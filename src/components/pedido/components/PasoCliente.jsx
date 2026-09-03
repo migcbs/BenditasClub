@@ -1,7 +1,7 @@
 // src/components/pedido/components/PasoCliente.jsx
-
 import React from "react";
-import "../styles/cliente.css";
+import { Box, TextField, Typography, Chip, Button } from "@mui/material";
+import { motion } from "framer-motion";
 
 // Valores locales — sin depender del import de constants
 const DOMICILIO = "domicilio";
@@ -30,119 +30,113 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, siguientePaso }
     (cliente.tipoPedido === RECOGER || cliente.direccion?.trim());
 
   return (
-    <form className="paso-cliente" onSubmit={handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+      <Typography variant="h1" sx={{ fontSize: 22 }}>Tu pedido</Typography>
 
-      <h2 className="titulo-seccion">Tu pedido</h2>
+      <TextField
+        name="nombre"
+        label="Tu nombre"
+        value={cliente.nombre || ""}
+        onChange={handleChange}
+        error={Boolean(errores.nombre)}
+        helperText={errores.nombre}
+        autoComplete="name"
+        fullWidth
+      />
 
-      {/* ── Nombre ── */}
-      <div className="form-group">
-        <input
-          type="text"
-          name="nombre"
-          placeholder="Tu nombre"
-          value={cliente.nombre || ""}
-          onChange={handleChange}
-          className={errores.nombre ? "input-error shake" : ""}
-          autoComplete="name"
-        />
-        {errores.nombre && <span className="error">{errores.nombre}</span>}
-      </div>
+      <TextField
+        type="tel"
+        name="telefono"
+        label="Teléfono (10 dígitos)"
+        value={cliente.telefono || ""}
+        onChange={handleChange}
+        error={Boolean(errores.telefono)}
+        helperText={errores.telefono}
+        slotProps={{ htmlInput: { maxLength: 10 } }}
+        autoComplete="tel"
+        fullWidth
+      />
 
-      {/* ── Teléfono ── */}
-      <div className="form-group">
-        <input
-          type="tel"
-          name="telefono"
-          placeholder="Teléfono (10 dígitos)"
-          value={cliente.telefono || ""}
-          onChange={handleChange}
-          className={errores.telefono ? "input-error shake" : ""}
-          maxLength={10}
-          autoComplete="tel"
-        />
-        {errores.telefono && <span className="error">{errores.telefono}</span>}
-      </div>
-
-      {/* ── Sucursal ── */}
-      <div className="form-group">
-        <label>¿A qué sucursal pides?</label>
-        <div className="sucursal-options">
-          <button
-            type="button"
-            className={`btn-sucursal ${cliente.sucursal === "xico" ? "activo" : ""}`}
+      <Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>¿A qué sucursal pides?</Typography>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Chip
+            label="📍 Xico"
             onClick={() => handleSucursal("xico")}
-          >
-            📍 Xico
-          </button>
-          <button
-            type="button"
-            className={`btn-sucursal ${cliente.sucursal === "coatepec" ? "activo" : ""}`}
+            color={cliente.sucursal === "xico" ? "primary" : "default"}
+            variant={cliente.sucursal === "xico" ? "filled" : "outlined"}
+            sx={{ fontWeight: 600, px: 1 }}
+          />
+          <Chip
+            label="📍 Coatepec"
             onClick={() => handleSucursal("coatepec")}
-          >
-            📍 Coatepec
-          </button>
-        </div>
-        {errores.sucursal && <span className="error">{errores.sucursal}</span>}
-      </div>
+            color={cliente.sucursal === "coatepec" ? "primary" : "default"}
+            variant={cliente.sucursal === "coatepec" ? "filled" : "outlined"}
+            sx={{ fontWeight: 600, px: 1 }}
+          />
+        </Box>
+        {errores.sucursal && <Typography variant="caption" color="error">{errores.sucursal}</Typography>}
+      </Box>
 
-      {/* ── Tipo de pedido ── */}
-      <div className="form-group">
-        <label>¿Cómo lo quieres?</label>
-        <div className="sucursal-options">
-          <button
-            type="button"
-            className={`btn-sucursal ${cliente.tipoPedido === DOMICILIO ? "activo" : ""}`}
+      <Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>¿Cómo lo quieres?</Typography>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Chip
+            label="🛵 A domicilio"
             onClick={() => handleTipoPedido(DOMICILIO)}
-          >
-            🛵 A domicilio
-          </button>
-          <button
-            type="button"
-            className={`btn-sucursal ${cliente.tipoPedido === RECOGER ? "activo" : ""}`}
+            color={cliente.tipoPedido === DOMICILIO ? "primary" : "default"}
+            variant={cliente.tipoPedido === DOMICILIO ? "filled" : "outlined"}
+            sx={{ fontWeight: 600, px: 1 }}
+          />
+          <Chip
+            label="🏪 Para recoger"
             onClick={() => handleTipoPedido(RECOGER)}
-          >
-            🏪 Para recoger
-          </button>
-        </div>
-        {errores.tipoPedido && <span className="error">{errores.tipoPedido}</span>}
-      </div>
+            color={cliente.tipoPedido === RECOGER ? "primary" : "default"}
+            variant={cliente.tipoPedido === RECOGER ? "filled" : "outlined"}
+            sx={{ fontWeight: 600, px: 1 }}
+          />
+        </Box>
+        {errores.tipoPedido && <Typography variant="caption" color="error">{errores.tipoPedido}</Typography>}
+      </Box>
 
-      {/* ── Dirección (solo si es domicilio) ── */}
       {cliente.tipoPedido === DOMICILIO && (
-        <div className="form-group direccion-animada">
-          <input
-            type="text"
+        <motion.div initial={{ opacity: 0.6, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.2 }}>
+          <TextField
             name="direccion"
-            placeholder="Calle, número, colonia..."
+            label="Calle, número, colonia..."
             value={cliente.direccion || ""}
             onChange={handleChange}
-            className={errores.direccion ? "input-error shake" : ""}
+            error={Boolean(errores.direccion)}
+            helperText={errores.direccion}
             autoComplete="street-address"
+            fullWidth
           />
-          {errores.direccion && <span className="error">{errores.direccion}</span>}
-        </div>
+        </motion.div>
       )}
 
-      {/* ── Comentarios ── */}
-      <div className="form-group">
-        <textarea
-          name="comentarios"
-          placeholder="Notas: sin cebolla, timbre descompuesto..."
-          value={cliente.comentarios || ""}
-          onChange={handleChange}
-          rows={2}
-        />
-      </div>
+      <TextField
+        name="comentarios"
+        label="Notas: sin cebolla, timbre descompuesto..."
+        value={cliente.comentarios || ""}
+        onChange={handleChange}
+        multiline
+        rows={2}
+        fullWidth
+      />
 
-      <button
-        type="submit"
-        className="btn-primary-form"
-        disabled={!puedeAvanzar}
-      >
-        Ver menú
-      </button>
-
-    </form>
+      <motion.div whileTap={{ scale: 0.97 }}>
+        <Button
+          type="submit"
+          fullWidth
+          size="large"
+          variant="contained"
+          disabled={!puedeAvanzar}
+          sx={{ background: "linear-gradient(135deg, #e682a8, #f6b43b)", color: "#171217" }}
+        >
+          Ver menú
+        </Button>
+      </motion.div>
+    </Box>
   );
 };
 

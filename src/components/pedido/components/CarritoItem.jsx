@@ -1,9 +1,7 @@
 // src/components/pedido/components/CarritoItem.jsx
-// ✅ Muestra sabores/configurables debajo del nombre
-// ✅ Subtotal calculado con calcularSubtotalItem (fuente única)
-// ✅ Layout correcto en mobile y desktop
-
 import React from "react";
+import { Box, Typography, Chip, IconButton } from "@mui/material";
+import { Minus, Plus, X } from "lucide-react";
 import { calcularSubtotalItem } from "../services/pedidoServices";
 
 const CarritoItem = React.memo(({ item, actualizarCantidad, eliminarProducto }) => {
@@ -19,54 +17,39 @@ const CarritoItem = React.memo(({ item, actualizarCantidad, eliminarProducto }) 
 
   const subtotal = calcularSubtotalItem(item);
 
+  const etiquetas = [
+    ...(item.configurables || []).map((c) => {
+      if (c.sabores?.length > 0) return `🌶 ${c.type ? `${c.type}: ` : ""}${c.sabores.join(", ")}`;
+      if (c.opcion) return `➤ ${c.type ? `${c.type}: ` : ""}${c.opcion}`;
+      return null;
+    }).filter(Boolean),
+    ...(item.opcionElegida ? [`➤ ${item.opcionElegida}`] : []),
+  ];
+
   return (
-    <div className="carrito-item">
+    <Box sx={{ background: "rgba(255,255,255,0.04)", borderRadius: 3, p: 1.75, mb: 1 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <Typography sx={{ fontWeight: 700 }}>{item.nombre}</Typography>
+        <Typography sx={{ fontWeight: 700, color: "#f6b43b" }}>${subtotal.toFixed(2)}</Typography>
+      </Box>
 
-      {/* ── Info: nombre + precio ── */}
-      <div className="carrito-info">
-        <strong className="carrito-nombre">{item.nombre}</strong>
-        <p className="carrito-precio">${subtotal.toFixed(2)}</p>
-      </div>
-
-      {/* ── Sabores / configurables ── */}
-      {item.configurables && item.configurables.length > 0 && (
-        <div className="carrito-sabores">
-          {item.configurables.map((c, i) => {
-            if (c.sabores && c.sabores.length > 0) {
-              return (
-                <span key={i} className="carrito-sabor-tag">
-                  🌶 {c.type ? `${c.type}: ` : ""}{c.sabores.join(", ")}
-                </span>
-              );
-            }
-            if (c.opcion) {
-              return (
-                <span key={i} className="carrito-sabor-tag">
-                  ➤ {c.type ? `${c.type}: ` : ""}{c.opcion}
-                </span>
-              );
-            }
-            return null;
-          })}
-        </div>
+      {etiquetas.length > 0 && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.75 }}>
+          {etiquetas.map((texto, i) => (
+            <Chip key={i} label={texto} size="small" variant="outlined" />
+          ))}
+        </Box>
       )}
 
-      {/* Opción simple (bebidas, etc.) */}
-      {item.opcionElegida && (
-        <span className="carrito-sabor-tag">➤ {item.opcionElegida}</span>
-      )}
-
-      {/* ── Controles de cantidad + eliminar ── */}
-      <div className="carrito-controles-row">
-        <div className="cantidad-control">
-          <button className="btn-cantidad" onClick={handleDisminuir} aria-label="Disminuir">−</button>
-          <span className="cantidad-numero">{item.cantidad}</span>
-          <button className="btn-cantidad" onClick={handleAumentar} aria-label="Aumentar">+</button>
-        </div>
-        <button className="btn-eliminar" onClick={handleEliminar} aria-label="Eliminar producto">✕</button>
-      </div>
-
-    </div>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <IconButton size="small" onClick={handleDisminuir} aria-label="Disminuir"><Minus size={14} /></IconButton>
+          <Typography sx={{ fontWeight: 700, minWidth: 16, textAlign: "center" }}>{item.cantidad}</Typography>
+          <IconButton size="small" onClick={handleAumentar} aria-label="Aumentar"><Plus size={14} /></IconButton>
+        </Box>
+        <IconButton size="small" onClick={handleEliminar} aria-label="Eliminar producto"><X size={14} /></IconButton>
+      </Box>
+    </Box>
   );
 });
 
