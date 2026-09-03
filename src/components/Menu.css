@@ -45,7 +45,7 @@
   overflow: hidden;
   border-radius: 12px;
   background: #111;
-  border: 2px solid rgba(231, 143, 187, 0.1);
+  border: 2px solid rgba(231, 101, 183, 0.1);
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
@@ -65,7 +65,7 @@
 /* Hover suave y limpio */
 .menu-item:hover {
   border-color: #E765B7;
-  box-shadow: 0 10px 30px rgba(231, 143, 187, 0.2);
+  box-shadow: 0 10px 30px rgba(231, 101, 183, 0.2);
 }
 
 .menu-item:hover img {
@@ -80,35 +80,43 @@
   margin-top: 70px;
 }
 
+/* Mismo lenguaje de botón que el resto de la plataforma (ver DESIGN.md):
+   píldora, relleno rosa, texto en tinta oscura, sombra suave — antes tenía
+   su propio "sticker" con borde de 4px y sombra dura offset, distinto de
+   cualquier otro botón del sitio. */
 .open-menu-btn {
   background-color: #E765B7;
-  color: #fff;
-  border: 4px solid #000;
+  color: #241a20;
+  border: 2px solid #241a20;
   padding: 22px 60px;
-  border-radius: 60px;
+  border-radius: 999px;
   font-family: 'Titan One', cursive;
   font-size: 1.5rem;
   cursor: pointer;
-  box-shadow: 8px 8px 0px #000;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(36,26,32,0.25);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .open-menu-btn:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 12px 12px 0px #000;
-  background-color: #f191b8;
+  background-color: #C43D8F;
+  color: #fff8f0;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(36,26,32,0.3);
 }
 
 .open-menu-btn:active {
-  transform: translate(4px, 4px);
-  box-shadow: 2px 2px 0px #000;
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(36,26,32,0.22);
 }
 
 /* POPUP DEL MENÚ (SCROLL INTERNO) */
+/* Mismo scrim que el popup de pedido (rgba(10,8,10,.7)) — antes era casi
+   negro sólido (.96), un valor distinto sin razón para el mismo tipo de
+   overlay. */
 .popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.96);
+  background: rgba(10, 8, 10, 0.7);
   z-index: 10000;
   display: flex;
   justify-content: center;
@@ -128,7 +136,7 @@
   overflow: hidden; /* Importante para que el scroll sea interno */
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 50px rgba(231, 143, 187, 0.3);
+  box-shadow: 0 0 50px rgba(231, 101, 183, 0.3);
 }
 
 /* ÁREA DE SCROLL INDEPENDIENTE */
@@ -153,20 +161,20 @@
   position: absolute;
   top: 20px;
   right: 25px;
-  width: 55px;
-  height: 55px;
+  width: 48px;
+  height: 48px;
   background: #E765B7;
-  color: #000;
-  border: 3px solid #000;
+  color: #241a20;
+  border: 2px solid #241a20;
   border-radius: 50%;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   cursor: pointer;
   z-index: 100; /* Siempre encima de las fotos */
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 4px 4px 0px #000;
-  transition: all 0.3s ease;
+  box-shadow: 0 6px 18px rgba(36,26,32,0.25);
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .close-btn span {
@@ -174,8 +182,9 @@
 }
 
 .close-btn:hover {
-  transform: rotate(90deg) scale(1.1);
-  background-color: #fff;
+  transform: scale(1.08);
+  background-color: #C43D8F;
+  color: #fff8f0;
 }
 
 /* LISTA DE PÁGINAS DEL MENÚ */
