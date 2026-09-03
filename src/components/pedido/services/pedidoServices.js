@@ -2,6 +2,9 @@
 // Archivo unificado — contiene helpers de cálculo Y datos del menú.
 // Todos los imports deben apuntar a este archivo.
 
+import { getProducts } from "../../../shared/staffApi";
+import { customerApi } from "../../../customer/customerApi";
+
 // ─────────────────────────────────────────────────────────────
 // DATOS DEL MENÚ
 // ─────────────────────────────────────────────────────────────
@@ -272,3 +275,49 @@ export const formatearMoneda = (cantidad = 0) => {
     currency: "MXN",
   }).format(cantidad);
 };
+
+// ─────────────────────────────────────────────────────────────
+// GUARDAR PEDIDO EN LA CUENTA (además del envío por WhatsApp)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Si hay un cliente con sesión iniciada, además de mandar el pedido por
+ * WhatsApp lo registra en su cuenta (pasa primero por la cola de Recepción
+ * del POS antes de llegar a cocina — ver PUT /api/orders/:id/recepcion).
+ *
+ * Es "best effort": nunca debe bloquear ni afectar el envío por WhatsApp,
+ * que sigue siendo el camino principal. Si algo falla (un producto del
+ * carrito no coincide con el catálogo real, no hay conexión, etc.) solo se
+ * registra una advertencia en consola.
+ */
+export async function guardarPedidoEnCuenta(cliente, carrito) {
+  const token = typeof window !== "undefined" && window.localStorage.getItem("bc_customer_token");
+  if (!token || !cliente?.sucursal || !carrito?.length) return;
+
+  try {
+    const productos = await getProducts();
+    const items = [];
+    for (const item of carrito) {
+      const producto = productos.find((p) => p.activo && p.nombre === item.nombre);
+      if (!producto) {
+        console.warn(`No se pudo vincular "${item.nombre}" a un producto del catálogo — el pedido no se guardó en la cuenta (el envío por WhatsApp no se vio afectado).`);
+        return;
+      }
+      const sabores = [
+        ...(item.configurables || []).flatMap((c) => (c.sabores?.length ? c.sabores : c.opcion ? [c.opcion] : [])),
+        ...(item.opcionElegida ? [item.opcionElegida] : []),
+      ];
+      items.push({ productId: producto.id, cantidad: item.cantidad || 1, sabores });
+    }
+
+    await customerApi.createOrder({
+      sucursal: cliente.sucursal,
+      tipo: cliente.tipoPedido === "domicilio" ? "domicilio" : "para_llevar",
+      direccion: cliente.tipoPedido === "domicilio" ? cliente.direccion : undefined,
+      notas: cliente.comentarios || undefined,
+      items,
+    }, token);
+  } catch (error) {
+    console.warn("No se pudo registrar el pedido en la cuenta del cliente (el envío por WhatsApp no se vio afectado):", error.message);
+  }
+}

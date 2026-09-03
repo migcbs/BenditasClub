@@ -26,5 +26,10 @@ export const customerApi = {
     body: JSON.stringify(payload),
   }).then(handle),
   orders: (token) => fetch(`${API_BASE}/api/customer/orders`, { headers: auth(token) }).then(handle),
+  createOrder: (payload, token) => fetch(`${API_BASE}/api/customer/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...auth(token) },
+    body: JSON.stringify(payload),
+  }).then(handle),
   loyalty: (token) => fetch(`${API_BASE}/api/customer/loyalty`, { headers: auth(token) }).then(handle),
 };

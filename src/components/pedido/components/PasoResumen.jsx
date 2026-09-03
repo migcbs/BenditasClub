@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { Box, Typography, Card, Button, Chip } from "@mui/material";
 import { motion } from "framer-motion";
 import { enviarPedidoWhatsApp } from "../services/whatsappService";
-import { calcularSubtotal, calcularSubtotalItem, formatearMoneda } from "../services/pedidoServices";
+import { calcularSubtotal, calcularSubtotalItem, formatearMoneda, guardarPedidoEnCuenta } from "../services/pedidoServices";
 import { TIPO_PEDIDO } from "../utils/constants";
 
 const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, onClose }) => {
@@ -17,6 +17,9 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
     const exito = enviarPedidoWhatsApp(cliente, carrito);
 
     if (exito) {
+      // Best effort: no bloquea ni retrasa el flujo de WhatsApp, que sigue
+      // siendo el camino principal para todos los clientes (con o sin cuenta).
+      guardarPedidoEnCuenta(cliente, carrito);
       resetPedido?.();
       onClose?.();
     } else {

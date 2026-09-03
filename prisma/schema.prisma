@@ -43,6 +43,11 @@ enum EstadoCocina {
   entregada
 }
 
+enum OrigenPedido {
+  pos
+  online
+}
+
 enum InventoryMovementType {
   purchase
   sale
@@ -122,6 +127,8 @@ model Order {
   tipo                TipoPedido
   estado              EstadoPedido   @default(pendiente)
   estadoCocina        EstadoCocina   @default(nueva)
+  origen              OrigenPedido   @default(pos)
+  recibidoEn          DateTime?
   metodoPago          MetodoPago?
   mesa                String?
   clienteNombre       String?

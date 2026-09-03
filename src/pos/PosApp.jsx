@@ -6,6 +6,7 @@ import { LogOut, Minus, Plus, X } from 'lucide-react';
 import ProductGrid from './ProductGrid';
 import CheckoutPanel from './CheckoutPanel';
 import OrdersList from './OrdersList';
+import ReceptionQueue from './ReceptionQueue';
 import StaffLogin from '../shared/StaffLogin';
 import { useStaffAuth } from '../shared/useStaffAuth';
 import { theme, glassSx } from '../shared/theme';
@@ -43,6 +44,7 @@ const PosApp = () => {
           >
             <Tab value="tomar" label="Tomar pedido" />
             <Tab value="lista" label="Pedidos del turno" />
+            <Tab value="recepcion" label="Recepción" />
           </Tabs>
         </AppBar>
 
@@ -92,9 +94,13 @@ const PosApp = () => {
                 <CheckoutPanel carrito={carrito} onOrderCreated={() => setRefreshKey((k) => k + 1)} />
               </Card>
             </Box>
-        ) : (
+        ) : tab === 'lista' ? (
             <Box sx={{ flex: 1, overflow: 'hidden' }}>
               <OrdersList refreshKey={refreshKey} />
+            </Box>
+        ) : (
+            <Box sx={{ flex: 1, overflow: 'hidden' }}>
+              <ReceptionQueue refreshKey={refreshKey} onResolved={() => setRefreshKey((k) => k + 1)} />
             </Box>
         )}
       </Box>
