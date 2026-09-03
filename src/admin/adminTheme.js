@@ -2,12 +2,12 @@ import { createTheme } from '@mui/material/styles';
 
 export const adminTheme = createTheme({
   palette: {
-    mode: 'dark',
-    primary: { main: '#e682a8', contrastText: '#171217' },
-    secondary: { main: '#f6b43b', contrastText: '#171217' },
-    background: { default: '#131113', paper: '#211c22' },
-    text: { primary: '#f7f2f5', secondary: '#cbbfc7' },
-    error: { main: '#ff6b78' },
+    mode: 'light',
+    primary: { main: '#d1477f', contrastText: '#fff8f0' },
+    secondary: { main: '#c98a1f', contrastText: '#fff8f0' },
+    background: { default: '#fff8f0', paper: '#ffffff' },
+    text: { primary: '#241a20', secondary: '#6e5c66' },
+    error: { main: '#c62838' },
   },
   shape: { borderRadius: 18 },
   typography: {
@@ -21,4 +21,3 @@ export const adminTheme = createTheme({
     MuiCard: { styleOverrides: { root: { backgroundImage: 'none' } } },
   },
 });
-

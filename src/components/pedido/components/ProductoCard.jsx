@@ -66,8 +66,8 @@ const ProductoCard = React.memo(({ producto, agregarProducto }) => {
         <Box
           sx={{
             borderRadius: 3,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(36,26,32,0.08)",
+            background: "rgba(36,26,32,0.05)",
             p: 2,
             display: "flex",
             flexDirection: "column",
@@ -81,7 +81,7 @@ const ProductoCard = React.memo(({ producto, agregarProducto }) => {
             <Typography variant="body2" color="text.secondary">{producto.descripcion}</Typography>
           )}
 
-          <Typography sx={{ color: "#f6b43b", fontWeight: 700 }}>${producto.precio}</Typography>
+          <Typography sx={{ color: "#c98a1f", fontWeight: 700 }}>${producto.precio}</Typography>
 
           <Button
             variant="outlined"

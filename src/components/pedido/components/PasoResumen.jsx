@@ -28,7 +28,7 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="h1" sx={{ fontSize: 22 }}>Confirmar pedido</Typography>
 
-      <Card elevation={0} sx={{ background: "rgba(255,255,255,0.05)", borderRadius: 3, p: 2 }}>
+      <Card elevation={0} sx={{ background: "rgba(36,26,32,0.05)", borderRadius: 3, p: 2 }}>
         <Typography variant="h2" sx={{ fontSize: 15, mb: 1 }}>Cliente</Typography>
         <Typography variant="body2"><b>Nombre:</b> {cliente.nombre || "—"}</Typography>
         <Typography variant="body2"><b>Teléfono:</b> {cliente.telefono || "—"}</Typography>
@@ -48,7 +48,7 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
         )}
       </Card>
 
-      <Card elevation={0} sx={{ background: "rgba(255,255,255,0.05)", borderRadius: 3, p: 2 }}>
+      <Card elevation={0} sx={{ background: "rgba(36,26,32,0.05)", borderRadius: 3, p: 2 }}>
         <Typography variant="h2" sx={{ fontSize: 15, mb: 1 }}>Productos</Typography>
 
         {carritoVacio ? (
@@ -65,7 +65,7 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
               ...(item.opcionElegida ? [`➤ ${item.opcionElegida}`] : []),
             ];
             return (
-              <Box key={item.id || index} sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", py: 1, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <Box key={item.id || index} sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", py: 1, borderBottom: "1px solid rgba(36,26,32,0.06)" }}>
                 <Box>
                   <Typography sx={{ fontWeight: 600 }}>{item.cantidad || 1}× {item.nombre}</Typography>
                   {etiquetas.length > 0 && (
@@ -74,7 +74,7 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
                     </Box>
                   )}
                 </Box>
-                <Typography sx={{ fontWeight: 700, color: "#f6b43b" }}>{formatearMoneda(subtotal)}</Typography>
+                <Typography sx={{ fontWeight: 700, color: "#c98a1f" }}>{formatearMoneda(subtotal)}</Typography>
               </Box>
             );
           })

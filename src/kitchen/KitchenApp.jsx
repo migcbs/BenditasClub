@@ -54,10 +54,10 @@ const KitchenApp = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
-        <AppBar position="static" elevation={0} sx={{ ...glassSx, boxShadow: 'none' }}>
+        <AppBar position="static" color="transparent" elevation={0} sx={{ ...glassSx, boxShadow: 'none' }}>
           <Toolbar sx={{ justifyContent: 'space-between' }}>
-            <Typography sx={{ fontWeight: 700 }}>{user.nombre} · {user.sucursal}</Typography>
-            <IconButton onClick={logout} color="inherit" aria-label="Cerrar sesión">
+            <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{user.nombre} · {user.sucursal}</Typography>
+            <IconButton onClick={logout} sx={{ color: 'text.primary' }} aria-label="Cerrar sesión">
               <LogOut size={20} />
             </IconButton>
           </Toolbar>
@@ -89,7 +89,7 @@ const KitchenApp = () => {
                           fullWidth
                           variant="contained"
                           size="small"
-                          sx={{ mt: 1.5, background: 'linear-gradient(135deg, #e682a8, #f6b43b)', color: '#171217' }}
+                          sx={{ mt: 1.5, background: 'linear-gradient(135deg, #d1477f, #c98a1f)', color: '#171217' }}
                           onClick={() => avanzar(orden, col.siguiente)}
                         >
                           {col.accion}

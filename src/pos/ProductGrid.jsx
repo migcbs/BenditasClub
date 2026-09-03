@@ -66,8 +66,8 @@ const ProductGrid = ({ onAgregar }) => {
                   textAlign: 'left',
                   p: 1.75,
                   borderRadius: 3,
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(36,26,32,0.08)',
+                  background: 'rgba(36,26,32,0.05)',
                   color: 'text.primary',
                   cursor: 'pointer',
                   display: 'flex',
@@ -76,7 +76,7 @@ const ProductGrid = ({ onAgregar }) => {
                 }}
               >
                 <strong>{producto.nombre}</strong>
-                <span style={{ color: '#f6b43b', fontWeight: 700 }}>${producto.precio}</span>
+                <span style={{ color: '#c98a1f', fontWeight: 700 }}>${producto.precio}</span>
               </Box>
             </motion.div>
           </Grid>
