@@ -123,17 +123,6 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, siguientePaso }
         </div>
       )}
 
-      {/* ── Comentarios ── */}
-      <div className="form-group">
-        <textarea
-          name="comentarios"
-          placeholder="Notas: sin cebolla, timbre descompuesto..."
-          value={cliente.comentarios || ""}
-          onChange={handleChange}
-          rows={2}
-        />
-      </div>
-
       <button
         type="submit"
         className="btn-primary-form"

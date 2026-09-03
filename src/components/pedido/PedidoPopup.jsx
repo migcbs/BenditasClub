@@ -54,6 +54,7 @@ const PedidoPopup = ({ onClose }) => {
               pasoAnterior={pasoAnterior}
               resetPedido={resetPedido}
               onClose={onClose}
+              handleChange={handleChange}
             />
           )}
 

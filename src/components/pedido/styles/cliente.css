@@ -25,9 +25,13 @@
   animation: entrance 0.4s var(--pop-ease);
 }
 
+/* Título compartido por cliente.jsx y resumen.jsx (misma clase, un solo
+   lugar que la define). Color #e3a7c5 = el rosa real que usa producción
+   para este título — antes vivía por accidente en una regla legacy de
+   Styles.css con más especificidad que esta; ahora es la fuente directa. */
 .titulo-seccion {
   font-family: 'Titan One', cursive;
-  color: var(--benditas-black);
+  color: #e3a7c5;
   text-transform: uppercase;
   text-align: center;
   font-size: 1.35rem;
