@@ -12,9 +12,9 @@ const nav = [
   ['Inicio', House], ['Operación', Gauge], ['Finanzas', ReceiptText], ['Inventario', PackageSearch], ['Equipo', UsersRound],
 ];
 
-function AlertRow({ icon: Icon, tone, title, detail, action }) {
+function AlertRow({ icon: Icon, tone, title, detail, action, onClick }) {
   return (
-    <ButtonBase className={`admin-alert admin-alert--${tone}`}>
+    <ButtonBase className={`admin-alert admin-alert--${tone}`} onClick={onClick} aria-label={`${title} — ${action}`}>
       <span className="admin-alert-icon"><Icon size={20} /></span>
       <span><b>{title}</b><small>{detail}</small></span>
       <span className="admin-alert-action">{action}<ChevronRight size={18} /></span>
@@ -25,7 +25,8 @@ function AlertRow({ icon: Icon, tone, title, detail, action }) {
 export default function AdminDashboard({ user, data, branch, onBranchChange, api, token }) {
   const [section, setSection] = useState('Inicio');
   const summary = data.summary;
-  const stockAlerts = data.alerts?.filter((alert) => alert.type === 'stock').length || 3;
+  const stockAlerts = data.alerts?.filter((alert) => alert.type === 'stock').length || 0;
+  const sucursalLabel = branch === 'all' ? 'ambas sucursales' : branch === 'xico' ? 'Xico' : 'Coatepec';
 
   return (
     <main className="admin-app-shell">
@@ -54,28 +55,61 @@ export default function AdminDashboard({ user, data, branch, onBranchChange, api
           </div>
           <div className="admin-sales">
             <strong>{money.format(summary.sales)}</strong>
-            <Chip icon={<ArrowUpRight size={15} />} label="8.4% vs. martes" color="primary" size="small" />
+            <Chip icon={<ArrowUpRight size={15} />} label={`${sucursalLabel}, hoy`} color="primary" size="small" />
           </div>
           <div className="admin-metrics">
             <span><b>{money.format(summary.averageTicket)}</b><small>Ticket promedio</small></span>
             <span><b>{summary.orders} pedidos</b><small>{summary.pendingOrders} siguen abiertos</small></span>
           </div>
-          <ButtonBase className="admin-stock-warning">
-            <AlertTriangle size={21} /><span><b>{stockAlerts} insumos con stock bajo</b><small>Uno puede frenar la venta de alitas</small></span><ChevronRight />
-          </ButtonBase>
+          {stockAlerts > 0 && (
+            <ButtonBase className="admin-stock-warning" onClick={() => setSection('Inventario')} aria-label="Ver inventario">
+              <AlertTriangle size={21} /><span><b>{stockAlerts} insumo{stockAlerts !== 1 ? 's' : ''} con stock bajo</b><small>Revisa inventario antes de que frene una venta</small></span><ChevronRight />
+            </ButtonBase>
+          )}
         </motion.section>
 
         <section className="admin-pulse">
-          <div className="admin-section-title"><Typography component="h2">Ahora en el restaurante</Typography><span>En vivo</span></div>
-          <div className="admin-alert-board">
-            <AlertRow icon={ChefHat} tone="amber" title="2 comandas llevan más de 15 min" detail="Cocina · la más antigua lleva 19 min" action="Ver cocina" />
-            <AlertRow icon={PackageSearch} tone="pink" title={`${stockAlerts} insumos están por agotarse`} detail="Pollo, salsa mango habanero y papas" action="Revisar" />
-            <AlertRow icon={Banknote} tone="neutral" title="Caja de Xico sigue abierta" detail={`${money.format(summary.cashSales)} esperado en efectivo`} action="Ver caja" />
-          </div>
+            <div className="admin-section-title"><Typography component="h2">Ahora en el restaurante</Typography><span>En vivo</span></div>
+            {summary.kitchenDelays === 0 && stockAlerts === 0 && summary.cashSales === 0 ? (
+              <Typography color="text.secondary">Todo tranquilo por ahora — sin comandas retrasadas, insumos bajos ni venta registrada aún.</Typography>
+            ) : (
+            <div className="admin-alert-board">
+              {summary.kitchenDelays > 0 && (
+                <AlertRow
+                  icon={ChefHat}
+                  tone="amber"
+                  title={`${summary.kitchenDelays} comanda${summary.kitchenDelays !== 1 ? 's' : ''} lleva${summary.kitchenDelays !== 1 ? 'n' : ''} más de 15 min`}
+                  detail="Cocina"
+                  action="Ver operación"
+                  onClick={() => setSection('Operación')}
+                />
+              )}
+              {stockAlerts > 0 && (
+                <AlertRow
+                  icon={PackageSearch}
+                  tone="pink"
+                  title={`${stockAlerts} insumo${stockAlerts !== 1 ? 's' : ''} están por agotarse`}
+                  detail="Inventario"
+                  action="Revisar"
+                  onClick={() => setSection('Inventario')}
+                />
+              )}
+              {summary.cashSales > 0 && (
+                <AlertRow
+                  icon={Banknote}
+                  tone="neutral"
+                  title={`Venta en efectivo hoy: ${money.format(summary.cashSales)}`}
+                  detail={sucursalLabel}
+                  action="Ver caja"
+                  onClick={() => setSection('Finanzas')}
+                />
+              )}
+            </div>
+            )}
         </section>
 
         <section className="admin-summary-grid">
-          <Card className="admin-summary-card"><Banknote /><span><small>Venta en efectivo</small><b>{money.format(summary.cashSales)}</b><em>Turno abierto</em></span></Card>
+          <Card className="admin-summary-card"><Banknote /><span><small>Venta en efectivo</small><b>{money.format(summary.cashSales)}</b><em>Hoy</em></span></Card>
           <Card className="admin-summary-card"><ChefHat /><span><small>Operación</small><b>{summary.orders - summary.pendingOrders} completados</b><em>{summary.kitchenDelays} con demora</em></span></Card>
         </section>
         </>}
