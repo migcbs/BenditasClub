@@ -30,7 +30,7 @@ const CarritoItem = React.memo(({ item, actualizarCantidad, eliminarProducto }) 
     <Box sx={{ background: "rgba(36,26,32,0.04)", borderRadius: 3, p: 1.75, mb: 1 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <Typography sx={{ fontWeight: 700 }}>{item.nombre}</Typography>
-        <Typography sx={{ fontWeight: 700, color: "#c98a1f" }}>${subtotal.toFixed(2)}</Typography>
+        <Typography sx={{ fontWeight: 700, color: "#C43D8F" }}>${subtotal.toFixed(2)}</Typography>
       </Box>
 
       {etiquetas.length > 0 && (

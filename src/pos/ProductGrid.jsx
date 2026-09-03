@@ -76,7 +76,7 @@ const ProductGrid = ({ onAgregar }) => {
                 }}
               >
                 <strong>{producto.nombre}</strong>
-                <span style={{ color: '#c98a1f', fontWeight: 700 }}>${producto.precio}</span>
+                <span style={{ color: '#C43D8F', fontWeight: 700 }}>${producto.precio}</span>
               </Box>
             </motion.div>
           </Grid>

@@ -99,7 +99,7 @@ const PasoProductos = ({
               variant="contained"
               onClick={siguientePaso}
               disabled={carritoVacio}
-              sx={{ background: "linear-gradient(135deg, #d1477f, #c98a1f)", color: "#171217" }}
+              sx={{ background: "#E765B7", color: "#241a20" }}
             >
               Continuar
             </Button>

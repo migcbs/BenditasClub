@@ -112,7 +112,7 @@ const Home = () => {
       <div className="home-nav-ui">
         {images.map((_, index) => (
           <div key={index} className="home-dot" onClick={() => { setCurrent(index); setProgress(0); }}>
-            {index === current && <div className="home-dot-progress" style={{ width: `${progress}%` }} />}
+            {index === current && <div className="home-dot-progress" style={{ transform: `scaleX(${progress / 100})` }} />}
           </div>
         ))}
       </div>

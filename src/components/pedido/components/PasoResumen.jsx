@@ -77,7 +77,7 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
                     </Box>
                   )}
                 </Box>
-                <Typography sx={{ fontWeight: 700, color: "#c98a1f" }}>{formatearMoneda(subtotal)}</Typography>
+                <Typography sx={{ fontWeight: 700, color: "#C43D8F" }}>{formatearMoneda(subtotal)}</Typography>
               </Box>
             );
           })

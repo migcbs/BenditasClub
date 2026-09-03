@@ -40,7 +40,7 @@ const PosApp = () => {
             value={tab}
             onChange={(_, v) => setTab(v)}
             textColor="primary"
-            sx={{ '& .MuiTabs-indicator': { background: 'linear-gradient(90deg, #d1477f, #c98a1f)', height: 3 } }}
+            sx={{ '& .MuiTabs-indicator': { background: '#E765B7', height: 3 } }}
           >
             <Tab value="tomar" label="Tomar pedido" />
             <Tab value="lista" label="Pedidos del turno" />

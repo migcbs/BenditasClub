@@ -4,12 +4,13 @@
    ================================================================ */
 
 :root {
-  --primary-color: #ff4d00;
+  --primary-color: #C43D8F; /* antes #ff4d00 (naranja) — no existe en la marca; ver DESIGN.md */
   --bg-dark:       #121212;
   --text-light:    #ffffff;
   --font-brand:    'Titan One', cursive;
   --transition:    all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --bp-pink:       #e78fbb;
+  --bp-pink:       #E765B7;
+  --bp-pink-deep:  #C43D8F;
   --bp-black:      #000000;
 }
 

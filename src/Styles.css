@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Titan+One&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Arimo&display=swap');
+/* Titan One e Inter ya se cargan globalmente en public/index.html junto con
+   Fredoka — ver DESIGN.md. 'Arimo' quedó reemplazada por 'Inter' en todo
+   este archivo: eran dos fuentes body distintas conviviendo sin razón. */
 
 /* RESET */
 * {
@@ -9,9 +10,9 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif;
   background-color: #fff8f0;
-  color: #222;
+  color: #241a20;
 }
 /* ------------------------------
    NAVBAR
@@ -78,7 +79,7 @@ body {
 }
 
 .navbar-links a:hover {
-  color: #e78fbb!important;
+  color: #E765B7!important;
 }
 
 /* ------------------------------
@@ -97,7 +98,7 @@ body {
 }
 
 .social-icons a:hover {
-  color: #e78fbb;
+  color: #E765B7;
 }
 
 .navbar.scrolled .social-icons a {
@@ -128,7 +129,7 @@ body {
 .hamburger div {
   width: 100%;
   height: 3px;
-  background-color: #e78fbb;
+  background-color: #E765B7;
   border-radius: 3px;
   transition: all 0.3s ease;
 }
@@ -216,7 +217,7 @@ body {
   text-transform: uppercase;
   font-size: 2rem; /* <-- Tu tamaño para móvil */
   padding: 0.8rem 0;
-  color: #e78fbb;
+  color: #E765B7;
   text-decoration: none;
   transition: color 0.3s ease;
 }
@@ -234,7 +235,7 @@ body {
 
 .mobile-menu-links .social-icons a {
   font-size: 2rem; /* <-- Tu tamaño para iconos en móvil */
-  color: #e78fbb;
+  color: #E765B7;
   transition: color 0.3s ease;
 }
 
@@ -394,7 +395,7 @@ body {
 }
 
 .indicator.active {
-  border-color: #e78fbb;
+  border-color: #E765B7;
 }
 
 .indicator .progress {
@@ -402,7 +403,7 @@ body {
   top: 0;
   left: 0;
   height: 100%;
-  background-color: #e78fbb;
+  background-color: #E765B7;
   transition: width 0.1s linear;
 }
 
@@ -467,7 +468,7 @@ body {
   font-size: 1rem;
   font-weight: bold;
   color: white;
-  background-color: #e78fbb;
+  background-color: #E765B7;
   border: none;
   border-radius: 30px;
   cursor: pointer;
@@ -498,7 +499,7 @@ body {
 /* Estilos principales del banner */
 .banner-avisos {
   width: 100%;
-  background-color: #e78fbb;
+  background-color: #E765B7;
   padding: 0.7rem 0.5rem;
   font-family: 'Titan One', cursive;
   text-transform: uppercase;
@@ -615,7 +616,7 @@ body {
 }
 
 .open-menu-btn {
-  background-color: #e78fbb;
+  background-color: #E765B7;
   border: none;
   color: white;
   padding: 1rem 2.5rem;
@@ -694,7 +695,7 @@ body {
 }
 
 .close-btn:hover {
-  color: #e78fbb;
+  color: #E765B7;
 }
 
 /* 📱 Responsive para móviles */
@@ -739,7 +740,7 @@ body {
   font-family: 'Titan One', cursive;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #e78fbb;
+  color: #E765B7;
   transition: transform 0.4s ease-out;
   will-change: transform;
 }
@@ -772,7 +773,7 @@ body {
   margin-bottom: 0.5rem;
   font-weight: bold;
   font-size: 1.2rem;
-  color: #e78fbb;
+  color: #E765B7;
   font-family: 'Titan One', cursive;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -837,10 +838,10 @@ body {
    FOOTER
 ------------------------------ */
 .footer {
-  background-color: #e78fbb;
+  background-color: #E765B7;
   color: white;
   padding: .5rem .5rem;
-  border-top: 1px solid #e78fbb;
+  border-top: 1px solid #E765B7;
   font-family: 'Titan One', cursive;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -868,7 +869,7 @@ body {
 }
 
 .social-icons a:hover {
-  color: #e78fbb;
+  color: #E765B7;
   transform: scale(1.2);
 }
 
@@ -907,7 +908,7 @@ body {
   padding-bottom: 2rem; /* Aumentado ligeramente para asegurar espacio al final */
   position: relative;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
   animation: fadeInUp 0.4s ease-out;
   overflow-y: auto; /* Permite el scroll dentro del popup si el contenido total es muy largo */
   display: flex;
@@ -1101,7 +1102,7 @@ body {
   width: 100%;
   max-width: 250px;
   margin-top: 1.5rem;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 30px;
@@ -1122,7 +1123,7 @@ body {
   color: #555;
   font-size: 1.05rem;
   text-align: center;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .pedido-popup input,
@@ -1138,7 +1139,7 @@ body {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   color: #333;
   text-align: center;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .pedido-popup select {
@@ -1167,7 +1168,7 @@ body {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
   text-align: center;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .input-error {
@@ -1193,7 +1194,7 @@ body {
   border-radius: 30px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: bold;
   letter-spacing: 0.5px;
 }
@@ -1231,7 +1232,7 @@ body {
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   margin-top: 1.5rem;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .enviar-btn:hover {
@@ -1254,7 +1255,7 @@ body {
   border-radius: 15px;
   border: 2px dashed #e3a7c5;
   font-size: 1rem;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
   width: 100%;
   max-width: 400px;
   text-align: center;
@@ -1262,7 +1263,7 @@ body {
 
 .comanda strong {
   color: #e3a7c5;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
   display: block;
   margin-bottom: 0.8rem;
   font-size: 1.1rem;
@@ -1276,7 +1277,7 @@ body {
   padding: 0.4rem 0;
   border-bottom: 1px solid #eee;
   text-align: left;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .comanda-item:last-child {
@@ -1302,7 +1303,7 @@ body {
   justify-content: center;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .comanda-item button:hover {
@@ -1329,7 +1330,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   user-select: none;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: bold;
   color: #e3a7c5;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -1389,7 +1390,7 @@ body {
   background-color: rgba(231, 143, 187, 0.1);
   border-radius: 8px;
   width: 100%;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .producto-item-with-options {
@@ -1458,7 +1459,7 @@ body {
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .michelada-options .option-btn:hover {
@@ -1486,7 +1487,7 @@ body {
     padding: 15px;
     margin-bottom: 10px;
     text-align: center;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: #333;
 }
 
@@ -1501,7 +1502,7 @@ body {
 .promo-info-card p {
     margin-bottom: 5px;
     line-height: 1.4;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .promo-info-card .time-info {
@@ -2000,7 +2001,7 @@ body {
 
 .slider-item p.product-price {
     font-size: 1.2em;
-    color: #e78fbb;
+    color: #E765B7;
     font-weight: bold;
     margin-bottom: 15px;
 }
@@ -2047,19 +2048,19 @@ body {
 
 .variant-thumbnail:hover {
     transform: scale(1.05);
-    border-color: #e78fbb;
+    border-color: #E765B7;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Estilo para el recuadro de variante ACTIVA (seleccionada) */
 .variant-thumbnail.active {
-    border-color: #e78fbb;
+    border-color: #E765B7;
     box-shadow: 0 0 0 2px rgba(231, 143, 187, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
     transform: scale(1.02);
 }
 
 .add-to-cart-btn {
-    background-color: #e78fbb;
+    background-color: #E765B7;
     color: white;
     padding: 16px 35px;
     border: none;
@@ -2477,7 +2478,7 @@ body {
     position: fixed;
     bottom: 30px; /* Distancia desde abajo */
     right: 30px; /* Distancia desde la derecha */
-    background-color: #e78fbb; /* Tu color primario */
+    background-color: #E765B7; /* Tu color primario */
     color: white;
     border: none;
     border-radius: 50%; /* Para que sea circular */
@@ -2510,7 +2511,7 @@ body {
 }
 
 .floating-cart-btn:focus-visible { /* Mejor accesibilidad para usuarios de teclado */
-    outline: 2px solid #e78fbb; /* Borde de foco visible */
+    outline: 2px solid #E765B7; /* Borde de foco visible */
     outline-offset: 4px;
 }
 
@@ -2599,7 +2600,7 @@ body {
   padding-bottom: 2rem; /* Asegurar espacio al final */
   position: relative;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35); /* Sombra más pronunciada */
-  font-family: 'Arimo', sans-serif; /* Fuente consistente */
+  font-family: 'Inter', sans-serif; /* Fuente consistente */
   animation: fadeInUp 0.4s ease-out; /* Animación de entrada */
   overflow-y: auto; /* Permite scroll interno */
   display: flex;
@@ -2665,7 +2666,7 @@ body {
   gap: 15px;
   padding: 12px 0;
   border-bottom: 1px solid #eee;
-  font-family: 'Arimo', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .cart-item:last-child {
@@ -2748,7 +2749,7 @@ body {
   justify-content: center;
   gap: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  font-family: 'Arimo', sans-serif; /* Fuente consistente */
+  font-family: 'Inter', sans-serif; /* Fuente consistente */
 }
 
 .clear-cart-btn {
@@ -2803,7 +2804,7 @@ body {
     color: #7f8c8d;
     font-size: 1em;
     margin-bottom: 20px;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .form-group {
@@ -2822,7 +2823,7 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 0.95em;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .form-group input[type="text"],
@@ -2836,7 +2837,7 @@ body {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     width: 100%;
     box-sizing: border-box;
-    font-family: 'Arimo', sans-serif; /* Fuente consistente */
+    font-family: 'Inter', sans-serif; /* Fuente consistente */
     color: #333;
     text-align: center; /* Centrar texto por defecto */
 }
@@ -2870,7 +2871,7 @@ body {
     gap: 5px;
     color: #333;
     font-size: 1em;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .radio-group input[type="radio"] {
@@ -2899,7 +2900,7 @@ body {
     margin-top: 5px;
     display: block;
     text-align: center;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .required {
@@ -2935,7 +2936,7 @@ body {
     justify-content: center;
     gap: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .back-to-cart-btn:hover {
@@ -2960,7 +2961,7 @@ body {
     justify-content: center;
     gap: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .whatsapp-order-btn:hover {
