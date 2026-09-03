@@ -150,13 +150,21 @@
   }
 
   .pedido-popup {
-    max-width: 720px;
-    height: 88vh;
-    padding: 60px 28px 28px;
+    max-width: 640px;
+    height: auto;
+    max-height: 85vh;
+    padding: 44px 24px 24px;
     border: var(--bp-border);
-    border-radius: 36px;
+    border-radius: 30px;
     box-shadow: 12px 12px 0 rgba(0,0,0,0.2);
     animation: scaleIn 0.35s var(--bp-ease);
+  }
+
+  /* El paso de productos (grid + carrito lado a lado) sí necesita ocupar
+     todo el alto disponible; cliente/resumen se ajustan a su contenido
+     en vez de dejar un cuadro casi vacío. */
+  .pedido-popup:has(.paso-productos) {
+    height: 85vh;
   }
 
   @keyframes scaleIn {
@@ -170,11 +178,16 @@
 ───────────────────────────────────────── */
 @media (min-width: 992px) {
   .pedido-popup {
-    max-width: 960px;
-    height: 85vh;
-    padding: 65px 36px 32px;
+    max-width: 900px;
+    height: auto;
+    max-height: 82vh;
+    padding: 48px 32px 28px;
     border-radius: var(--bp-radius);
     box-shadow: 16px 16px 0 rgba(0,0,0,0.22);
+  }
+
+  .pedido-popup:has(.paso-productos) {
+    height: 82vh;
   }
 
   .btn-cerrar-popup {
