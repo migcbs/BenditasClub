@@ -29,6 +29,9 @@ let demoPurchases = [];
 let demoRecipes = [{ id: 'r1', productId: 'p1', yield: 1, product: { id: 'p1', nombre: '8 Alitas' }, items: [{}, {}, {}, {}] }, { id: 'r2', productId: 'p2', yield: 1, product: { id: 'p2', nombre: 'Boneless 250g' }, items: [{}, {}, {}] }];
 let demoRewards = [{ id: 'lr1', label: '20% de descuento', type: 'discount_percent', value: 20, stampsRequired: 6, activo: true }];
 let demoRedemptions = [{ id: 'red1', code: 'AB12-CD34', redeemed: false, reward: { type: 'discount_percent', value: 20 }, customer: { nombre: 'Mariana' } }];
+let demoCategories = [{ id: 'cat-merch-1', nombre: 'Playeras', orden: 100 }];
+let demoMerchProducts = [{ id: 'merch-1', nombre: 'Playera Monalisa', category: { nombre: 'Playeras' }, variants: [{ id: 'var-1', nombre: 'Única', precio: 249, activo: true, stocks: [{ sucursal: 'xico', quantity: 5 }, { sucursal: 'coatepec', quantity: 3 }] }] }];
+let demoMerchOrders = [];
 const demoApi = {
   inventory: async () => demoInventory,
   addStock: async ({ ingredientId, quantity, reason }) => { const ingredient = demoInventory.find((item) => item.id === ingredientId); demoInventory = demoInventory.map((item) => item.id === ingredientId ? { ...item, quantity: item.quantity + quantity, health: stockHealth(item.quantity + quantity, item.reorderPoint) } : item); demoMovements.unshift({ id:`m-${Date.now()}`, quantity, reason, createdAt:new Date().toISOString(), ingredient:{nombre:ingredient.nombre,unit:ingredient.unit} }); },
@@ -50,6 +53,32 @@ const demoApi = {
   loyaltyRedemptions: async () => demoRedemptions,
   createLoyaltyReward: async (payload) => { demoRewards = [...demoRewards.map((r) => ({ ...r, activo: false })), { id: `lr-${Date.now()}`, ...payload, activo: true }]; },
   updateLoyaltyReward: async (id, payload) => { demoRewards = demoRewards.map((r) => (payload.activo ? { ...r, activo: r.id === id } : r.id === id ? { ...r, ...payload } : r)); },
+  categories: async () => demoCategories,
+  createCategory: async (payload) => { const category = { id: `cat-${Date.now()}`, ...payload }; demoCategories = [...demoCategories, category]; return category; },
+  merchProducts: async () => demoMerchProducts,
+  merchOrders: async () => demoMerchOrders,
+  createProduct: async (payload) => {
+    const category = demoCategories.find((c) => c.id === payload.categoryId);
+    const product = { id: `merch-${Date.now()}`, nombre: payload.nombre, category, variants: [] };
+    demoMerchProducts = [...demoMerchProducts, product];
+    return product;
+  },
+  createVariant: async (productId, payload) => {
+    const variant = { id: `var-${Date.now()}`, ...payload, activo: true, stocks: [{ sucursal: 'xico', quantity: 0 }, { sucursal: 'coatepec', quantity: 0 }] };
+    demoMerchProducts = demoMerchProducts.map((p) => p.id === productId ? { ...p, variants: [...p.variants, variant] } : p);
+    return variant;
+  },
+  updateVariant: async (id, payload) => {
+    demoMerchProducts = demoMerchProducts.map((p) => ({ ...p, variants: p.variants.map((v) => v.id === id ? { ...v, ...payload } : v) }));
+  },
+  updateVariantStock: async (id, { sucursal, quantity }) => {
+    demoMerchProducts = demoMerchProducts.map((p) => ({
+      ...p,
+      variants: p.variants.map((v) => v.id === id
+        ? { ...v, stocks: v.stocks.some((s) => s.sucursal === sucursal) ? v.stocks.map((s) => s.sucursal === sucursal ? { ...s, quantity } : s) : [...v.stocks, { sucursal, quantity }] }
+        : v),
+    }));
+  },
 };
 
 export default function AdminApp({ api = defaultApi, storage = window.localStorage }) {

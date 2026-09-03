@@ -99,6 +99,14 @@
   margin: 6px auto 0;
 }
 
+.shop-empty-state {
+  text-align: center;
+  color: var(--bp-black, #241a20);
+  opacity: .65;
+  padding: 24px 16px;
+  font-size: .95rem;
+}
+
 /* ─── FILTROS ──────────────────────────── */
 .shop-filtros {
   display: flex;

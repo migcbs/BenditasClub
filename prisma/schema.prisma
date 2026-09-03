@@ -48,6 +48,16 @@ enum OrigenPedido {
   online
 }
 
+enum ProductTipo {
+  comida
+  merch
+}
+
+enum MerchEntrega {
+  recoger
+  domicilio
+}
+
 enum InventoryMovementType {
   purchase
   sale
@@ -92,6 +102,7 @@ model User {
   activo    Boolean  @default(true)
   staffOrders    Order[] @relation("StaffOrders")
   customerOrders Order[] @relation("CustomerOrders")
+  merchOrders    MerchOrder[] @relation("CustomerMerchOrders")
   loyaltyCard    LoyaltyCard?
   loyaltyRedemptions LoyaltyRedemption[] @relation("CustomerRedemptions")
   createdAt DateTime @default(now())
@@ -111,14 +122,74 @@ model Product {
   precio      Int
   categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tipo        ProductTipo @default(comida)
+  imagenUrl   String?
   maxSabores  Int?
   isPromotion Boolean     @default(false)
   activo      Boolean     @default(true)
   orderItems  OrderItem[]
   recipe      Recipe?
+  variants    ProductVariant[]
   loyaltyRewards LoyaltyReward[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+}
+
+model ProductVariant {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  nombre    String
+  precio    Int
+  imagenUrl String?
+  sku       String?
+  activo    Boolean  @default(true)
+  orden     Int      @default(0)
+  stocks    VariantStock[]
+  merchOrderItems MerchOrderItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VariantStock {
+  id        String         @id @default(uuid())
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  sucursal  SucursalNombre
+  quantity  Int            @default(0)
+  updatedAt DateTime       @updatedAt
+
+  @@unique([variantId, sucursal])
+}
+
+model MerchOrder {
+  id              String         @id @default(uuid())
+  sucursal        SucursalNombre
+  tipoEntrega     MerchEntrega   @default(recoger)
+  estado          EstadoPedido   @default(pendiente)
+  clienteId       String?
+  cliente         User?          @relation("CustomerMerchOrders", fields: [clienteId], references: [id])
+  clienteNombre   String?
+  clienteTelefono String?
+  direccion       String?
+  notas           String?
+  total           Int
+  items           MerchOrderItem[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model MerchOrderItem {
+  id             String         @id @default(uuid())
+  orderId        String
+  order          MerchOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId      String
+  variant        ProductVariant @relation(fields: [variantId], references: [id])
+  nombre         String
+  varianteNombre String
+  precio         Int
+  cantidad       Int
+  subtotal       Int
 }
 
 model Order {

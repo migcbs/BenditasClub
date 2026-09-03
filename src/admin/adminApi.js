@@ -39,4 +39,13 @@ export const adminApi = {
   createLoyaltyReward: (payload, token) => fetch(`${API_BASE}/api/admin/loyalty/rewards`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   updateLoyaltyReward: (id, payload, token) => fetch(`${API_BASE}/api/admin/loyalty/rewards/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   loyaltyRedemptions: (token) => fetch(`${API_BASE}/api/admin/loyalty/redemptions`, { headers: auth(token) }).then(handle),
+  categories: (token) => fetch(`${API_BASE}/api/admin/categories`, { headers: auth(token) }).then(handle),
+  createCategory: (payload, token) => fetch(`${API_BASE}/api/admin/categories`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  merchProducts: (token) => fetch(`${API_BASE}/api/admin/merch/products`, { headers: auth(token) }).then(handle),
+  merchOrders: (token) => fetch(`${API_BASE}/api/admin/merch/orders`, { headers: auth(token) }).then(handle),
+  createProduct: (payload, token) => fetch(`${API_BASE}/api/admin/products`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  updateProduct: (id, payload, token) => fetch(`${API_BASE}/api/admin/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  createVariant: (productId, payload, token) => fetch(`${API_BASE}/api/admin/products/${productId}/variants`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  updateVariant: (id, payload, token) => fetch(`${API_BASE}/api/admin/variants/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  updateVariantStock: (id, payload, token) => fetch(`${API_BASE}/api/admin/variants/${id}/stock`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
 };
