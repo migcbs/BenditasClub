@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
+import { shopApi } from './shopApi';
+import { CUSTOMER_TOKEN_KEY } from '../customer/CustomerAuth';
 
 const WHATSAPP_NUMEROS = {
   Coatepec: '522284032836',
@@ -74,12 +76,32 @@ const CartPopup = ({ cartItems, onClose, removeFromCart, clearCart }) => {
     return encodeURIComponent(msg);
   };
 
+  // Best effort: además de mandarlo por WhatsApp (el camino principal para
+  // todos), si el cliente tiene sesión iniciada también lo guarda en su
+  // cuenta. Nunca debe bloquear ni retrasar el envío por WhatsApp — si algo
+  // falla (sin sesión, sin stock, sin conexión) solo se registra en consola.
+  const guardarPedidoMerchEnCuenta = async () => {
+    const token = window.localStorage.getItem(CUSTOMER_TOKEN_KEY);
+    if (!token) return;
+    try {
+      await shopApi.createOrder({
+        sucursal: sucursal.toLowerCase(),
+        tipoEntrega: metodo === 'delivery' ? 'domicilio' : 'recoger',
+        direccion: metodo === 'delivery' ? direccion : undefined,
+        items: cartItems.map((item) => ({ variantId: item.variantId ?? item.varianteId, cantidad: getCantidad(item) })),
+      }, token);
+    } catch (error) {
+      console.warn('No se pudo registrar el pedido de merch en la cuenta del cliente (el envío por WhatsApp no se vio afectado):', error.message);
+    }
+  };
+
   const enviarPedido = () => {
     if (!validar()) return;
     const numOrden = `BC-${Date.now().toString().slice(-6)}-${Math.floor(Math.random()*1000).toString().padStart(3,'0')}`;
     const numero   = WHATSAPP_NUMEROS[sucursal];
     if (!numero) { alert('Número no configurado para esta sucursal.'); return; }
     window.open(`https://wa.me/${numero}?text=${generarMensaje(numOrden)}`, '_blank');
+    guardarPedidoMerchEnCuenta();
   };
 
   const confirmarVaciar = () => {

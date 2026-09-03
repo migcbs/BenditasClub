@@ -302,13 +302,113 @@ app.get('/api/admin/dashboard', verifyToken, requireRole('admin'), async (req, r
 app.get('/api/products', async (req, res) => {
   try {
     const products = await prisma.product.findMany({
-      where: { activo: true },
+      where: { activo: true, tipo: 'comida' },
       include: { category: { select: { nombre: true, orden: true } } },
       orderBy: [{ category: { orden: 'asc' } }, { nombre: 'asc' }],
     });
     res.json(products);
   } catch (e) {
     console.error('❌ Error listando productos:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.get('/api/shop/products', async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: { activo: true, tipo: 'merch' },
+      include: {
+        category: { select: { nombre: true, orden: true } },
+        variants: { where: { activo: true }, include: { stocks: true }, orderBy: { orden: 'asc' } },
+      },
+      orderBy: [{ category: { orden: 'asc' } }, { nombre: 'asc' }],
+    });
+    const conEstado = products.map((product) => ({
+      ...product,
+      variants: product.variants.map((variant) => {
+        const totalStock = variant.stocks.reduce((sum, stock) => sum + stock.quantity, 0);
+        const estado = totalStock <= 0 ? 'agotado' : totalStock <= 5 ? 'poco' : 'disponible';
+        return { ...variant, totalStock, estado };
+      }),
+    }));
+    res.json(conEstado);
+  } catch (e) {
+    console.error('❌ Error listando catálogo de merch:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/customer/shop-orders', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const { sucursal, tipoEntrega, direccion, notas, items } = req.body;
+    if (!['xico', 'coatepec'].includes(sucursal) || !['recoger', 'domicilio'].includes(tipoEntrega)) {
+      return res.status(400).json({ error: 'Sucursal y tipo de entrega válidos son obligatorios' });
+    }
+    if (tipoEntrega === 'domicilio' && !direccion?.trim()) {
+      return res.status(400).json({ error: 'La dirección es obligatoria para domicilio' });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'items (no vacío) es obligatorio' });
+    }
+
+    const customer = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!customer || !customer.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
+
+    const variantIds = items.map((i) => i.variantId);
+    const variants = await prisma.productVariant.findMany({
+      where: { id: { in: variantIds }, activo: true },
+      include: { product: true, stocks: { where: { sucursal } } },
+    });
+    const variantMap = new Map(variants.map((v) => [v.id, v]));
+
+    const orderItemsData = [];
+    for (const item of items) {
+      const variant = variantMap.get(item.variantId);
+      if (!variant) return res.status(400).json({ error: `Variante no encontrada: ${item.variantId}` });
+      const cantidad = item.cantidad || 1;
+      const disponible = variant.stocks[0]?.quantity ?? 0;
+      if (disponible < cantidad) {
+        return res.status(400).json({ error: `No hay suficiente stock de ${variant.product.nombre} (${variant.nombre})` });
+      }
+      orderItemsData.push({
+        variantId: variant.id,
+        nombre: variant.product.nombre,
+        varianteNombre: variant.nombre,
+        precio: variant.precio,
+        cantidad,
+        subtotal: variant.precio * cantidad,
+      });
+    }
+
+    const total = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);
+
+    const order = await prisma.$transaction(async (tx) => {
+      const created = await tx.merchOrder.create({
+        data: {
+          sucursal,
+          tipoEntrega,
+          clienteId: customer.id,
+          clienteNombre: customer.nombre,
+          clienteTelefono: customer.telefono,
+          direccion: direccion || null,
+          notas: notas || null,
+          total,
+          items: { create: orderItemsData },
+        },
+        include: { items: true },
+      });
+      for (const item of orderItemsData) {
+        await tx.variantStock.update({
+          where: { variantId_sucursal: { variantId: item.variantId, sucursal } },
+          data: { quantity: { decrement: item.cantidad } },
+        });
+      }
+      return created;
+    });
+
+    res.status(201).json(order);
+  } catch (e) {
+    console.error('❌ Error creando pedido de merch:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
@@ -422,7 +522,7 @@ app.post('/api/loyalty/redeem', verifyToken, requireRole('empleado', 'admin'), a
 
 app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, res) => {
   try {
-    const { nombre, precio, categoryId, maxSabores, isPromotion } = req.body;
+    const { nombre, precio, categoryId, maxSabores, isPromotion, tipo, imagenUrl } = req.body;
     if (!nombre || precio === undefined || !categoryId) {
       return res.status(400).json({ error: 'Campos obligatorios: nombre, precio, categoryId' });
     }
@@ -431,7 +531,13 @@ app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, r
     if (!category) return res.status(400).json({ error: 'categoryId no existe' });
 
     const product = await prisma.product.create({
-      data: { nombre, precio, categoryId, maxSabores: maxSabores ?? null, isPromotion: isPromotion ?? false },
+      data: {
+        nombre, precio, categoryId,
+        maxSabores: maxSabores ?? null,
+        isPromotion: isPromotion ?? false,
+        tipo: tipo === 'merch' ? 'merch' : 'comida',
+        imagenUrl: imagenUrl || null,
+      },
     });
     res.status(201).json(product);
   } catch (e) {
@@ -442,10 +548,10 @@ app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, r
 
 app.put('/api/admin/products/:id', verifyToken, requireRole('admin'), async (req, res) => {
   try {
-    const { nombre, precio, categoryId, maxSabores, isPromotion, activo } = req.body;
+    const { nombre, precio, categoryId, maxSabores, isPromotion, activo, imagenUrl } = req.body;
     const product = await prisma.product.update({
       where: { id: req.params.id },
-      data: { nombre, precio, categoryId, maxSabores, isPromotion, activo },
+      data: { nombre, precio, categoryId, maxSabores, isPromotion, activo, imagenUrl },
     });
     res.json(product);
   } catch (e) {
@@ -465,6 +571,121 @@ app.delete('/api/admin/products/:id', verifyToken, requireRole('admin'), async (
   } catch (e) {
     if (e.code === 'P2025') return res.status(404).json({ error: 'Producto no encontrado' });
     console.error('❌ Error eliminando producto:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.get('/api/admin/categories', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const categories = await prisma.category.findMany({ orderBy: { orden: 'asc' } });
+    res.json(categories);
+  } catch (e) {
+    console.error('❌ Error listando categorías:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/admin/categories', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { nombre, orden } = req.body;
+    if (!nombre?.trim()) return res.status(400).json({ error: 'nombre es obligatorio' });
+    const category = await prisma.category.create({ data: { nombre: nombre.trim(), orden: orden ?? 0 } });
+    res.status(201).json(category);
+  } catch (e) {
+    if (e.code === 'P2002') return res.status(409).json({ error: 'Ya existe una categoría con ese nombre' });
+    console.error('❌ Error creando categoría:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.get('/api/admin/merch/products', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: { tipo: 'merch' },
+      include: {
+        category: { select: { nombre: true, orden: true } },
+        variants: { include: { stocks: true }, orderBy: { orden: 'asc' } },
+      },
+      orderBy: [{ category: { orden: 'asc' } }, { nombre: 'asc' }],
+    });
+    res.json(products);
+  } catch (e) {
+    console.error('❌ Error listando productos de merch:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.get('/api/admin/merch/orders', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const orders = await prisma.merchOrder.findMany({
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    res.json(orders);
+  } catch (e) {
+    console.error('❌ Error listando pedidos de merch:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/admin/products/:id/variants', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { nombre, precio, imagenUrl, sku } = req.body;
+    if (!nombre?.trim() || precio === undefined) {
+      return res.status(400).json({ error: 'Campos obligatorios: nombre, precio' });
+    }
+    const product = await prisma.product.findUnique({ where: { id: req.params.id } });
+    if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
+
+    const variant = await prisma.$transaction(async (tx) => {
+      const created = await tx.productVariant.create({
+        data: { productId: product.id, nombre: nombre.trim(), precio, imagenUrl: imagenUrl || null, sku: sku || null },
+      });
+      for (const sucursal of ['xico', 'coatepec']) {
+        await tx.variantStock.create({ data: { variantId: created.id, sucursal, quantity: 0 } });
+      }
+      return tx.productVariant.findUnique({ where: { id: created.id }, include: { stocks: true } });
+    });
+    res.status(201).json(variant);
+  } catch (e) {
+    console.error('❌ Error creando variante:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.put('/api/admin/variants/:id', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { nombre, precio, imagenUrl, activo } = req.body;
+    const variant = await prisma.productVariant.update({
+      where: { id: req.params.id },
+      data: { nombre, precio, imagenUrl, activo },
+    });
+    res.json(variant);
+  } catch (e) {
+    if (e.code === 'P2025') return res.status(404).json({ error: 'Variante no encontrada' });
+    console.error('❌ Error actualizando variante:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.put('/api/admin/variants/:id/stock', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { sucursal, quantity } = req.body;
+    if (!['xico', 'coatepec'].includes(sucursal) || typeof quantity !== 'number' || quantity < 0) {
+      return res.status(400).json({ error: 'sucursal válida y quantity (>= 0) son obligatorios' });
+    }
+    const variant = await prisma.productVariant.findUnique({ where: { id: req.params.id } });
+    if (!variant) return res.status(404).json({ error: 'Variante no encontrada' });
+
+    const stock = await prisma.variantStock.upsert({
+      where: { variantId_sucursal: { variantId: variant.id, sucursal } },
+      update: { quantity },
+      create: { variantId: variant.id, sucursal, quantity },
+    });
+    res.json(stock);
+  } catch (e) {
+    console.error('❌ Error actualizando stock de variante:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });

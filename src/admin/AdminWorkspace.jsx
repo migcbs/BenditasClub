@@ -316,10 +316,198 @@ function Loyalty({ api, token }) {
   </section>;
 }
 
+const MERCH_ORDER_LABEL = { pendiente: 'Pendiente', pagado: 'Pagado', cancelado: 'Cancelado' };
+const MERCH_ORDER_COLOR = { pendiente: 'warning', pagado: 'success', cancelado: 'default' };
+
+function Merch({ api, token }) {
+  const [products, setProducts] = useState(null);
+  const [orders, setOrders] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [categoryName, setCategoryName] = useState('');
+
+  const [productOpen, setProductOpen] = useState(false);
+  const [product, setProduct] = useState({ nombre: '', categoryId: '', precio: '', imagenUrl: '' });
+
+  const [variantTarget, setVariantTarget] = useState(null);
+  const [variant, setVariant] = useState({ nombre: '', precio: '', imagenUrl: '' });
+
+  const [editingVariant, setEditingVariant] = useState(null);
+
+  const load = () => Promise.all([api.merchProducts(token), api.merchOrders(token), api.categories(token)])
+    .then(([p, o, c]) => { setProducts(p); setOrders(o); setCategories(c); });
+
+  useEffect(() => { load().catch((e) => setError(e.message)); }, [api, token]);
+
+  const saveCategory = async () => {
+    if (!categoryName.trim()) return setError('El nombre de la categoría es obligatorio.');
+    setSaving(true); setError('');
+    try {
+      await api.createCategory({ nombre: categoryName.trim(), orden: 100 }, token);
+      await load();
+      setCategoryOpen(false); setCategoryName('');
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  const openProduct = () => { setProduct({ nombre: '', categoryId: categories[0]?.id || '', precio: '', imagenUrl: '' }); setProductOpen(true); };
+  const saveProduct = async () => {
+    if (!product.nombre.trim() || !product.precio || !product.categoryId) {
+      return setError('Nombre, precio y categoría son obligatorios.');
+    }
+    setSaving(true); setError('');
+    try {
+      await api.createProduct({ nombre: product.nombre.trim(), precio: Number(product.precio), categoryId: product.categoryId, tipo: 'merch', imagenUrl: product.imagenUrl || undefined }, token);
+      await load();
+      setProductOpen(false);
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  const openVariant = (productId) => { setVariantTarget(productId); setVariant({ nombre: '', precio: '', imagenUrl: '' }); };
+  const saveVariant = async () => {
+    if (!variant.nombre.trim() || !variant.precio) return setError('Nombre y precio de la variante son obligatorios.');
+    setSaving(true); setError('');
+    try {
+      await api.createVariant(variantTarget, { nombre: variant.nombre.trim(), precio: Number(variant.precio), imagenUrl: variant.imagenUrl || undefined }, token);
+      await load();
+      setVariantTarget(null);
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  const openEditVariant = (v) => setEditingVariant({ id: v.id, nombre: v.nombre, precio: String(v.precio), imagenUrl: v.imagenUrl || '', activo: v.activo });
+  const saveEditVariant = async () => {
+    setSaving(true); setError('');
+    try {
+      await api.updateVariant(editingVariant.id, { nombre: editingVariant.nombre.trim(), precio: Number(editingVariant.precio), imagenUrl: editingVariant.imagenUrl || null, activo: editingVariant.activo }, token);
+      await load();
+      setEditingVariant(null);
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  const saveStock = async (variantId, sucursal, value) => {
+    const quantity = Number(value);
+    if (!Number.isFinite(quantity) || quantity < 0) return;
+    setError('');
+    try {
+      await api.updateVariantStock(variantId, { sucursal, quantity }, token);
+      await load();
+    } catch (e) { setError(e.message); }
+  };
+
+  if (!products) return <Loading />;
+
+  return <section className="admin-module">
+    {error ? <Alert severity="error" onClose={() => setError('')}>{error}</Alert> : null}
+    <header>
+      <div><Typography component="h1">Merch</Typography><Typography>Playeras, gorras y accesorios — catálogo, variantes y stock por sucursal.</Typography></div>
+      <div className="admin-header-actions">
+        <Button variant="outlined" onClick={() => setCategoryOpen(true)}>+ Categoría</Button>
+        <Button variant="contained" startIcon={<Plus size={18} />} onClick={openProduct}>Nuevo producto</Button>
+      </div>
+    </header>
+
+    <div className="admin-data-panel">
+      <div className="admin-data-heading"><h2>Catálogo</h2><span>{products.length} productos</span></div>
+      {products.length ? products.map((p) => (
+        <div className="admin-list-row" key={p.id} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span><b>{p.nombre}</b><small>{p.category?.nombre}</small></span>
+            <Button size="small" onClick={() => openVariant(p.id)}>+ Variante</Button>
+          </div>
+          {p.variants.map((v) => (
+            <div key={v.id} className="admin-stock-row" style={{ marginLeft: 8 }}>
+              <div>
+                <b>{v.nombre}</b>
+                <small>${v.precio} · {v.activo ? 'Activa' : 'Inactiva'}</small>
+                <div className="admin-row-actions"><Button size="small" startIcon={<Edit3 size={14} />} onClick={() => openEditVariant(v)}>Editar</Button></div>
+              </div>
+              <div className="admin-stock-controls">
+                {['xico', 'coatepec'].map((sucursal) => {
+                  const stock = v.stocks.find((s) => s.sucursal === sucursal);
+                  return (
+                    <TextField
+                      key={sucursal}
+                      size="small"
+                      type="number"
+                      label={sucursal === 'xico' ? 'Xico' : 'Coatepec'}
+                      defaultValue={stock?.quantity ?? 0}
+                      slotProps={{ htmlInput: { min: 0 } }}
+                      onBlur={(e) => saveStock(v.id, sucursal, e.target.value)}
+                      sx={{ width: 100 }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )) : <Empty>Todavía no hay productos de merch — agrega el primero.</Empty>}
+    </div>
+
+    <div className="admin-data-panel">
+      <div className="admin-data-heading"><h2>Pedidos de merch</h2><span>Últimos 50</span></div>
+      {orders?.length ? orders.map((o) => (
+        <div className="admin-list-row" key={o.id}>
+          <span><b>{o.clienteNombre || 'Sin nombre'}</b><small>{o.sucursal} · {o.tipoEntrega} · {new Date(o.createdAt).toLocaleString('es-MX')}</small></span>
+          <div className="admin-row-actions"><b>{money.format(o.total)}</b><Chip size="small" color={MERCH_ORDER_COLOR[o.estado]} label={MERCH_ORDER_LABEL[o.estado]} /></div>
+        </div>
+      )) : <Empty>Sin pedidos de merch todavía.</Empty>}
+    </div>
+
+    <Dialog open={categoryOpen} onClose={() => !saving && setCategoryOpen(false)} fullWidth maxWidth="xs">
+      <DialogTitle>Nueva categoría de merch</DialogTitle>
+      <DialogContent><TextField autoFocus fullWidth label="Nombre" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} /></DialogContent>
+      <DialogActions><Button onClick={() => setCategoryOpen(false)} disabled={saving}>Cancelar</Button><Button variant="contained" onClick={saveCategory} disabled={saving}>Guardar</Button></DialogActions>
+    </Dialog>
+
+    <Dialog open={productOpen} onClose={() => !saving && setProductOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Nuevo producto de merch</DialogTitle>
+      <DialogContent className="admin-form-grid">
+        <TextField autoFocus required label="Nombre" value={product.nombre} onChange={(e) => setProduct({ ...product, nombre: e.target.value })} />
+        <TextField select required label="Categoría" value={product.categoryId} onChange={(e) => setProduct({ ...product, categoryId: e.target.value })}>
+          {categories.map((c) => <MenuItem key={c.id} value={c.id}>{c.nombre}</MenuItem>)}
+        </TextField>
+        <TextField required label="Precio" type="number" value={product.precio} onChange={(e) => setProduct({ ...product, precio: e.target.value })} />
+        <TextField label="URL de imagen" value={product.imagenUrl} onChange={(e) => setProduct({ ...product, imagenUrl: e.target.value })} placeholder="/assets/shop/ejemplo.jpg" />
+      </DialogContent>
+      <DialogActions><Button onClick={() => setProductOpen(false)} disabled={saving}>Cancelar</Button><Button variant="contained" onClick={saveProduct} disabled={saving}>Guardar producto</Button></DialogActions>
+    </Dialog>
+
+    <Dialog open={Boolean(variantTarget)} onClose={() => !saving && setVariantTarget(null)} fullWidth maxWidth="xs">
+      <DialogTitle>Nueva variante</DialogTitle>
+      <DialogContent className="admin-form-grid">
+        <TextField autoFocus required label="Nombre (ej. Rosa, Única)" value={variant.nombre} onChange={(e) => setVariant({ ...variant, nombre: e.target.value })} />
+        <TextField required label="Precio" type="number" value={variant.precio} onChange={(e) => setVariant({ ...variant, precio: e.target.value })} />
+        <TextField label="URL de imagen" value={variant.imagenUrl} onChange={(e) => setVariant({ ...variant, imagenUrl: e.target.value })} placeholder="/assets/shop/ejemplo.jpg" />
+      </DialogContent>
+      <DialogActions><Button onClick={() => setVariantTarget(null)} disabled={saving}>Cancelar</Button><Button variant="contained" onClick={saveVariant} disabled={saving}>Guardar variante</Button></DialogActions>
+    </Dialog>
+
+    <Dialog open={Boolean(editingVariant)} onClose={() => !saving && setEditingVariant(null)} fullWidth maxWidth="xs">
+      <DialogTitle>Editar variante</DialogTitle>
+      {editingVariant && (
+        <DialogContent className="admin-form-grid">
+          <TextField autoFocus required label="Nombre" value={editingVariant.nombre} onChange={(e) => setEditingVariant({ ...editingVariant, nombre: e.target.value })} />
+          <TextField required label="Precio" type="number" value={editingVariant.precio} onChange={(e) => setEditingVariant({ ...editingVariant, precio: e.target.value })} />
+          <TextField label="URL de imagen" value={editingVariant.imagenUrl} onChange={(e) => setEditingVariant({ ...editingVariant, imagenUrl: e.target.value })} />
+          <div className="admin-row-actions">
+            <span>Activa</span>
+            <Switch checked={editingVariant.activo} onChange={(e) => setEditingVariant({ ...editingVariant, activo: e.target.checked })} />
+          </div>
+        </DialogContent>
+      )}
+      <DialogActions><Button onClick={() => setEditingVariant(null)} disabled={saving}>Cancelar</Button><Button variant="contained" onClick={saveEditVariant} disabled={saving}>Guardar cambios</Button></DialogActions>
+    </Dialog>
+  </section>;
+}
+
 export default function AdminWorkspace({ section, api, token, branch, dashboard }) {
   if (section === 'Operación') return <Operation dashboard={dashboard} />;
   if (section === 'Finanzas') return <Finance api={api} token={token} branch={branch} dashboard={dashboard} />;
   if (section === 'Inventario') return <Inventory api={api} token={token} branch={branch} />;
+  if (section === 'Merch') return <Merch api={api} token={token} />;
   if (section === 'Fidelidad') return <Loyalty api={api} token={token} />;
   if (section === 'Equipo') return <Team api={api} token={token} />;
   return null;

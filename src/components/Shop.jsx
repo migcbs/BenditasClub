@@ -1,144 +1,41 @@
 // src/components/Shop.jsx
-// Lógica nueva: categorías agrupadas, max 3 cols, semáforo de stock, filtro por categoría
+// Catálogo real desde la base de datos (antes era una lista hardcodeada) —
+// categorías agrupadas, max 3 cols, semáforo de stock, filtro por categoría.
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Shop.css';
 import { ShoppingCart, ArrowDown } from 'lucide-react';
+import { shopApi } from './shopApi';
 
-import gorra1          from '../assets/gorra1.jpg';
-import gorra2          from '../assets/gorra2.jpg';
-import lanyard1        from '../assets/lanyard1.jpg';
-import lanyard2        from '../assets/lanyard2.jpg';
-import llavero1        from '../assets/llavero1.jpg';
-import llavero2        from '../assets/llavero2.jpg';
-import tote1           from '../assets/tote1.jpg';
-import tote2           from '../assets/tote2.jpg';
-import monedero1       from '../assets/monedero1.jpeg';
-import monedero2       from '../assets/monedero2.jpeg';
-import monedero3       from '../assets/monedero3.jpeg';
-import cartera1        from '../assets/cartera1.jpeg';
-import cartera2        from '../assets/cartera2.jpeg';
-import playeraMonalisa from '../assets/playera-monalisa.jpeg';
-import playeraGrito    from '../assets/playera-grito.jpeg';
-import playeraFridas   from '../assets/playera-fridas.jpeg';
-import playeraVenus    from '../assets/playera-venus.jpeg';
-import playeraAdan     from '../assets/playera-adan.jpeg';
 import bannerShopImage from '../assets/banner.jpg';
 
 import FloatingCartButton from './FloatingCartButton';
 import CartPopup          from './CartPopup';
 
 // ─── Constantes de stock ──────────────────────────────────────
+// Deben coincidir exactamente con los valores que calcula el backend en
+// GET /api/shop/products (ver index.js).
 export const STOCK = {
   DISPONIBLE: 'disponible',
   POCO:       'poco',
   AGOTADO:    'agotado',
 };
 
-// ─── Catálogo ─────────────────────────────────────────────────
-// Cada producto tiene: id, nombre, categoria, variantes[]
-// Cada variante tiene: id, nombre, precio, imagen, stock
-const CATALOGO = [
-  {
-    id: 'playera-monalisa',
-    nombre: 'Playera Monalisa',
-    categoria: 'Playeras',
-    variantes: [
-      { id: 'monalisa-u', nombre: 'Única', precio: 249, imagen: playeraMonalisa, stock: STOCK.POCO },
-    ],
-  },
-  {
-    id: 'playera-grito',
-    nombre: 'Playera El Grito',
-    categoria: 'Playeras',
-    variantes: [
-      { id: 'grito-u', nombre: 'Única', precio: 249, imagen: playeraGrito, stock: STOCK.POCO },
-    ],
-  },
-  {
-    id: 'playera-fridas',
-    nombre: 'Playera Dos Fridas',
-    categoria: 'Playeras',
-    variantes: [
-      { id: 'fridas-u', nombre: 'Única', precio: 249, imagen: playeraFridas, stock: STOCK.POCO },
-    ],
-  },
-  {
-    id: 'playera-adan',
-    nombre: 'Playera Creación de Adán',
-    categoria: 'Playeras',
-    variantes: [
-      { id: 'adan-u', nombre: 'Única', precio: 249, imagen: playeraAdan, stock: STOCK.POCO },
-    ],
-  },
-  {
-    id: 'playera-venus',
-    nombre: 'Playera Nacimiento de Venus',
-    categoria: 'Playeras',
-    variantes: [
-      { id: 'venus-u', nombre: 'Única', precio: 249, imagen: playeraVenus, stock: STOCK.POCO },
-    ],
-  },
-  {
-    id: 'gorra',
-    nombre: 'Gorra',
-    categoria: 'Gorras',
-    variantes: [
-      { id: 'gorra-arena', nombre: 'Arena', precio: 89, imagen: gorra1, stock: STOCK.DISPONIBLE },
-      { id: 'gorra-rosa',  nombre: 'Rosa',  precio: 89, imagen: gorra2, stock: STOCK.POCO },
-    ],
-  },
-  {
-    id: 'monedero',
-    nombre: 'Monedero',
-    categoria: 'Accesorios',
-    variantes: [
-      { id: 'monedero-byn',  nombre: 'Blanco y Negro', precio: 50, imagen: monedero1, stock: STOCK.DISPONIBLE },
-      { id: 'monedero-rosa', nombre: 'Rosa',            precio: 50, imagen: monedero2, stock: STOCK.DISPONIBLE },
-      { id: 'monedero-r2',   nombre: 'Rosa Alt',        precio: 50, imagen: monedero3, stock: STOCK.AGOTADO   },
-    ],
-  },
-  {
-    id: 'cartera',
-    nombre: 'Cartera',
-    categoria: 'Accesorios',
-    variantes: [
-      { id: 'cartera-1', nombre: 'Classic 1', precio: 99, imagen: cartera1, stock: STOCK.DISPONIBLE },
-      { id: 'cartera-2', nombre: 'Classic 2', precio: 99, imagen: cartera2, stock: STOCK.DISPONIBLE },
-    ],
-  },
-  {
-    id: 'lanyard',
-    nombre: 'Lanyard',
-    categoria: 'Accesorios',
-    variantes: [
-      { id: 'lanyard-1', nombre: 'Clásico', precio: 69, imagen: lanyard1, stock: STOCK.DISPONIBLE },
-      { id: 'lanyard-2', nombre: 'Patrón',  precio: 69, imagen: lanyard2, stock: STOCK.DISPONIBLE },
-    ],
-  },
-  {
-    id: 'llavero',
-    nombre: 'Llavero',
-    categoria: 'Accesorios',
-    variantes: [
-      { id: 'llavero-burger', nombre: 'Hamburguesa', precio: 49, imagen: llavero1, stock: STOCK.DISPONIBLE },
-      { id: 'llavero-alita',  nombre: 'Alita',        precio: 49, imagen: llavero2, stock: STOCK.DISPONIBLE },
-    ],
-  },
-  {
-    id: 'tote',
-    nombre: 'Tote Bag',
-    categoria: 'Bolsas',
-    variantes: [
-      { id: 'tote-burger', nombre: 'Hamburguesa', precio: 109, imagen: tote1, stock: STOCK.DISPONIBLE },
-      { id: 'tote-alita',  nombre: 'Alita',        precio: 109, imagen: tote2, stock: STOCK.DISPONIBLE },
-    ],
-  },
-];
-
-// Categorías únicas en el orden en que aparecen
-const CATEGORIAS = ['Todas', ...new Set(CATALOGO.map(p => p.categoria))];
+// Adapta la forma que entrega la API (product.variants[].estado) a la forma
+// que ya esperaba este componente (producto.variantes[].stock/imagen).
+const adaptarCatalogo = (products) => products.map((p) => ({
+  id: p.id,
+  nombre: p.nombre,
+  categoria: p.category?.nombre || 'Otros',
+  variantes: p.variants.map((v) => ({
+    id: v.id,
+    nombre: v.nombre,
+    precio: v.precio,
+    imagen: v.imagenUrl || p.imagenUrl,
+    stock: v.estado,
+  })),
+})).filter((p) => p.variantes.length > 0);
 
 // ─── Stock helpers ────────────────────────────────────────────
 const STOCK_CONFIG = {
@@ -149,16 +46,29 @@ const STOCK_CONFIG = {
 
 // ─── Componente principal ─────────────────────────────────────
 const Shop = () => {
+  const [catalogo,        setCatalogo]        = useState(null);
+  const [error,           setError]           = useState('');
   const [filtro,          setFiltro]          = useState('Todas');
   const [cartItems,       setCartItems]       = useState([]);
   const [isCartOpen,      setIsCartOpen]      = useState(false);
   const [toastMsg,        setToastMsg]        = useState('');
 
+  useEffect(() => {
+    let live = true;
+    shopApi.products()
+      .then((products) => live && setCatalogo(adaptarCatalogo(products)))
+      .catch((e) => live && setError(e.message));
+    return () => { live = false; };
+  }, []);
+
+  // Categorías únicas en el orden en que llegan
+  const categorias = useMemo(() => ['Todas', ...new Set((catalogo || []).map(p => p.categoria))], [catalogo]);
+
   // Productos filtrados agrupados por categoría
   const productosFiltrados = useMemo(() => {
     const lista = filtro === 'Todas'
-      ? CATALOGO
-      : CATALOGO.filter(p => p.categoria === filtro);
+      ? (catalogo || [])
+      : (catalogo || []).filter(p => p.categoria === filtro);
 
     const grupos = {};
     lista.forEach(p => {
@@ -166,7 +76,7 @@ const Shop = () => {
       grupos[p.categoria].push(p);
     });
     return grupos;
-  }, [filtro]);
+  }, [filtro, catalogo]);
 
   const totalItems = cartItems.reduce((t, i) => t + i.cantidad, 0);
 
@@ -219,9 +129,15 @@ const Shop = () => {
 
         <h2 className="shop-section-title">Merch Benditas</h2>
 
+        {error && <p className="shop-empty-state">No pudimos cargar el catálogo — intenta de nuevo en un momento.</p>}
+        {!error && !catalogo && <p className="shop-empty-state">Cargando catálogo…</p>}
+        {!error && catalogo && catalogo.length === 0 && <p className="shop-empty-state">Todavía no hay productos publicados.</p>}
+
+        {catalogo && catalogo.length > 0 && (
+        <>
         {/* Filtros */}
         <div className="shop-filtros">
-          {CATEGORIAS.map(cat => (
+          {categorias.map(cat => (
             <button
               key={cat}
               className={`shop-filtro-btn ${filtro === cat ? 'activo' : ''}`}
@@ -256,6 +172,8 @@ const Shop = () => {
             </div>
           </div>
         ))}
+        </>
+        )}
 
       </div>
 
