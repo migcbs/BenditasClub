@@ -27,6 +27,8 @@ let demoMovements = [];
 let demoSuppliers = [{ id: 's1', nombre: 'Distribuidora Avícola Veracruz' }];
 let demoPurchases = [];
 let demoRecipes = [{ id: 'r1', productId: 'p1', yield: 1, product: { id: 'p1', nombre: '8 Alitas' }, items: [{}, {}, {}, {}] }, { id: 'r2', productId: 'p2', yield: 1, product: { id: 'p2', nombre: 'Boneless 250g' }, items: [{}, {}, {}] }];
+let demoRewards = [{ id: 'lr1', label: '20% de descuento', type: 'discount_percent', value: 20, stampsRequired: 6, activo: true }];
+let demoRedemptions = [{ id: 'red1', code: 'AB12-CD34', redeemed: false, reward: { type: 'discount_percent', value: 20 }, customer: { nombre: 'Mariana' } }];
 const demoApi = {
   inventory: async () => demoInventory,
   addStock: async ({ ingredientId, quantity, reason }) => { const ingredient = demoInventory.find((item) => item.id === ingredientId); demoInventory = demoInventory.map((item) => item.id === ingredientId ? { ...item, quantity: item.quantity + quantity, health: stockHealth(item.quantity + quantity, item.reorderPoint) } : item); demoMovements.unshift({ id:`m-${Date.now()}`, quantity, reason, createdAt:new Date().toISOString(), ingredient:{nombre:ingredient.nombre,unit:ingredient.unit} }); },
@@ -44,6 +46,10 @@ const demoApi = {
   cashShifts: async () => [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, difference: null, movements: [] }],
   expenses: async () => [{ id: 'e1', concept: 'Gas', category: 'Servicios', paymentMethod: 'efectivo', amount: 620 }],
   users: async () => [{ id: 'u1', nombre: 'Ana', role: 'empleado', sucursal: 'xico', activo: true }, { id: 'u2', nombre: 'Luis', role: 'cocina', sucursal: 'xico', activo: true }],
+  loyaltyRewards: async () => demoRewards,
+  loyaltyRedemptions: async () => demoRedemptions,
+  createLoyaltyReward: async (payload) => { demoRewards = [...demoRewards.map((r) => ({ ...r, activo: false })), { id: `lr-${Date.now()}`, ...payload, activo: true }]; },
+  updateLoyaltyReward: async (id, payload) => { demoRewards = demoRewards.map((r) => (payload.activo ? { ...r, activo: r.id === id } : r.id === id ? { ...r, ...payload } : r)); },
 };
 
 export default function AdminApp({ api = defaultApi, storage = window.localStorage }) {

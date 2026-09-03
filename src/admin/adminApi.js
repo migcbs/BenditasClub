@@ -35,4 +35,8 @@ export const adminApi = {
   cashShifts: (branch, token) => fetch(`${API_BASE}/api/admin/cash-shifts?branch=${branch}`, { headers: auth(token) }).then(handle),
   expenses: (branch, token) => fetch(`${API_BASE}/api/admin/expenses?branch=${branch}`, { headers: auth(token) }).then(handle),
   users: (token) => fetch(`${API_BASE}/api/admin/users`, { headers: auth(token) }).then(handle),
+  loyaltyRewards: (token) => fetch(`${API_BASE}/api/admin/loyalty/rewards`, { headers: auth(token) }).then(handle),
+  createLoyaltyReward: (payload, token) => fetch(`${API_BASE}/api/admin/loyalty/rewards`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  updateLoyaltyReward: (id, payload, token) => fetch(`${API_BASE}/api/admin/loyalty/rewards/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  loyaltyRedemptions: (token) => fetch(`${API_BASE}/api/admin/loyalty/redemptions`, { headers: auth(token) }).then(handle),
 };

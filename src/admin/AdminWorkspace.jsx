@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, MenuItem, TextField, Typography } from '@mui/material';
-import { Banknote, ChefHat, CircleDollarSign, ClipboardList, Edit3, PackageCheck, Plus, ReceiptText, ShoppingBasket, Trash2 } from 'lucide-react';
+import { Alert, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, MenuItem, Switch, TextField, Typography } from '@mui/material';
+import { Banknote, ChefHat, CircleDollarSign, ClipboardList, Edit3, Gift, PackageCheck, Plus, ReceiptText, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
 
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 
@@ -183,10 +183,125 @@ function Team({ api, token }) {
   return <section className="admin-module"><header><div><Typography component="h1">Equipo y permisos</Typography><Typography>Accesos operativos separados para piso y cocina.</Typography></div><Chip label={`${users.filter((user) => user.activo).length} activos`} /></header><div className="admin-data-panel"><div className="admin-data-heading"><h2>Personal</h2><span>PIN individual</span></div>{users.map((user) => <div className="admin-list-row" key={user.id}><span><b>{user.nombre}</b><small>{user.sucursal} · {user.role}</small></span><Chip size="small" color={user.activo ? 'success' : 'default'} label={user.activo ? 'Activo' : 'Inactivo'} /></div>)}</div></section>;
 }
 
+const REWARD_TYPES = [
+  { value: 'discount_percent', label: 'Descuento %' },
+  { value: 'discount_fixed', label: 'Descuento fijo' },
+  { value: 'free_item', label: 'Producto gratis' },
+  { value: 'free_shipping', label: 'Envío gratis' },
+];
+const rewardSummary = (reward) => {
+  if (reward.type === 'discount_percent') return `${reward.value}% de descuento`;
+  if (reward.type === 'discount_fixed') return `$${reward.value} de descuento`;
+  if (reward.type === 'free_shipping') return 'Envío gratis';
+  if (reward.type === 'free_item') return `${reward.product?.nombre || 'Producto'} gratis`;
+  return reward.label;
+};
+
+function Loyalty({ api, token }) {
+  const [rewards, setRewards] = useState(null);
+  const [redemptions, setRedemptions] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ label: '', type: 'discount_percent', value: '', productId: '', stampsRequired: '6' });
+
+  const load = () => Promise.all([api.loyaltyRewards(token), api.loyaltyRedemptions(token)])
+    .then(([r, red]) => { setRewards(r); setRedemptions(red); });
+
+  useEffect(() => { load().catch((e) => setError(e.message)); }, [api, token]);
+
+  const openForm = async () => {
+    if (!products.length) setProducts(await api.products());
+    setForm({ label: '', type: 'discount_percent', value: '', productId: '', stampsRequired: '6' });
+    setOpen(true);
+  };
+
+  const saveReward = async () => {
+    if (!form.label.trim()) return setError('El nombre de la recompensa es obligatorio.');
+    if (form.type === 'free_item' && !form.productId) return setError('Elige el producto que se regala.');
+    setSaving(true); setError('');
+    try {
+      await api.createLoyaltyReward({
+        label: form.label.trim(),
+        type: form.type,
+        value: form.type.startsWith('discount') ? Number(form.value || 0) : undefined,
+        productId: form.type === 'free_item' ? form.productId : undefined,
+        stampsRequired: Number(form.stampsRequired || 6),
+      }, token);
+      await load(); setOpen(false);
+    } catch (requestError) { setError(requestError.message); } finally { setSaving(false); }
+  };
+
+  const toggleActive = async (reward) => {
+    setSaving(true); setError('');
+    try { await api.updateLoyaltyReward(reward.id, { activo: !reward.activo }, token); await load(); }
+    catch (requestError) { setError(requestError.message); } finally { setSaving(false); }
+  };
+
+  if (!rewards) return <Loading />;
+  const activeReward = rewards.find((r) => r.activo);
+  const pending = redemptions?.filter((r) => !r.redeemed) || [];
+
+  return <section className="admin-module">
+    {error ? <Alert severity="error" onClose={() => setError('')}>{error}</Alert> : null}
+    <header>
+      <div><Typography component="h1">Tarjeta de fidelidad</Typography><Typography>Configura qué se gana el cliente al completar sus sellos.</Typography></div>
+      <div className="admin-header-actions"><Button variant="contained" startIcon={<Plus size={18} />} onClick={openForm}>Nueva recompensa</Button></div>
+    </header>
+    <div className="admin-module-stats">
+      <article><Sparkles /><span><b>{activeReward ? rewardSummary(activeReward) : 'Ninguna'}</b><small>Recompensa activa</small></span></article>
+      <article><PackageCheck /><span><b>{activeReward?.stampsRequired ?? 6}</b><small>Sellos requeridos</small></span></article>
+      <article><Gift /><span><b>{pending.length}</b><small>Canjes pendientes</small></span></article>
+    </div>
+    <div className="admin-data-panel">
+      <div className="admin-data-heading"><h2>Recompensas</h2><span>Solo una activa a la vez</span></div>
+      {rewards.length ? rewards.map((reward) => (
+        <div className="admin-list-row" key={reward.id}>
+          <span><b>{reward.label}</b><small>{rewardSummary(reward)} · {reward.stampsRequired} sellos</small></span>
+          <div className="admin-row-actions">
+            <Chip size="small" color={reward.activo ? 'success' : 'default'} label={reward.activo ? 'Activa' : 'Inactiva'} />
+            <Switch checked={reward.activo} onChange={() => toggleActive(reward)} disabled={saving} inputProps={{ 'aria-label': `Activar ${reward.label}` }} />
+          </div>
+        </div>
+      )) : <Empty>Todavía no configuras ninguna recompensa — la tarjeta de fidelidad no otorgará nada hasta que crees una.</Empty>}
+    </div>
+    <div className="admin-data-panel">
+      <div className="admin-data-heading"><h2>Canjes pendientes</h2><span>{pending.length}</span></div>
+      {pending.length ? pending.map((r) => (
+        <div className="admin-list-row" key={r.id}>
+          <span><b>{r.customer.nombre}</b><small>{rewardSummary(r.reward)} · código {r.code}</small></span>
+        </div>
+      )) : <Empty>Sin canjes pendientes.</Empty>}
+    </div>
+
+    <Dialog open={open} onClose={() => !saving && setOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Nueva recompensa de fidelidad</DialogTitle>
+      <DialogContent className="admin-form-grid">
+        <TextField autoFocus required label="Nombre" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} />
+        <TextField select required label="Tipo" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+          {REWARD_TYPES.map((t) => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
+        </TextField>
+        {form.type.startsWith('discount') && (
+          <TextField required label={form.type === 'discount_percent' ? 'Porcentaje' : 'Monto ($)'} type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
+        )}
+        {form.type === 'free_item' && (
+          <TextField select required label="Producto" value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })}>
+            {products.map((p) => <MenuItem key={p.id} value={p.id}>{p.nombre}</MenuItem>)}
+          </TextField>
+        )}
+        <TextField required label="Sellos requeridos" type="number" value={form.stampsRequired} onChange={(e) => setForm({ ...form, stampsRequired: e.target.value })} />
+      </DialogContent>
+      <DialogActions><Button onClick={() => setOpen(false)} disabled={saving}>Cancelar</Button><Button variant="contained" onClick={saveReward} disabled={saving}>Guardar y activar</Button></DialogActions>
+    </Dialog>
+  </section>;
+}
+
 export default function AdminWorkspace({ section, api, token, branch, dashboard }) {
   if (section === 'Operación') return <Operation dashboard={dashboard} />;
   if (section === 'Finanzas') return <Finance api={api} token={token} branch={branch} dashboard={dashboard} />;
   if (section === 'Inventario') return <Inventory api={api} token={token} branch={branch} />;
+  if (section === 'Fidelidad') return <Loyalty api={api} token={token} />;
   if (section === 'Equipo') return <Team api={api} token={token} />;
   return null;
 }
