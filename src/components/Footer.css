@@ -53,14 +53,14 @@
   border-radius: 50%;
   font-size: 1.3rem;
   border: 2px solid #000;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .social-link:hover {
-  transform: translateY(-5px) scale(1.1);
+  transform: translateY(-3px);
   background: #E765B7;
-  color: #fff; /* Aseguramos que el icono se vea blanco en hover */
-  box-shadow: 0 5px 20px rgba(231, 143, 187, 0.5);
+  color: #241a20; /* antes blanco sobre rosa — no cumple contraste (ver DESIGN.md) */
+  box-shadow: 0 5px 20px rgba(231, 101, 183, 0.5);
 }
 
 /* SECCIÓN FINAL (LINKS HASTA ABAJO) */
@@ -103,9 +103,6 @@
   margin: 0;
 }
 
-.social-icons a:hover{
-    color: #fff;
-}
 
 /* RESPONSIVO */
 @media (max-width: 768px) {
