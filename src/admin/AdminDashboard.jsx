@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Avatar, ButtonBase, Card, Chip, Typography } from '@mui/material';
-import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Gauge, House, PackageSearch, ReceiptText, UsersRound } from 'lucide-react';
+import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Gauge, House, PackageSearch, ReceiptText, Sparkles, UsersRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AdminWorkspace from './AdminWorkspace';
 
@@ -9,7 +9,7 @@ const brand = '/assets/plates/brand-lockup.png';
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 
 const nav = [
-  ['Inicio', House], ['Operación', Gauge], ['Finanzas', ReceiptText], ['Inventario', PackageSearch], ['Equipo', UsersRound],
+  ['Inicio', House], ['Operación', Gauge], ['Finanzas', ReceiptText], ['Inventario', PackageSearch], ['Fidelidad', Sparkles], ['Equipo', UsersRound],
 ];
 
 function AlertRow({ icon: Icon, tone, title, detail, action, onClick }) {
