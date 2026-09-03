@@ -1,8 +1,6 @@
 // src/components/pedido/components/ProductoCard.jsx
 
 import React, { useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
-import { motion } from "framer-motion";
 import SelectorSabores from "./SelectorSabores";
 
 // Productos que requieren configuración antes de agregar
@@ -62,37 +60,19 @@ const ProductoCard = React.memo(({ producto, agregarProducto }) => {
 
   return (
     <>
-      <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }}>
-        <Box
-          sx={{
-            borderRadius: 3,
-            border: "1px solid rgba(36,26,32,0.08)",
-            background: "rgba(36,26,32,0.05)",
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            gap: 0.75,
-            height: "100%",
-          }}
-        >
-          <Typography sx={{ fontWeight: 700 }}>{producto.nombre}</Typography>
+      <div className="producto-card">
+        <h4 className="producto-nombre">{producto.nombre}</h4>
 
-          {producto.descripcion && (
-            <Typography variant="body2" color="text.secondary">{producto.descripcion}</Typography>
-          )}
+        {producto.descripcion && (
+          <p className="producto-descripcion">{producto.descripcion}</p>
+        )}
 
-          <Typography sx={{ color: "#C43D8F", fontWeight: 700 }}>${producto.precio}</Typography>
+        <span className="precio-tag">${producto.precio}</span>
 
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={handleAgregar}
-            sx={{ mt: "auto", alignSelf: "flex-start" }}
-          >
-            + Agregar
-          </Button>
-        </Box>
-      </motion.div>
+        <button className="btn-agregar" onClick={handleAgregar}>
+          + Agregar
+        </button>
+      </div>
 
       {mostrarSelector && (
         <SelectorSabores

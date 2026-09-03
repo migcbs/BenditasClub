@@ -1,10 +1,13 @@
 // src/components/pedido/components/PasoResumen.jsx
+// ✅ Total calculado con calcularSubtotal (fuente única)
+// ✅ Sabores / configurables visibles en el resumen
+// ✅ enviarPedidoWhatsApp recibe tipoPedido correctamente
+
 import React, { useMemo } from "react";
-import { Box, Typography, Card, Button, Chip } from "@mui/material";
-import { motion } from "framer-motion";
 import { enviarPedidoWhatsApp } from "../services/whatsappService";
 import { calcularSubtotal, calcularSubtotalItem, formatearMoneda, guardarPedidoEnCuenta } from "../services/pedidoServices";
 import { TIPO_PEDIDO } from "../utils/constants";
+import "../styles/resumen.css";
 
 const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, onClose }) => {
 
@@ -28,84 +31,101 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="h1" sx={{ fontSize: 22 }}>Confirmar pedido</Typography>
+    <div className="paso-resumen">
 
-      <Card elevation={0} sx={{ background: "rgba(36,26,32,0.05)", borderRadius: 3, p: 2 }}>
-        <Typography variant="h2" sx={{ fontSize: 15, mb: 1 }}>Cliente</Typography>
-        <Typography variant="body2"><b>Nombre:</b> {cliente.nombre || "—"}</Typography>
-        <Typography variant="body2"><b>Teléfono:</b> {cliente.telefono || "—"}</Typography>
-        <Typography variant="body2"><b>Sucursal:</b> {cliente.sucursal?.toUpperCase() || "—"}</Typography>
+      <h2 className="titulo-seccion">Confirmar pedido</h2>
+
+      {/* ── Datos del cliente ── */}
+      <div className="resumen-seccion">
+        <h3>Cliente</h3>
+        <p><strong>Nombre:</strong> {cliente.nombre || "—"}</p>
+        <p><strong>Teléfono:</strong> {cliente.telefono || "—"}</p>
+        <p><strong>Sucursal:</strong> {cliente.sucursal?.toUpperCase() || "—"}</p>
 
         {cliente.tipoPedido === TIPO_PEDIDO.DOMICILIO ? (
           <>
-            <Typography variant="body2"><b>Tipo:</b> 🛵 A domicilio</Typography>
-            <Typography variant="body2"><b>Dirección:</b> {cliente.direccion || "—"}</Typography>
+            <p><strong>Tipo:</strong> 🛵 A domicilio</p>
+            <p><strong>Dirección:</strong> {cliente.direccion || "—"}</p>
           </>
         ) : (
-          <Typography variant="body2"><b>Tipo:</b> 🏪 Para recoger</Typography>
+          <p><strong>Tipo:</strong> 🏪 Para recoger</p>
         )}
 
         {cliente.comentarios && (
-          <Typography variant="body2"><b>Comentarios:</b> {cliente.comentarios}</Typography>
+          <p><strong>Comentarios:</strong> {cliente.comentarios}</p>
         )}
-      </Card>
+      </div>
 
-      <Card elevation={0} sx={{ background: "rgba(36,26,32,0.05)", borderRadius: 3, p: 2 }}>
-        <Typography variant="h2" sx={{ fontSize: 15, mb: 1 }}>Productos</Typography>
+      {/* ── Productos ── */}
+      <div className="resumen-seccion">
+        <h3>Productos</h3>
 
         {carritoVacio ? (
-          <Typography color="text.secondary">No se han agregado productos.</Typography>
+          <p>No se han agregado productos.</p>
         ) : (
           carrito.map((item, index) => {
             const subtotal = calcularSubtotalItem(item);
-            const etiquetas = [
-              ...(item.configurables || []).map((c) => {
-                if (c.sabores?.length > 0) return `🌶 ${c.type ? `${c.type}: ` : ""}${c.sabores.join(", ")}`;
-                if (c.opcion) return `➤ ${c.type ? `${c.type}: ` : ""}${c.opcion}`;
-                return null;
-              }).filter(Boolean),
-              ...(item.opcionElegida ? [`➤ ${item.opcionElegida}`] : []),
-            ];
             return (
-              <Box key={item.id || index} sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", py: 1, borderBottom: "1px solid rgba(36,26,32,0.06)" }}>
-                <Box>
-                  <Typography sx={{ fontWeight: 600 }}>{item.cantidad || 1}× {item.nombre}</Typography>
-                  {etiquetas.length > 0 && (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
-                      {etiquetas.map((texto, i) => <Chip key={i} label={texto} size="small" variant="outlined" />)}
-                    </Box>
+              <div key={item.id || index} className="resumen-item">
+                <div className="resumen-item-info">
+                  <span className="resumen-item-nombre">
+                    {item.cantidad || 1}× {item.nombre}
+                  </span>
+
+                  {/* Sabores / configurables */}
+                  {item.configurables?.map((c, i) => {
+                    if (c.sabores?.length > 0) {
+                      return (
+                        <span key={i} className="resumen-sabor">
+                          🌶 {c.type ? `${c.type}: ` : ""}{c.sabores.join(", ")}
+                        </span>
+                      );
+                    }
+                    if (c.opcion) {
+                      return (
+                        <span key={i} className="resumen-sabor">
+                          ➤ {c.type ? `${c.type}: ` : ""}{c.opcion}
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  {item.opcionElegida && (
+                    <span className="resumen-sabor">➤ {item.opcionElegida}</span>
                   )}
-                </Box>
-                <Typography sx={{ fontWeight: 700, color: "#C43D8F" }}>{formatearMoneda(subtotal)}</Typography>
-              </Box>
+                </div>
+
+                <span className="resumen-item-precio">
+                  {formatearMoneda(subtotal)}
+                </span>
+              </div>
             );
           })
         )}
-      </Card>
+      </div>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <Typography variant="h2" sx={{ fontSize: 20 }}>Total: {formatearMoneda(total)}</Typography>
+      {/* ── Total ── */}
+      <div className="resumen-total">
+        <h3>Total: {formatearMoneda(total)}</h3>
         {cliente.tipoPedido === TIPO_PEDIDO.DOMICILIO && (
-          <Typography variant="caption" color="text.secondary">+ costo de envío por confirmar</Typography>
+          <p className="resumen-envio-nota">+ costo de envío por confirmar</p>
         )}
-      </Box>
+      </div>
 
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <Button onClick={pasoAnterior} fullWidth>Atrás</Button>
-        <motion.div style={{ flex: 2 }} whileTap={{ scale: 0.97 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={confirmarPedido}
-            disabled={carritoVacio}
-            sx={{ background: "linear-gradient(135deg, #25D366, #128C7E)", color: "#fff" }}
-          >
-            Enviar por WhatsApp
-          </Button>
-        </motion.div>
-      </Box>
-    </Box>
+      {/* ── Acciones ── */}
+      <div className="acciones">
+        <button onClick={pasoAnterior}>Atrás</button>
+        <button
+          className="btn-primary"
+          onClick={confirmarPedido}
+          disabled={carritoVacio}
+        >
+          Enviar por WhatsApp
+        </button>
+      </div>
+
+    </div>
   );
 };
 

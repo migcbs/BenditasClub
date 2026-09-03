@@ -1,0 +1,220 @@
+/* ==========================================================================
+   PASO 1: DATOS DEL CLIENTE — BENDITAS CLUB
+   Mobile-first. Breakpoints: 480px / 768px / 992px
+   ========================================================================== */
+
+:root {
+  --benditas-pink:  #e78fbb;
+  --benditas-black: #000000;
+  --benditas-white: #ffffff;
+  --benditas-red:   #ff4d4d;
+  --border-thick:   3px;
+  --pop-ease:       cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─────────────────────────────────────────
+   FORM
+───────────────────────────────────────── */
+.paso-cliente {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 8px 4px 16px;
+  width: 100%;
+  box-sizing: border-box;
+  animation: entrance 0.4s var(--pop-ease);
+}
+
+.titulo-seccion {
+  font-family: 'Titan One', cursive;
+  color: var(--benditas-black);
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 1.35rem;
+  margin: 0 0 6px;
+  letter-spacing: 1px;
+}
+
+/* ── Form groups ── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.form-group label {
+  font-family: 'Titan One', cursive;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--benditas-black);
+  margin-left: 10px;
+}
+
+/* ── Inputs ── */
+.paso-cliente input,
+.paso-cliente textarea {
+  width: 100%;
+  padding: 12px 15px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: var(--border-thick) solid var(--benditas-black);
+  border-radius: 14px;
+  background: var(--benditas-white);
+  box-shadow: 3px 3px 0 var(--benditas-black);
+  transition: all 0.2s var(--pop-ease);
+  outline: none;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+}
+
+.paso-cliente input:focus,
+.paso-cliente textarea:focus {
+  border-color: var(--benditas-pink);
+  box-shadow: 5px 5px 0 var(--benditas-pink);
+  transform: translate(-2px, -2px);
+}
+
+.paso-cliente textarea {
+  min-height: 72px;
+  resize: none;
+}
+
+/* ── Campo dirección animado ── */
+.direccion-animada {
+  animation: slideDown 0.3s var(--pop-ease);
+}
+
+/* ── Botones de sucursal / tipo de pedido ── */
+.sucursal-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.btn-sucursal {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thick) solid var(--benditas-black);
+  border-radius: 14px;
+  font-family: 'Titan One', cursive;
+  font-size: 0.8rem;
+  background: white;
+  color: var(--benditas-black);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.18s var(--pop-ease);
+  box-shadow: 4px 4px 0 var(--benditas-black);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-sucursal.activo {
+  background: var(--benditas-pink) !important;
+  color: white;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--benditas-black);
+}
+
+.btn-sucursal:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--benditas-black);
+}
+
+/* ── Errores ── */
+.error {
+  color: var(--benditas-red);
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 0.62rem;
+  margin-left: 10px;
+  text-transform: uppercase;
+  animation: shake 0.35s ease;
+}
+
+.input-error {
+  border-color: var(--benditas-red) !important;
+  box-shadow: 3px 3px 0 var(--benditas-red) !important;
+}
+
+/* ── Botón continuar ── */
+.btn-primary-form {
+  width: 55%;
+  align-self: center;
+  height: 52px;
+  margin-top: 10px;
+  background: var(--benditas-black);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Titan One', cursive;
+  font-size: 1rem;
+  text-transform: uppercase;
+  box-shadow: 0 5px 0 var(--benditas-pink);
+  cursor: pointer;
+  transition: all 0.2s var(--pop-ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary-form:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 var(--benditas-pink);
+}
+
+.btn-primary-form:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--benditas-pink);
+}
+
+.btn-primary-form:disabled {
+  background: #ddd;
+  color: #aaa;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────
+   IPAD (768px+)
+───────────────────────────────────────── */
+@media (min-width: 768px) {
+  .paso-cliente { max-width: 480px; margin: 0 auto; gap: 13px; }
+  .titulo-seccion { font-size: 1.5rem; }
+  .btn-sucursal { height: 54px; font-size: 0.85rem; }
+  .btn-primary-form { width: 50%; height: 55px; font-size: 1.05rem; }
+}
+
+/* ─────────────────────────────────────────
+   MOBILE PEQUEÑO (< 380px)
+───────────────────────────────────────── */
+@media (max-width: 380px) {
+  .btn-sucursal { font-size: 0.72rem; height: 46px; }
+  .btn-primary-form { width: 80%; }
+  .titulo-seccion { font-size: 1.2rem; }
+}
+
+/* ─────────────────────────────────────────
+   ANIMACIONES
+───────────────────────────────────────── */
+@keyframes entrance {
+  from { opacity: 0; transform: scale(0.97) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-4px); }
+  75%       { transform: translateX(4px); }
+}

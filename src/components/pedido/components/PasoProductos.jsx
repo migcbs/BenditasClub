@@ -1,12 +1,13 @@
 // src/components/pedido/components/PasoProductos.jsx
+
 import React, { useState, useMemo } from "react";
-import { Box, Grid, Typography, Button } from "@mui/material";
-import { AnimatePresence, motion } from "framer-motion";
 import CategoriaTabs  from "./CategoriaTabs";
 import ProductoCard   from "./ProductoCard";
 import CarritoItem    from "./CarritoItem";
 
 import { categorias, obtenerProductosPorCategoria, calcularSubtotal, formatearMoneda } from "../services/pedidoServices";
+
+import "../styles/productos.css";
 
 // Categorías que NO se muestran en pedidos a domicilio
 const CATEGORIAS_SOLO_LOCAL = ["Cerveza", "Preparados"];
@@ -51,30 +52,32 @@ const PasoProductos = ({
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 2.5, position: "relative" }}>
+    <div className="paso-productos">
 
       {/* ── Productos ── */}
-      <Box sx={{ flex: 2, minWidth: 0 }}>
+      <div className="productos-section">
         <CategoriaTabs
           categorias={categoriasVisibles}
           categoriaActiva={categoriaFinal}
           setCategoriaActiva={setCategoriaActiva}
         />
 
-        <Grid container spacing={1.5} sx={{ mt: 0.5, maxHeight: { md: 420 }, overflowY: { md: "auto" } }}>
+        <div className="productos-grid-scroll">
           {productos.map((producto, idx) => (
-            <Grid key={`${producto.nombre}-${idx}`} size={{ xs: 6, sm: 4 }}>
-              <ProductoCard producto={producto} agregarProducto={handleAgregarProducto} />
-            </Grid>
+            <ProductoCard
+              key={`${producto.nombre}-${idx}`}
+              producto={producto}
+              agregarProducto={handleAgregarProducto}
+            />
           ))}
-        </Grid>
-      </Box>
+        </div>
+      </div>
 
       {/* ── Carrito ── */}
-      <Box sx={{ flex: 1, minWidth: { md: 280 }, display: "flex", flexDirection: "column" }}>
-        <Typography variant="h2" sx={{ fontSize: 18, mb: 1 }}>Tu pedido</Typography>
+      <div className="carrito-section">
+        <h3 className="carrito-titulo">Tu pedido</h3>
 
-        <Box sx={{ maxHeight: { md: 320 }, overflowY: "auto" }}>
+        <div className="carrito-scroll">
           {carrito.map(item => (
             <CarritoItem
               key={item.id}
@@ -83,46 +86,27 @@ const PasoProductos = ({
               eliminarProducto={eliminarProducto}
             />
           ))}
-          {carritoVacio && <Typography color="text.secondary">Agrega productos al carrito 😎</Typography>}
-        </Box>
+          {carritoVacio && <p className="carrito-vacio">Agrega productos al carrito 😎</p>}
+        </div>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", fontWeight: 800, fontSize: 20, my: 1.5 }}>
+        <div className="carrito-total">
           <span>Total</span>
           <span>{formatearMoneda(total)}</span>
-        </Box>
+        </div>
 
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button onClick={pasoAnterior} fullWidth>Atrás</Button>
-          <motion.div style={{ flex: 2 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={siguientePaso}
-              disabled={carritoVacio}
-              sx={{ background: "#E765B7", color: "#241a20" }}
-            >
-              Continuar
-            </Button>
-          </motion.div>
-        </Box>
-      </Box>
+        <div className="acciones">
+          <button onClick={pasoAnterior}>Atrás</button>
+          <button className="btn-primary" onClick={siguientePaso} disabled={carritoVacio}>
+            Continuar
+          </button>
+        </div>
+      </div>
 
-      <AnimatePresence>
-        {toastVisible && (
-          <motion.div
-            initial={{ opacity: 0.6, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            style={{ position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)" }}
-          >
-            <Box sx={{ background: "#5fd88f", color: "#0d1f14", px: 2, py: 1, borderRadius: 3, fontWeight: 700 }}>
-              ✓ {productoAgregado} agregado
-            </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {toastVisible && (
+        <div className="toast-agregado">✓ {productoAgregado} agregado</div>
+      )}
 
-    </Box>
+    </div>
   );
 };
 
