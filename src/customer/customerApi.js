@@ -26,4 +26,5 @@ export const customerApi = {
     body: JSON.stringify(payload),
   }).then(handle),
   orders: (token) => fetch(`${API_BASE}/api/customer/orders`, { headers: auth(token) }).then(handle),
+  loyalty: (token) => fetch(`${API_BASE}/api/customer/loyalty`, { headers: auth(token) }).then(handle),
 };

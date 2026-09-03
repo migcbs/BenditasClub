@@ -28,6 +28,13 @@
 .customer-order small { overflow:hidden; color:#756870; text-overflow:ellipsis; white-space:nowrap; }
 .customer-order strong { font-size:18px; }
 .customer-empty { padding:16px 0; }
+.customer-reward-ready { margin-top:16px; padding:16px; border:1px dashed #e78fbb; border-radius:14px; background:linear-gradient(135deg,rgba(231,143,187,.12),rgba(201,138,31,.1)); }
+.customer-reward-ready p { color:#1e171b; margin-bottom:8px; }
+.customer-reward-code { padding:10px 14px; margin-bottom:6px; border-radius:10px; background:#171114; color:#fff; font:700 20px/1 'Roboto Mono',monospace; letter-spacing:.06em; text-align:center; }
+.customer-wallet-btn { width:100%; margin-top:10px; }
+.customer-reward-history { margin-top:14px; color:#6b5d64; font-size:13px; }
+.customer-reward-history summary { cursor:pointer; font-weight:800; color:#1e171b; }
+.customer-reward-history p { margin-top:8px; }
 
 @media (max-width:520px) {
   .customer-page { padding-top:78px; }
