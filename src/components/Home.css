@@ -80,43 +80,34 @@
 }
 .home-pill svg { color: #E765B7; flex-shrink: 0; }
 
-.home-hero-logo {
-  width: 100%;
-  max-width: 420px;
-  height: auto;
-  margin-bottom: 35px;
-  pointer-events: auto;
-  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
-}
-
 /* Mismo lenguaje de botón que el resto de la plataforma (ver DESIGN.md):
-   píldora, relleno rosa de marca, texto en tinta oscura, borde fino en vez
-   del "sticker pop-art" con sombra sólida offset que traía antes — ese
-   estilo no aparecía en ningún otro botón del sitio. */
+   píldora, relleno rosa de marca, texto blanco. Más sutil que antes —
+   borde fino translúcido en vez de tinta sólida, sombra suave en vez de
+   la más pronunciada que traía. */
 .home-order-btn {
   pointer-events: auto;
   background-color: #E765B7;
   color: #fff;
-  border: 2px solid #241a20;
-  padding: 18px 45px;
+  border: 1px solid rgba(255,255,255,0.35);
+  padding: 15px 38px;
   border-radius: 999px;
   font-family: 'Titan One', cursive;
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(36,26,32,0.25);
+  box-shadow: 0 4px 16px rgba(36,26,32,0.2);
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .home-order-btn:hover {
   background-color: #C43D8F;
   color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(36,26,32,0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(36,26,32,0.24);
 }
 
 .home-order-btn:active {
   transform: translateY(0);
-  box-shadow: 0 6px 18px rgba(36,26,32,0.22);
+  box-shadow: 0 3px 10px rgba(36,26,32,0.18);
 }
 
 /* INDICADORES */
@@ -151,7 +142,6 @@
 /* RESPONSIVO */
 @media (max-width: 768px) {
   .home-pill { font-size: 0.72rem; padding: 6px 14px; text-align: center; }
-  .home-hero-logo { max-width: 280px; }
   .home-order-btn {
     font-size: 1.1rem;
     padding: 15px 30px;

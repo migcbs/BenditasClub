@@ -4,7 +4,6 @@ import { MapPin } from "lucide-react";
 import img1 from "../assets/1.jpg";
 import img2 from "../assets/2.jpg";
 import img3 from "../assets/3.jpg";
-import logo from "../assets/logo.png";
 import PedidoPopup from "./pedido/PedidoPopup";
 import "./Home.css";
 
@@ -84,17 +83,8 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           >
-            <MapPin size={14} /> Xico y Coatepec · Alitas, boneless, box y más
+            <MapPin size={14} /> Xico y Coatepec
           </motion.div>
-
-          <motion.img
-            src={logo}
-            alt="Benditas Club Logo"
-            className="home-hero-logo"
-            initial={{ opacity: 0.85, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          />
 
           <motion.button
             className="home-order-btn"

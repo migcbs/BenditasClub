@@ -15,16 +15,31 @@
   --nav-shadow:    0 4px 14px rgba(36, 26, 32, 0.16);
 }
 
-/* ── Desktop navbar: cápsula flotante (logo · pill de links · cuenta) ── */
+/* ── Desktop navbar: cápsula flotante (logo · pill de links · cuenta) ──
+   El posicionamiento/centrado vive en .navbar-float (sin transform propio
+   de framer-motion); la animación de entrada vive en .navbar-float-inner.
+   Iban juntos en el mismo elemento antes, pero framer-motion anima `y`
+   escribiendo `transform` inline, lo que pisaba el `translateX(-50%)` de
+   centrado — por eso la barra se veía corrida a la derecha. */
 .navbar-float {
   position: fixed;
   top: clamp(14px, 2.4vh, 22px);
   left: 50%;
   transform: translateX(-50%);
+  z-index: 1000;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.navbar-float.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-14px);
+  pointer-events: none;
+}
+
+.navbar-float-inner {
   display: flex;
   align-items: center;
   gap: clamp(12px, 1.6vw, 18px);
-  z-index: 1000;
 }
 
 .nav-logo-btn {
@@ -95,17 +110,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: clamp(42px, 4.6vw, 48px);
-  padding: 0 clamp(18px, 2vw, 22px);
+  width: clamp(42px, 4.2vw, 46px);
+  height: clamp(42px, 4.2vw, 46px);
   background: #241a20;
   color: #fff8f0;
-  border-radius: 999px;
+  border-radius: 50%;
   box-shadow: var(--nav-shadow, 0 4px 14px rgba(36,26,32,0.16));
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: clamp(13px, 1.1vw, 14.5px);
   text-decoration: none;
-  white-space: nowrap;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -129,6 +140,32 @@
 }
 
 .social-icons a:hover { color: var(--primary-color); transform: scale(1.2); }
+
+/* ── Desktop: botón colapsado — aparece al deslizar, reemplaza la cápsula ── */
+.nav-collapsed-btn {
+  display: none; /* .is-visible lo muestra, solo en desktop (media query abajo) */
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  height: 46px;
+  width: 46px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--nav-shadow);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
 
 /* ── Mobile: cápsula flotante ───────────────────────────────── */
 /* Siempre clara (antes cambiaba de oscura a clara al hacer scroll; ya no
@@ -162,7 +199,8 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.mobile-pill:active {
+.mobile-pill:active,
+.nav-collapsed-btn:active {
   transform: scale(0.94);
 }
 
@@ -177,10 +215,13 @@
   pointer-events: none;
 }
 
-/* Animación a X cuando está abierto */
-.mobile-pill.abierto .pill-linea:nth-child(1) { transform: translateY(7.5px) rotate(45deg); background: var(--bp-pink); }
-.mobile-pill.abierto .pill-linea:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.mobile-pill.abierto .pill-linea:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); background: var(--bp-pink); }
+/* Animación a X cuando está abierto (mobile y el botón colapsado de desktop) */
+.mobile-pill.abierto .pill-linea:nth-child(1),
+.nav-collapsed-btn.abierto .pill-linea:nth-child(1) { transform: translateY(7.5px) rotate(45deg); background: var(--bp-pink); }
+.mobile-pill.abierto .pill-linea:nth-child(2),
+.nav-collapsed-btn.abierto .pill-linea:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.mobile-pill.abierto .pill-linea:nth-child(3),
+.nav-collapsed-btn.abierto .pill-linea:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); background: var(--bp-pink); }
 
 /* ── Fullscreen menu mobile ─────────────────────────────────── */
 .fullscreen-menu-overlay {
@@ -277,15 +318,22 @@
 @media (max-width: 768px) {
   /* Ocultar navbar de desktop */
   .navbar-float { display: none; }
+  .nav-collapsed-btn { display: none !important; }
 
   /* Mostrar cápsula flotante */
   .mobile-pill { display: flex; }
 }
 
 @media (min-width: 769px) {
-  /* Ocultar todo lo mobile en desktop */
-  .mobile-pill            { display: none !important; }
-  .fullscreen-menu-overlay{ display: none !important; }
+  /* Ocultar el botón mobile — el equivalente en desktop es .nav-collapsed-btn */
+  .mobile-pill { display: none !important; }
+
+  .nav-collapsed-btn { display: flex; }
+  .nav-collapsed-btn.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
 }
 
 /* ── Animaciones ────────────────────────────────────────────── */
