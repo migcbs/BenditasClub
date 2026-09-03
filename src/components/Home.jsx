@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { MapPin } from "lucide-react";
 import img1 from "../assets/1.jpg";
 import img2 from "../assets/2.jpg";
 import img3 from "../assets/3.jpg";
@@ -76,10 +78,33 @@ const Home = () => {
       {/* Contenido Centrado que Scrollea Normal */}
       <div className="home-main-overlay">
         <div className="home-content-wrap">
-          <img src={logo} alt="Benditas Club Logo" className="home-hero-logo" />
-          <button className="home-order-btn" onClick={() => setShowPedido(true)}>
+          <motion.div
+            className="home-pill"
+            initial={{ opacity: 0.85, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <MapPin size={14} /> Xico y Coatepec · Alitas, boneless, box y más
+          </motion.div>
+
+          <motion.img
+            src={logo}
+            alt="Benditas Club Logo"
+            className="home-hero-logo"
+            initial={{ opacity: 0.85, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          />
+
+          <motion.button
+            className="home-order-btn"
+            onClick={() => setShowPedido(true)}
+            initial={{ opacity: 0.85, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
             ¡Haz tu pedido en línea!
-          </button>
+          </motion.button>
         </div>
       </div>
 

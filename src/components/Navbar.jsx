@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaFacebookF, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import { CircleUserRound } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { CUSTOMER_TOKEN_KEY } from '../customer/CustomerAuth';
 import './Navbar.css';
@@ -65,11 +66,16 @@ const Navbar = () => {
     <>
       {/* ── Desktop navbar ── */}
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
-        <div className="navbar-links-container">
+        <motion.div
+          className="navbar-links-container"
+          initial={{ opacity: 0.85, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
           <ul className="navbar-links">
             <NavLinks onClose={closeMenu} />
           </ul>
-        </div>
+        </motion.div>
       </nav>
 
       {/* ── Mobile: cápsula flotante ── */}
