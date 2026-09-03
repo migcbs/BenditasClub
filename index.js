@@ -19,6 +19,7 @@ const {
 } = require('./server/admin/analytics');
 const adminRouter = require('./server/admin/router');
 const { applyInventoryForOrder } = require('./server/admin/inventory-service');
+const { awardStampForOrder } = require('./server/loyalty/loyalty-service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
@@ -354,6 +355,51 @@ app.get('/api/customer/orders', verifyToken, requireRole('cliente'), async (req,
   }
 });
 
+app.get('/api/customer/loyalty', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const [card, activeReward, redemptions] = await Promise.all([
+      prisma.loyaltyCard.findUnique({ where: { customerId: req.user.id } }),
+      prisma.loyaltyReward.findFirst({ where: { activo: true }, include: { product: true } }),
+      prisma.loyaltyRedemption.findMany({
+        where: { customerId: req.user.id },
+        include: { reward: true },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+    ]);
+    res.json({
+      stamps: card?.stamps ?? 0,
+      stampsRequired: activeReward?.stampsRequired ?? 6,
+      activeReward,
+      redemptions,
+    });
+  } catch (e) {
+    console.error('❌ Error consultando fidelidad:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/loyalty/redeem', verifyToken, requireRole('empleado', 'admin'), async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'code es obligatorio' });
+
+    const redemption = await prisma.loyaltyRedemption.findUnique({ where: { code: code.toUpperCase().trim() }, include: { reward: true, customer: { select: { nombre: true } } } });
+    if (!redemption) return res.status(404).json({ error: 'Código no encontrado' });
+    if (redemption.redeemed) return res.status(409).json({ error: `Este código ya se canjeó el ${new Date(redemption.redeemedAt).toLocaleString('es-MX')}` });
+
+    const updated = await prisma.loyaltyRedemption.update({
+      where: { id: redemption.id },
+      data: { redeemed: true, redeemedAt: new Date() },
+      include: { reward: true, customer: { select: { nombre: true } } },
+    });
+    res.json(updated);
+  } catch (e) {
+    console.error('❌ Error canjeando recompensa:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, res) => {
   try {
     const { nombre, precio, categoryId, maxSabores, isPromotion } = req.body;
@@ -526,7 +572,10 @@ app.put('/api/orders/:id/estado', verifyToken, requireRole('empleado'), async (r
         data: { estado, ...(metodoPago ? { metodoPago } : {}) },
         include: { items: true },
       });
-      if (estado === 'pagado') await applyInventoryForOrder(tx, orderUpdated.id, req.user.id);
+      if (estado === 'pagado') {
+        await applyInventoryForOrder(tx, orderUpdated.id, req.user.id);
+        await awardStampForOrder(tx, orderUpdated);
+      }
       return tx.order.findUnique({ where: { id: orderUpdated.id }, include: { items: true } });
     });
     res.json(updated);
