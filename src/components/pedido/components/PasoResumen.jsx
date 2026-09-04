@@ -3,26 +3,29 @@
 // ✅ Sabores / configurables visibles en el resumen
 // ✅ enviarPedidoWhatsApp recibe tipoPedido correctamente
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { enviarPedidoWhatsApp } from "../services/whatsappService";
 import { calcularSubtotal, calcularSubtotalItem, formatearMoneda, guardarPedidoEnCuenta } from "../services/pedidoServices";
 import { TIPO_PEDIDO } from "../utils/constants";
+import TransferenciaPopup from "./TransferenciaPopup";
 import "../styles/resumen.css";
 
 const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, onClose, handleChange }) => {
 
   const total       = useMemo(() => calcularSubtotal(carrito), [carrito]);
   const carritoVacio = !carrito || carrito.length === 0;
+  const [showTransferencia, setShowTransferencia] = useState(false);
 
-  const confirmarPedido = () => {
+  const confirmarPedido = (metodoPago = null) => {
     if (carritoVacio) return;
 
-    const exito = enviarPedidoWhatsApp(cliente, carrito);
+    const exito = enviarPedidoWhatsApp(cliente, carrito, "0001", metodoPago);
 
     if (exito) {
       // Best effort: no bloquea ni retrasa el flujo de WhatsApp, que sigue
       // siendo el camino principal para todos los clientes (con o sin cuenta).
       guardarPedidoEnCuenta(cliente, carrito);
+      setShowTransferencia(false);
       resetPedido?.();
       onClose?.();
     } else {
@@ -125,12 +128,29 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
         <button onClick={pasoAnterior}>Atrás</button>
         <button
           className="btn-primary"
-          onClick={confirmarPedido}
+          onClick={() => confirmarPedido(null)}
           disabled={carritoVacio}
         >
           Enviar por WhatsApp
         </button>
       </div>
+
+      <button
+        type="button"
+        className="btn-transferencia"
+        onClick={() => setShowTransferencia(true)}
+        disabled={carritoVacio || !cliente.sucursal}
+      >
+        🏦 Pagar por transferencia
+      </button>
+
+      {showTransferencia && (
+        <TransferenciaPopup
+          sucursal={cliente.sucursal}
+          onClose={() => setShowTransferencia(false)}
+          onEnviarComprobante={() => confirmarPedido("transferencia")}
+        />
+      )}
 
     </div>
   );

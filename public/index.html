@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
   <head>
     <meta charset="utf-8" />
 
@@ -10,21 +10,24 @@
 
     <!-- ── Viewport & Theme ── -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#e78fbb" />
+    <meta name="theme-color" content="#E765B7" />
 
     <!-- ── SEO Principal ── -->
-    <title>Benditas Club</title>
-    <meta name="description" content="Alitas N' More Est. 2017" />
-    <meta name="keywords" content="Alitas N' More Est. 2017" />
+    <title>Benditas Club — Alitas, Boneless y Burgys en Xico y Coatepec | Alitas N' More Est. 2017</title>
+    <meta name="description" content="Benditas Club: las mejores alitas, boneless, burgys, doggys y boxes de Xico y Coatepec, Veracruz. Más de 20 sabores de alitas, pedidos en línea para recoger o a domicilio, y pago en efectivo o transferencia. ¡Alitas N' More desde 2017!" />
+    <meta name="keywords" content="alitas Xico, alitas Coatepec, wings Veracruz, boneless Xico, comida a domicilio Coatepec, restaurante de alitas Veracruz, Benditas Club, alitas n more" />
     <meta name="author" content="Benditas Club" />
     <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.benditasclub.com/" />
+    <meta name="geo.region" content="MX-VER" />
+    <meta name="geo.placename" content="Xico, Coatepec, Veracruz" />
 
     <!-- ── Open Graph (Facebook, WhatsApp, etc.) ── -->
-    <meta property="og:type"        content="restaurant" />
+    <meta property="og:type"        content="website" />
     <meta property="og:title"       content="Benditas Club — Alitas N' More Est. 2017" />
     <meta property="og:description" content="Alitas, burgys, boneless, doggys, papas y drinks en Xico y Coatepec, Veracruz. ¡Haz tu pedido en línea!" />
     <meta property="og:url"         content="https://www.benditasclub.com" />
-    <meta property="og:image"       content="%PUBLIC_URL%/logo192.jpg" />
+    <meta property="og:image"       content="https://www.benditasclub.com/logo192.jpg" />
     <meta property="og:site_name"   content="Benditas Club" />
     <meta property="og:locale"      content="es_MX" />
 
@@ -32,7 +35,65 @@
     <meta name="twitter:card"        content="summary_large_image" />
     <meta name="twitter:title"       content="Benditas Club — Alitas N' More Est. 2017" />
     <meta name="twitter:description" content="Alitas, burgys, boneless, doggys, papas y drinks en Xico y Coatepec, Veracruz." />
-    <meta name="twitter:image"       content="%PUBLIC_URL%/logo192.jpg" />
+    <meta name="twitter:image"       content="https://www.benditasclub.com/logo192.jpg" />
+
+    <!-- ── Datos estructurados (Google rich results): dos sucursales como
+         FoodEstablishment — ayuda a que aparezcan horario, teléfono y
+         ubicación directo en el buscador/Maps. Ajustar horarios/coords
+         reales si cambian. ── -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "FastFoodRestaurant",
+            "name": "Benditas Club Xico",
+            "image": "https://www.benditasclub.com/logo192.jpg",
+            "url": "https://www.benditasclub.com/",
+            "telephone": "+522283544463",
+            "servesCuisine": ["Alitas", "Comida rápida", "Wings"],
+            "priceRange": "$$",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Av. Hidalgo 212, Centro",
+              "addressLocality": "Xico",
+              "addressRegion": "Veracruz",
+              "addressCountry": "MX"
+            },
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+              "opens": "14:00",
+              "closes": "22:30"
+            },
+            "acceptsReservations": "False"
+          },
+          {
+            "@type": "FastFoodRestaurant",
+            "name": "Benditas Club Coatepec",
+            "image": "https://www.benditasclub.com/logo192.jpg",
+            "url": "https://www.benditasclub.com/",
+            "telephone": "+522284032836",
+            "servesCuisine": ["Alitas", "Comida rápida", "Wings"],
+            "priceRange": "$$",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Melchor Ocampo 14, Centro",
+              "addressLocality": "Coatepec",
+              "addressRegion": "Veracruz",
+              "addressCountry": "MX"
+            },
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+              "opens": "14:00",
+              "closes": "22:30"
+            },
+            "acceptsReservations": "False"
+          }
+        ]
+      }
+    </script>
 
     <!-- ── Fonts ── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

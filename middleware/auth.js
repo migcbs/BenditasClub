@@ -20,6 +20,23 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+// Como verifyToken, pero para rutas que aceptan tanto invitados como
+// clientes logueados (ej. crear pedido en línea): si hay un token válido
+// puebla req.user, si no lo hay o es inválido sigue como invitado (sin
+// user) en vez de rechazar la petición.
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token) {
+    try {
+      req.user = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      // Token vencido/inválido: se trata como invitado en vez de bloquear.
+    }
+  }
+  next();
+};
+
 // Uso: requireRole('admin') o requireRole('empleado', 'cocina')
 // Siempre debe ir DESPUÉS de verifyToken.
 const requireRole = (...roles) => {
@@ -34,4 +51,4 @@ const requireRole = (...roles) => {
   };
 };
 
-module.exports = { verifyToken, requireRole };
+module.exports = { verifyToken, requireRole, optionalAuth };

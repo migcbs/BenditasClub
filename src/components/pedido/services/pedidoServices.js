@@ -5,6 +5,19 @@
 import { getProducts } from "../../../shared/staffApi";
 import { customerApi } from "../../../customer/customerApi";
 
+// Ver adminApi.js — mismo criterio: relativo en producción, localhost:3001 en dev.
+const API_BASE = process.env.REACT_APP_API_BASE ?? (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
+
+/**
+ * Datos bancarios (CLABE) de la sucursal para pago por transferencia —
+ * ruta pública, editable por el admin (ver /api/admin/branch-settings).
+ */
+export async function getBranchSettings(sucursal) {
+  const res = await fetch(`${API_BASE}/api/branch-settings/${sucursal}`);
+  if (!res.ok) throw new Error("No se pudieron obtener los datos de transferencia");
+  return res.json();
+}
+
 // ─────────────────────────────────────────────────────────────
 // DATOS DEL MENÚ
 // ─────────────────────────────────────────────────────────────
@@ -281,9 +294,12 @@ export const formatearMoneda = (cantidad = 0) => {
 // ─────────────────────────────────────────────────────────────
 
 /**
- * Si hay un cliente con sesión iniciada, además de mandar el pedido por
- * WhatsApp lo registra en su cuenta (pasa primero por la cola de Recepción
- * del POS antes de llegar a cocina — ver PUT /api/orders/:id/recepcion).
+ * Además de mandar el pedido por WhatsApp, lo registra en el sistema
+ * (pasa primero por la cola de Recepción del POS antes de llegar a cocina —
+ * ver PUT /api/orders/:id/recepcion) — con o sin cuenta de cliente. Si hay
+ * sesión iniciada (`bc_customer_token`) el pedido queda ligado a esa cuenta;
+ * si es invitado, se guarda con el nombre/teléfono que ya capturó el popup
+ * (mismos datos que usa el mensaje de WhatsApp).
  *
  * Es "best effort": nunca debe bloquear ni afectar el envío por WhatsApp,
  * que sigue siendo el camino principal. Si algo falla (un producto del
@@ -292,7 +308,7 @@ export const formatearMoneda = (cantidad = 0) => {
  */
 export async function guardarPedidoEnCuenta(cliente, carrito) {
   const token = typeof window !== "undefined" && window.localStorage.getItem("bc_customer_token");
-  if (!token || !cliente?.sucursal || !carrito?.length) return;
+  if (!cliente?.sucursal || !carrito?.length) return;
 
   try {
     const productos = await getProducts();
@@ -300,7 +316,7 @@ export async function guardarPedidoEnCuenta(cliente, carrito) {
     for (const item of carrito) {
       const producto = productos.find((p) => p.activo && p.nombre === item.nombre);
       if (!producto) {
-        console.warn(`No se pudo vincular "${item.nombre}" a un producto del catálogo — el pedido no se guardó en la cuenta (el envío por WhatsApp no se vio afectado).`);
+        console.warn(`No se pudo vincular "${item.nombre}" a un producto del catálogo — el pedido no se guardó en el sistema (el envío por WhatsApp no se vio afectado).`);
         return;
       }
       const sabores = [
@@ -315,9 +331,11 @@ export async function guardarPedidoEnCuenta(cliente, carrito) {
       tipo: cliente.tipoPedido === "domicilio" ? "domicilio" : "para_llevar",
       direccion: cliente.tipoPedido === "domicilio" ? cliente.direccion : undefined,
       notas: cliente.comentarios || undefined,
+      nombre: cliente.nombre,
+      telefono: cliente.telefono,
       items,
-    }, token);
+    }, token || undefined);
   } catch (error) {
-    console.warn("No se pudo registrar el pedido en la cuenta del cliente (el envío por WhatsApp no se vio afectado):", error.message);
+    console.warn("No se pudo registrar el pedido en el sistema (el envío por WhatsApp no se vio afectado):", error.message);
   }
 }

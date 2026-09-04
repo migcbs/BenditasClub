@@ -25,8 +25,15 @@ const OrdersList = ({ refreshKey }) => {
       .catch((e) => setError(e.message));
   }, []);
 
+  // Antes solo se recargaba al montar o cuando este mismo mesero resolvía
+  // algo en Recepción — un pedido aceptado desde OTRA terminal, o que
+  // cocina marca "lista", no aparecía aquí hasta cambiar de pestaña. Mismo
+  // intervalo que Recepción/Cocina (4-5s) para que las tres pantallas se
+  // sientan igual de "en vivo".
   useEffect(() => {
     cargar();
+    const interval = setInterval(cargar, 5000);
+    return () => clearInterval(interval);
   }, [cargar, refreshKey]);
 
   const marcarEntregado = async (orden) => {

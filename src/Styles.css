@@ -14,6 +14,21 @@ body {
   background-color: #fff8f0;
   color: #241a20;
 }
+
+/* Para texto que debe existir para SEO/lectores de pantalla (ej. el único
+   <h1> de la página) sin aparecer visualmente — el Hero ya comunica lo
+   mismo con imagen/diseño, ver Home.jsx. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 /* ------------------------------
    NAVBAR
 ------------------------------ */

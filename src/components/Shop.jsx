@@ -12,6 +12,7 @@ import bannerShopImage from '../assets/banner.jpg';
 
 import FloatingCartButton from './FloatingCartButton';
 import CartPopup          from './CartPopup';
+import { useDocumentMeta } from '../shared/useDocumentMeta';
 
 // ─── Constantes de stock ──────────────────────────────────────
 // Deben coincidir exactamente con los valores que calcula el backend en
@@ -46,6 +47,10 @@ const STOCK_CONFIG = {
 
 // ─── Componente principal ─────────────────────────────────────
 const Shop = () => {
+  useDocumentMeta({
+    title: 'Tienda Benditas Club — Playeras, gorras y más | Xico y Coatepec',
+    description: 'Compra la mercancía oficial de Benditas Club: playeras, gorras y accesorios. Envíos y entrega en Xico y Coatepec, Veracruz.',
+  });
   const [catalogo,        setCatalogo]        = useState(null);
   const [error,           setError]           = useState('');
   const [filtro,          setFiltro]          = useState('Todas');

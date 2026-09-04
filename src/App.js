@@ -5,6 +5,8 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 import Navbar     from './components/Navbar';
+import AmbientStars from './components/AmbientStars';
+import CookieConsent from './components/CookieConsent';
 import Home       from './components/Home';
 import Banner     from './components/Banner';
 import Menu       from './components/Menu';
@@ -16,6 +18,8 @@ import KitchenApp from './kitchen/KitchenApp';
 import AdminApp   from './admin/AdminApp';
 import CustomerAuth from './customer/CustomerAuth';
 import CustomerProfile from './customer/CustomerProfile';
+import Terminos from './components/legal/Terminos';
+import Privacidad from './components/legal/Privacidad';
 import ErrorBoundary from './shared/ErrorBoundary';
 
 import './Styles.css';
@@ -48,9 +52,11 @@ const SiteChrome = ({ children }) => {
 
   return (
     <>
+      <AmbientStars />
       <Navbar />
       {children}
       <Footer />
+      <CookieConsent />
     </>
   );
 };
@@ -63,16 +69,18 @@ function App() {
         <Routes>
           <Route path="/" element={
             <>
-              <section id="home"><Home /></section>
+              <Home />
               <Banner />
-              <section id="menu"><Menu /></section>
-              <section id="ubicaciones"><Ubicaciones /></section>
+              <Menu />
+              <Ubicaciones />
             </>
           } />
           <Route path="/shop" element={<Shop />} />
           <Route path="/login" element={<CustomerAuth mode="login" />} />
           <Route path="/registro" element={<CustomerAuth mode="register" />} />
           <Route path="/perfil" element={<ErrorBoundary label="Tu perfil tuvo un problema."><CustomerProfile /></ErrorBoundary>} />
+          <Route path="/terminos" element={<Terminos />} />
+          <Route path="/privacidad" element={<Privacidad />} />
           <Route path="/pos" element={<ErrorBoundary label="El POS tuvo un problema."><PosApp /></ErrorBoundary>} />
           <Route path="/cocina" element={<ErrorBoundary label="La pantalla de cocina tuvo un problema."><KitchenApp /></ErrorBoundary>} />
           <Route path="/admin" element={<ErrorBoundary label="El panel admin tuvo un problema."><AdminApp /></ErrorBoundary>} />

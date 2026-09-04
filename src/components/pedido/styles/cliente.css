@@ -56,11 +56,13 @@
 }
 
 /* ── Inputs ── */
-.paso-cliente input {
+.paso-cliente input,
+.paso-cliente select {
   height: 50px;
 }
 
 .paso-cliente input,
+.paso-cliente select,
 .paso-cliente textarea {
   width: 100%;
   padding: 12px 15px;
@@ -78,11 +80,26 @@
 }
 
 .paso-cliente input:focus,
+.paso-cliente select:focus,
 .paso-cliente textarea:focus {
   border-color: var(--benditas-pink);
   box-shadow: 5px 5px 0 var(--benditas-pink);
   transform: translate(-2px, -2px);
 }
+
+.btn-usar-guardada {
+  margin-top: 8px;
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--benditas-pink);
+  font-family: 'Inter', sans-serif;
+  font-weight: 750;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.btn-usar-guardada:hover { text-decoration: underline; }
 
 .paso-cliente textarea {
   min-height: 72px;

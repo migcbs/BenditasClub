@@ -34,6 +34,7 @@ enum EstadoPedido {
 enum MetodoPago {
   tarjeta
   efectivo
+  transferencia
 }
 
 enum EstadoCocina {
@@ -105,6 +106,7 @@ model User {
   merchOrders    MerchOrder[] @relation("CustomerMerchOrders")
   loyaltyCard    LoyaltyCard?
   loyaltyRedemptions LoyaltyRedemption[] @relation("CustomerRedemptions")
+  addresses      Address[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -190,6 +192,30 @@ model MerchOrderItem {
   precio         Int
   cantidad       Int
   subtotal       Int
+}
+
+// Direcciones guardadas del cliente para pedidos a domicilio — puede tener
+// varias (casa, trabajo, etc.) y elegir cuál usar al pedir, en vez de un
+// solo campo `direccion` fijo en User.
+model Address {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  etiqueta    String?
+  direccion   String
+  esPrincipal Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+// Datos bancarios por sucursal para pedidos pagados por transferencia — el
+// admin los edita, y el popup de "Confirmar pedido" los muestra al cliente
+// según a qué sucursal está pidiendo.
+model BranchSettings {
+  sucursal  SucursalNombre @id
+  clabe     String?
+  banco     String?
+  titular   String?
+  updatedAt DateTime       @updatedAt
 }
 
 model Order {

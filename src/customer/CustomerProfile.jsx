@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { customerApi as defaultApi } from './customerApi';
 import { CUSTOMER_TOKEN_KEY } from './CustomerAuth';
+import { useDocumentMeta } from '../shared/useDocumentMeta';
 import './customer.css';
 
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
@@ -23,6 +24,7 @@ const orderStatusLabel = (order) => {
 };
 
 export default function CustomerProfile({ api = defaultApi, storage = window.localStorage }) {
+  useDocumentMeta({ title: 'Mi cuenta | Benditas Club', noindex: true });
   const navigate = useNavigate();
   const [token, setToken] = useState(() => storage.getItem(CUSTOMER_TOKEN_KEY));
   const [user, setUser] = useState(null);
@@ -32,6 +34,12 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const [addresses, setAddresses] = useState([]);
+  const [addressForm, setAddressForm] = useState({ etiqueta: '', direccion: '', esPrincipal: false });
+  const [savingAddress, setSavingAddress] = useState(false);
+
+  const cargarDirecciones = () => api.addresses(token).then(setAddresses);
+
   useEffect(() => {
     if (!token) {
       navigate('/login');
@@ -39,13 +47,14 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
     }
 
     let live = true;
-    Promise.all([api.profile(token), api.orders(token), api.loyalty(token)])
-      .then(([profile, history, loyaltyStatus]) => {
+    Promise.all([api.profile(token), api.orders(token), api.loyalty(token), api.addresses(token)])
+      .then(([profile, history, loyaltyStatus, addressList]) => {
         if (!live) return;
         setUser(profile.user);
         setForm({ nombre: profile.user.nombre || '', telefono: profile.user.telefono || '' });
         setOrders(history);
         setLoyalty(loyaltyStatus);
+        setAddresses(addressList);
       })
       .catch((requestError) => {
         if (!live) return;
@@ -55,6 +64,56 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
       });
     return () => { live = false; };
   }, [api, navigate, storage, token]);
+
+  // Para que el cliente vea su pedido pasar de "en revisión" a "listo" sin
+  // tener que recargar la página a mano — solo el historial, no todo el
+  // perfil, para no repetir llamadas de más.
+  useEffect(() => {
+    if (!token) return undefined;
+    const interval = setInterval(() => {
+      api.orders(token).then(setOrders).catch(() => {});
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [api, token]);
+
+  const updateAddressForm = (field) => (event) => {
+    const value = field === 'esPrincipal' ? event.target.checked : event.target.value;
+    setAddressForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const agregarDireccion = async (event) => {
+    event.preventDefault();
+    if (!addressForm.direccion.trim()) return;
+    setSavingAddress(true);
+    setError('');
+    try {
+      await api.createAddress(addressForm, token);
+      setAddressForm({ etiqueta: '', direccion: '', esPrincipal: false });
+      await cargarDirecciones();
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSavingAddress(false);
+    }
+  };
+
+  const marcarPrincipal = async (id) => {
+    try {
+      await api.updateAddress(id, { esPrincipal: true }, token);
+      await cargarDirecciones();
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  };
+
+  const eliminarDireccion = async (id) => {
+    try {
+      await api.deleteAddress(id, token);
+      await cargarDirecciones();
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  };
 
   const rewardDescription = (reward) => {
     if (!reward) return '';
@@ -114,6 +173,45 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
               <input value={form.telefono} onChange={update('telefono')} inputMode="tel" />
             </label>
             <button className="customer-primary" disabled={saving}>{saving ? 'Guardando...' : 'Guardar datos'}</button>
+          </form>
+        </article>
+
+        <article className="customer-card">
+          <h2>Mis direcciones</h2>
+          {addresses.length ? (
+            <ul className="customer-address-list">
+              {addresses.map((a) => (
+                <li key={a.id} className="customer-address-item">
+                  <span>
+                    {a.etiqueta ? <b>{a.etiqueta}: </b> : null}
+                    {a.direccion}
+                    {a.esPrincipal ? <em> · Principal</em> : null}
+                  </span>
+                  <span className="customer-address-actions">
+                    {!a.esPrincipal && (
+                      <button type="button" className="customer-address-link" onClick={() => marcarPrincipal(a.id)}>Usar como principal</button>
+                    )}
+                    <button type="button" className="customer-address-link customer-address-danger" onClick={() => eliminarDireccion(a.id)}>Eliminar</button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="customer-empty">Todavía no tienes direcciones guardadas.</p>}
+
+          <form className="customer-form customer-address-form" onSubmit={agregarDireccion}>
+            <label>
+              Etiqueta (opcional)
+              <input value={addressForm.etiqueta} onChange={updateAddressForm('etiqueta')} placeholder="Casa, trabajo..." />
+            </label>
+            <label>
+              Dirección
+              <input value={addressForm.direccion} onChange={updateAddressForm('direccion')} placeholder="Calle, número, colonia..." required />
+            </label>
+            <label className="customer-address-checkbox">
+              <input type="checkbox" checked={addressForm.esPrincipal} onChange={updateAddressForm('esPrincipal')} />
+              Usar como principal
+            </label>
+            <button className="customer-primary" disabled={savingAddress}>{savingAddress ? 'Agregando...' : 'Agregar dirección'}</button>
           </form>
         </article>
 

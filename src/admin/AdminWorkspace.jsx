@@ -184,6 +184,95 @@ function Finance({ api, token, branch, dashboard }) {
   return <section className="admin-module"><header><div><Typography component="h1">Finanzas y caja</Typography><Typography>Venta, efectivo esperado, gastos y diferencias de cierre.</Typography></div><Chip label={`${data.shifts.filter((item) => item.status === 'open').length} cajas abiertas`} color="secondary" /></header><div className="admin-module-stats"><article><CircleDollarSign/><span><b>{money.format(dashboard.summary.sales)}</b><small>Venta neta</small></span></article><article><Banknote/><span><b>{money.format(dashboard.summary.cashSales)}</b><small>Venta en efectivo</small></span></article><article><ReceiptText/><span><b>{money.format(expenses)}</b><small>Gastos registrados</small></span></article></div><div className="admin-two-columns"><div className="admin-data-panel"><div className="admin-data-heading"><h2>Turnos de caja</h2><span>Últimos 30</span></div>{data.shifts.length ? data.shifts.map((shift) => <div className="admin-list-row" key={shift.id}><span><b>{shift.sucursal} · {shift.status === 'open' ? 'Abierta' : 'Cerrada'}</b><small>Fondo {money.format(Number(shift.openingAmount))}{shift.difference != null ? ` · diferencia ${money.format(Number(shift.difference))}` : ''}</small></span><Chip size="small" color={shift.status === 'open' ? 'success' : 'default'} label={shift.status} /></div>) : <Empty>No hay turnos de caja registrados.</Empty>}</div><div className="admin-data-panel"><div className="admin-data-heading"><h2>Gastos</h2><span>Comprobación</span></div>{data.expenses.length ? data.expenses.map((expense) => <div className="admin-list-row" key={expense.id}><span><b>{expense.concept}</b><small>{expense.category} · {expense.paymentMethod}</small></span><b>{money.format(Number(expense.amount))}</b></div>) : <Empty>Sin gastos en el periodo.</Empty>}</div></div></section>;
 }
 
+const SUCURSAL_LABEL = { xico: 'Xico', coatepec: 'Coatepec' };
+
+function BranchSettings({ api, token }) {
+  const [settings, setSettings] = useState(null);
+  const [forms, setForms] = useState({});
+  const [saving, setSaving] = useState('');
+  const [error, setError] = useState('');
+  const [savedFlash, setSavedFlash] = useState('');
+
+  useEffect(() => {
+    let live = true;
+    api.branchSettings(token)
+      .then((rows) => {
+        if (!live) return;
+        setSettings(rows);
+        setForms(Object.fromEntries(rows.map((r) => [r.sucursal, { clabe: r.clabe || '', banco: r.banco || '', titular: r.titular || '' }])));
+      })
+      .catch((requestError) => live && setError(requestError.message));
+    return () => { live = false; };
+  }, [api, token]);
+
+  const updateField = (sucursal, field) => (event) => {
+    setForms((current) => ({ ...current, [sucursal]: { ...current[sucursal], [field]: event.target.value } }));
+  };
+
+  const guardar = async (sucursal) => {
+    setSaving(sucursal);
+    setError('');
+    try {
+      const updated = await api.updateBranchSettings(sucursal, forms[sucursal], token);
+      setSettings((current) => current.map((r) => (r.sucursal === sucursal ? updated : r)));
+      setSavedFlash(sucursal);
+      setTimeout(() => setSavedFlash(''), 2000);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSaving('');
+    }
+  };
+
+  if (error) return <Alert severity="error">{error}</Alert>;
+  if (!settings) return <Loading />;
+
+  return (
+    <section className="admin-module">
+      <header>
+        <div>
+          <Typography component="h1">Cuentas para transferencia</Typography>
+          <Typography>El CLABE que ve el cliente en el popup de "Pagar por transferencia" al hacer su pedido en línea.</Typography>
+        </div>
+      </header>
+      <div className="admin-data-panel">
+        {settings.map((row) => (
+          <div className="admin-list-row" key={row.sucursal} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
+            <b>{SUCURSAL_LABEL[row.sucursal] || row.sucursal}</b>
+            <TextField
+              size="small"
+              label="CLABE (18 dígitos)"
+              value={forms[row.sucursal]?.clabe || ''}
+              onChange={updateField(row.sucursal, 'clabe')}
+              inputProps={{ maxLength: 18, inputMode: 'numeric' }}
+            />
+            <TextField
+              size="small"
+              label="Banco (opcional)"
+              value={forms[row.sucursal]?.banco || ''}
+              onChange={updateField(row.sucursal, 'banco')}
+            />
+            <TextField
+              size="small"
+              label="Titular (opcional)"
+              value={forms[row.sucursal]?.titular || ''}
+              onChange={updateField(row.sucursal, 'titular')}
+            />
+            <Button
+              variant="contained"
+              onClick={() => guardar(row.sucursal)}
+              disabled={saving === row.sucursal}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              {saving === row.sucursal ? 'Guardando...' : savedFlash === row.sucursal ? '¡Guardado!' : 'Guardar'}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Team({ api, token }) {
   const [users, setUsers] = useState(null);
   const [error, setError] = useState('');
@@ -510,5 +599,6 @@ export default function AdminWorkspace({ section, api, token, branch, dashboard 
   if (section === 'Merch') return <Merch api={api} token={token} />;
   if (section === 'Fidelidad') return <Loyalty api={api} token={token} />;
   if (section === 'Equipo') return <Team api={api} token={token} />;
+  if (section === 'Configuración') return <BranchSettings api={api} token={token} />;
   return null;
 }

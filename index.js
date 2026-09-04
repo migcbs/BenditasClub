@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const prisma = require('./lib/prisma');
-const { verifyToken, requireRole } = require('./middleware/auth');
+const { verifyToken, requireRole, optionalAuth } = require('./middleware/auth');
 const {
   parseDashboardFilters,
   summarizeOrders,
@@ -29,11 +29,15 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-// Todo corre en local por ahora: aceptamos cualquier puerto de localhost.
+// Cualquier puerto de localhost siempre se acepta (desarrollo). En
+// producción, además, los dominios reales listados en ALLOWED_ORIGINS
+// (separados por coma, ej. "https://www.benditasclub.com,https://benditasclub.com").
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true); // curl / tests sin Origin
     if (/^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error('No permitido por CORS'));
   },
   credentials: true,
@@ -106,12 +110,18 @@ app.get('/api/health', async (req, res) => {
 
 app.post('/api/auth/register', authLimiter, async (req, res) => {
   try {
-    const { nombre, email, password } = req.body;
+    const { nombre, email, password, telefono, direccion } = req.body;
     if (!nombre || !email || !password) {
       return res.status(400).json({ error: 'Campos obligatorios: nombre, email, password' });
     }
     if (password.length < 8) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+    }
+    // Teléfono obligatorio: es el dato de contacto que usa el staff para
+    // pedidos en línea (mismo formato de 10 dígitos que el popup de pedido).
+    const telLimpio = (telefono || '').replace(/\D/g, '');
+    if (telLimpio.length !== 10) {
+      return res.status(400).json({ error: 'Teléfono a 10 dígitos es obligatorio' });
     }
 
     const emailLimpio = email.toLowerCase().trim();
@@ -120,7 +130,17 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
-      data: { nombre, email: emailLimpio, password: hashedPassword, role: 'cliente' },
+      data: {
+        nombre,
+        email: emailLimpio,
+        password: hashedPassword,
+        role: 'cliente',
+        telefono: telLimpio,
+        // Dirección opcional al registrarse: si la dan, queda como su
+        // primera dirección guardada (ver modelo Address) — puede agregar
+        // más después desde su perfil.
+        ...(direccion?.trim() ? { addresses: { create: { direccion: direccion.trim(), esPrincipal: true } } } : {}),
+      },
     });
 
     const token = jwt.sign(
@@ -244,6 +264,76 @@ app.put('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res
   }
 });
 
+// ── Direcciones guardadas del cliente (una cuenta puede tener varias:
+// casa, trabajo, etc.) — se usan al pedir a domicilio en vez de escribir
+// la dirección cada vez. ──
+app.get('/api/customer/addresses', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const addresses = await prisma.address.findMany({
+      where: { userId: req.user.id },
+      orderBy: [{ esPrincipal: 'desc' }, { createdAt: 'asc' }],
+    });
+    res.json(addresses);
+  } catch (e) {
+    console.error('❌ Error listando direcciones:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/customer/addresses', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const { etiqueta, direccion, esPrincipal } = req.body;
+    if (!direccion?.trim()) return res.status(400).json({ error: 'La dirección es obligatoria' });
+
+    if (esPrincipal) {
+      await prisma.address.updateMany({ where: { userId: req.user.id }, data: { esPrincipal: false } });
+    }
+    const address = await prisma.address.create({
+      data: { userId: req.user.id, etiqueta: etiqueta?.trim() || null, direccion: direccion.trim(), esPrincipal: !!esPrincipal },
+    });
+    res.status(201).json(address);
+  } catch (e) {
+    console.error('❌ Error creando dirección:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.put('/api/customer/addresses/:id', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const existing = await prisma.address.findUnique({ where: { id: req.params.id } });
+    if (!existing || existing.userId !== req.user.id) return res.status(404).json({ error: 'Dirección no encontrada' });
+
+    const { etiqueta, direccion, esPrincipal } = req.body;
+    if (esPrincipal) {
+      await prisma.address.updateMany({ where: { userId: req.user.id }, data: { esPrincipal: false } });
+    }
+    const address = await prisma.address.update({
+      where: { id: req.params.id },
+      data: {
+        ...(etiqueta !== undefined ? { etiqueta: etiqueta?.trim() || null } : {}),
+        ...(direccion !== undefined ? { direccion: direccion.trim() } : {}),
+        ...(esPrincipal !== undefined ? { esPrincipal: !!esPrincipal } : {}),
+      },
+    });
+    res.json(address);
+  } catch (e) {
+    console.error('❌ Error actualizando dirección:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.delete('/api/customer/addresses/:id', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const existing = await prisma.address.findUnique({ where: { id: req.params.id } });
+    if (!existing || existing.userId !== req.user.id) return res.status(404).json({ error: 'Dirección no encontrada' });
+    await prisma.address.delete({ where: { id: req.params.id } });
+    res.status(204).end();
+  } catch (e) {
+    console.error('❌ Error eliminando dirección:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 app.get('/api/admin/dashboard', verifyToken, requireRole('admin'), async (req, res) => {
   try {
     let filters;
@@ -295,6 +385,26 @@ app.get('/api/admin/dashboard', verifyToken, requireRole('admin'), async (req, r
     });
   } catch (e) {
     console.error('❌ Error dashboard admin:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+// Pública (sin login) — el popup de pedido la usa para mostrar el CLABE de
+// la sucursal elegida cuando el cliente paga por transferencia. Solo
+// expone clabe/banco/titular, nada administrativo.
+app.get('/api/branch-settings/:sucursal', async (req, res) => {
+  try {
+    const { sucursal } = req.params;
+    if (!['xico', 'coatepec'].includes(sucursal)) return res.status(400).json({ error: 'Sucursal inválida' });
+    const settings = await prisma.branchSettings.findUnique({ where: { sucursal } });
+    res.json({
+      sucursal,
+      clabe: settings?.clabe || null,
+      banco: settings?.banco || null,
+      titular: settings?.titular || null,
+    });
+  } catch (e) {
+    console.error('❌ Error obteniendo datos de transferencia:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
@@ -413,9 +523,14 @@ app.post('/api/customer/shop-orders', verifyToken, requireRole('cliente'), async
   }
 });
 
-app.post('/api/customer/orders', verifyToken, requireRole('cliente'), async (req, res) => {
+// optionalAuth (no verifyToken/requireRole): un pedido en línea debe
+// guardarse tanto si el cliente tiene cuenta como si es invitado — antes
+// esta ruta exigía sesión de cliente y los pedidos de invitados (el caso
+// más común, vía el botón "Haz tu pedido" sin login) nunca llegaban a la
+// BD ni a Recepción/Cocina/Admin, solo se mandaban por WhatsApp.
+app.post('/api/customer/orders', optionalAuth, async (req, res) => {
   try {
-    const { sucursal, tipo, direccion, notas, items } = req.body;
+    const { sucursal, tipo, direccion, notas, items, nombre, telefono } = req.body;
     if (!['xico', 'coatepec'].includes(sucursal) || !['para_llevar', 'domicilio'].includes(tipo)) {
       return res.status(400).json({ error: 'Sucursal y tipo de pedido válidos son obligatorios' });
     }
@@ -423,8 +538,27 @@ app.post('/api/customer/orders', verifyToken, requireRole('cliente'), async (req
       return res.status(400).json({ error: 'La dirección es obligatoria para domicilio' });
     }
 
-    const customer = await prisma.user.findUnique({ where: { id: req.user.id } });
-    if (!customer || !customer.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
+    let clienteId = null;
+    let clienteNombre;
+    let clienteTelefono;
+
+    if (req.user?.role === 'cliente') {
+      const customer = await prisma.user.findUnique({ where: { id: req.user.id } });
+      if (!customer || !customer.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
+      clienteId = customer.id;
+      clienteNombre = customer.nombre;
+      clienteTelefono = customer.telefono;
+    } else {
+      // Invitado: no hay cuenta de la que tomar nombre/teléfono, así que
+      // vienen directo del formulario del popup (mismos campos que ya
+      // se piden para el mensaje de WhatsApp).
+      const telLimpio = (telefono || '').replace(/\D/g, '');
+      if (!nombre?.trim() || telLimpio.length !== 10) {
+        return res.status(400).json({ error: 'Nombre y teléfono a 10 dígitos son obligatorios' });
+      }
+      clienteNombre = nombre.trim();
+      clienteTelefono = telLimpio;
+    }
 
     let orderItemsData;
     try {
@@ -438,9 +572,9 @@ app.post('/api/customer/orders', verifyToken, requireRole('cliente'), async (req
       data: {
         sucursal,
         tipo,
-        clienteId: customer.id,
-        clienteNombre: customer.nombre,
-        clienteTelefono: customer.telefono,
+        clienteId,
+        clienteNombre,
+        clienteTelefono,
         direccion: direccion || null,
         notas: notas || null,
         total,

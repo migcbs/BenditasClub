@@ -90,6 +90,24 @@
   color: #E765B7;
 }
 
+.footer-legal-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+
+.footer-legal-links a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer-legal-links a:hover {
+  color: #E765B7;
+  text-decoration: underline;
+}
+
 .footer-copyright {
   font-size: 0.85rem;
   opacity: 0.5;

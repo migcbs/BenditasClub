@@ -1,13 +1,32 @@
 // src/components/pedido/components/PasoCliente.jsx
 
-import React from "react";
+import React, { useState } from "react";
 import "../styles/cliente.css";
 
 // Valores locales — sin depender del import de constants
 const DOMICILIO = "domicilio";
 const RECOGER   = "recoger";
+const OTRA_DIRECCION = "__otra__";
 
-const PasoCliente = ({ cliente = {}, errores = {}, handleChange, siguientePaso }) => {
+const PasoCliente = ({ cliente = {}, errores = {}, handleChange, direcciones = [], siguientePaso }) => {
+  // Las direcciones llegan de una llamada async (useCustomerAccount), así
+  // que no pueden fijarse en el estado inicial — si no, con direcciones=[]
+  // en el primer render se queda para siempre en modo "otra dirección"
+  // aunque luego lleguen. Solo se guarda si el cliente pidió explícitamente
+  // usar el campo libre; mostrar el selector es automático en cuanto hay
+  // direcciones y el cliente no pidió lo contrario.
+  const [modoManualOtra, setModoManualOtra] = useState(false);
+  const mostrarSelectorGuardadas = direcciones.length > 0 && !modoManualOtra;
+
+  const handleDireccionGuardada = (e) => {
+    const valor = e.target.value;
+    if (valor === OTRA_DIRECCION) {
+      setModoManualOtra(true);
+      handleChange({ target: { name: "direccion", value: "" } });
+    } else {
+      handleChange({ target: { name: "direccion", value: valor } });
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -110,15 +129,38 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, siguientePaso }
       {/* ── Dirección (solo si es domicilio) ── */}
       {cliente.tipoPedido === DOMICILIO && (
         <div className="form-group direccion-animada">
-          <input
-            type="text"
-            name="direccion"
-            placeholder="Calle, número, colonia..."
-            value={cliente.direccion || ""}
-            onChange={handleChange}
-            className={errores.direccion ? "input-error shake" : ""}
-            autoComplete="street-address"
-          />
+          {mostrarSelectorGuardadas ? (
+            <select
+              onChange={handleDireccionGuardada}
+              defaultValue=""
+              className={errores.direccion ? "input-error shake" : ""}
+            >
+              <option value="" disabled>Elige una dirección guardada</option>
+              {direcciones.map((d) => (
+                <option key={d.id} value={d.direccion}>
+                  {d.etiqueta ? `${d.etiqueta}: ` : ""}{d.direccion}
+                </option>
+              ))}
+              <option value={OTRA_DIRECCION}>Otra dirección...</option>
+            </select>
+          ) : (
+            <>
+              <input
+                type="text"
+                name="direccion"
+                placeholder="Calle, número, colonia..."
+                value={cliente.direccion || ""}
+                onChange={handleChange}
+                className={errores.direccion ? "input-error shake" : ""}
+                autoComplete="street-address"
+              />
+              {direcciones.length > 0 && (
+                <button type="button" className="btn-usar-guardada" onClick={() => setModoManualOtra(false)}>
+                  Usar una dirección guardada
+                </button>
+              )}
+            </>
+          )}
           {errores.direccion && <span className="error">{errores.direccion}</span>}
         </div>
       )}

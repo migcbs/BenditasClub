@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowRight } from "lucide-react";
 import img1 from "../assets/1.jpg";
 import img2 from "../assets/2.jpg";
 import img3 from "../assets/3.jpg";
@@ -60,6 +60,7 @@ const Home = () => {
 
   return (
     <section className="home-section" id="home" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <h1 className="visually-hidden">Benditas Club — Alitas, Boneless y Burgys en Xico y Coatepec</h1>
       {/* Contenedor de Imágenes - El "Escenario" */}
       <div className="home-bg-container">
         {images.map((src, index) => (
@@ -67,16 +68,20 @@ const Home = () => {
             key={index}
             ref={index === current ? activeImageRef : null}
             src={src}
-            alt="Delicious Wings"
+            alt="Alitas y boneless de Benditas Club en Xico y Coatepec"
             className={`home-bg-img ${index === current ? "active" : ""}`}
             loading={index === 0 ? "eager" : "lazy"}
           />
         ))}
       </div>
 
-      {/* Contenido Centrado que Scrollea Normal */}
-      <div className="home-main-overlay">
-        <div className="home-content-wrap">
+      {/* Textura + degradado para que el texto grande siempre se lea bien */}
+      <div className="home-noise-overlay" />
+      <div className="home-gradient-overlay" />
+
+      {/* Contenido inferior: tag de ubicación + CTA */}
+      <div className="home-foreground">
+        <div className="home-bottom-content">
           <motion.div
             className="home-pill"
             initial={{ opacity: 0.85, y: 14 }}
@@ -89,22 +94,25 @@ const Home = () => {
           <motion.button
             className="home-order-btn"
             onClick={() => setShowPedido(true)}
-            initial={{ opacity: 0.85, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            ¡Haz tu pedido en línea!
+            Haz tu pedido
+            <span className="home-order-btn-icon">
+              <ArrowRight size={16} />
+            </span>
           </motion.button>
         </div>
-      </div>
 
-      {/* Navegación Inferior */}
-      <div className="home-nav-ui">
-        {images.map((_, index) => (
-          <div key={index} className="home-dot" onClick={() => { setCurrent(index); setProgress(0); }}>
-            {index === current && <div className="home-dot-progress" style={{ transform: `scaleX(${progress / 100})` }} />}
-          </div>
-        ))}
+        {/* Navegación Inferior */}
+        <div className="home-nav-ui">
+          {images.map((_, index) => (
+            <div key={index} className="home-dot" onClick={() => { setCurrent(index); setProgress(0); }}>
+              {index === current && <div className="home-dot-progress" style={{ transform: `scaleX(${progress / 100})` }} />}
+            </div>
+          ))}
+        </div>
       </div>
 
       {showPedido && <PedidoPopup onClose={() => setShowPedido(false)} />}

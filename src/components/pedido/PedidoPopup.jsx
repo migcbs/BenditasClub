@@ -12,7 +12,7 @@ import { usePedido } from "./hooks/usePedido";
 const PedidoPopup = ({ onClose }) => {
   const {
     paso, siguientePaso, pasoAnterior, resetPedido,
-    cliente, errores, handleChange,
+    cliente, errores, handleChange, direcciones,
     carrito, agregarProducto, eliminarProducto, actualizarCantidad,
     total,
   } = usePedido();
@@ -30,6 +30,7 @@ const PedidoPopup = ({ onClose }) => {
               cliente={cliente}
               errores={errores}
               handleChange={handleChange}
+              direcciones={direcciones}
               siguientePaso={siguientePaso}
             />
           )}
