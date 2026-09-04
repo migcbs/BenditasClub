@@ -1,6 +1,6 @@
 /* ================================================================
    NAVBAR — BENDITAS CLUB
-   Desktop: barra fija arriba | Mobile: cápsula flotante
+   Desktop: un solo "shell" que muta de píldora a botón | Mobile: cápsula
    ================================================================ */
 
 :root {
@@ -15,51 +15,82 @@
   --nav-shadow:    0 4px 14px rgba(36, 26, 32, 0.16);
 }
 
-/* ── Desktop navbar: cápsula flotante (logo · pill de links · cuenta) ──
-   El posicionamiento/centrado vive en .navbar-float (sin transform propio
-   de framer-motion); la animación de entrada vive en .navbar-float-inner.
-   Iban juntos en el mismo elemento antes, pero framer-motion anima `y`
-   escribiendo `transform` inline, lo que pisaba el `translateX(-50%)` de
-   centrado — por eso la barra se veía corrida a la derecha. */
-.navbar-float {
+/* ── Desktop: el shell — una sola pieza que hace de contenedor visual en
+   ambos estados (píldora ancha / botón circular). `layout` de framer-motion
+   anima el cambio de tamaño y posición con un resorte; el border-radius se
+   deja como transición CSS normal porque layout no interpola esa propiedad
+   por sí solo. Centrado con left/right + margin auto (no con
+   `transform: translateX(-50%)`) para no repetir el bug de antes: ese
+   transform en CSS competía con el que framer-motion escribe inline al
+   animar el layout. ── */
+.navbar-shell {
   position: fixed;
   top: clamp(14px, 2.4vh, 22px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 1100; /* por encima de .fullscreen-menu-overlay (1050) — si no, el
+  botón colapsado (con la X para cerrar) quedaba tapado por el overlay */
+  width: fit-content;
+  height: clamp(42px, 4.6vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 999px;
+  box-shadow: var(--nav-shadow);
+  overflow: hidden;
+  transition: border-radius 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.navbar-float.is-hidden {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-14px);
-  pointer-events: none;
+.navbar-shell.is-collapsed {
+  top: 20px;
+  left: auto;
+  right: 20px;
+  margin: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.navbar-float-inner {
+.navbar-shell.is-collapsed:active { transform: scale(0.94); }
+
+.navbar-shell-row {
   display: flex;
   align-items: center;
   gap: clamp(12px, 1.6vw, 18px);
+  padding: 0 clamp(14px, 1.8vw, 18px);
+  white-space: nowrap;
+}
+
+.is-collapsed-row {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
 }
 
 .nav-logo-btn {
   display: grid;
   place-items: center;
-  width: clamp(42px, 4.2vw, 46px);
-  height: clamp(42px, 4.2vw, 46px);
+  width: clamp(32px, 3.2vw, 36px);
+  height: clamp(32px, 3.2vw, 36px);
   border-radius: 50%;
-  background: #fff;
-  box-shadow: var(--nav-shadow, 0 4px 14px rgba(36,26,32,0.16));
   overflow: hidden;
+  flex-shrink: 0;
   transition: transform 0.2s ease;
 }
 
-.nav-logo-btn:hover { transform: scale(1.04); }
+.nav-logo-btn:hover { transform: scale(1.06); }
 
 .nav-logo-btn img {
   width: 72%;
   height: 72%;
   object-fit: contain;
+  margin: 14%;
 }
 
 .nav-pill {
@@ -68,11 +99,7 @@
   align-items: center;
   gap: clamp(14px, 1.8vw, 22px);
   margin: 0;
-  padding: 0 clamp(16px, 2vw, 22px);
-  height: clamp(42px, 4.6vw, 48px);
-  background: #fff;
-  border-radius: 999px;
-  box-shadow: var(--nav-shadow, 0 4px 14px rgba(36,26,32,0.16));
+  padding: 0;
 }
 
 .nav-pill li a {
@@ -110,23 +137,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(42px, 4.2vw, 46px);
-  height: clamp(42px, 4.2vw, 46px);
-  background: #241a20;
-  color: #fff8f0;
+  width: clamp(34px, 3.4vw, 38px);
+  height: clamp(34px, 3.4vw, 38px);
+  background: #E765B7;
+  color: #fff;
+  border: none;
   border-radius: 50%;
-  box-shadow: var(--nav-shadow, 0 4px 14px rgba(36,26,32,0.16));
+  cursor: pointer;
   text-decoration: none;
+  flex-shrink: 0;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .nav-account-pill:hover {
-  background: #3a2c33;
+  background: #C43D8F;
   transform: translateY(-1px);
 }
 
-.navbar-cuenta-icon { display: flex; align-items: center; }
-.navbar-cuenta-icon svg { width: 22px; height: 22px; stroke-width: 2px; }
+.navbar-cuenta-icon { display: flex; align-items: center; background: none; border: none; padding: 0; cursor: pointer; }
+.navbar-cuenta-icon svg { width: 22px; height: 22px; stroke-width: 2px; color: var(--text-light); }
 
 .social-icons {
   display: flex;
@@ -140,32 +169,6 @@
 }
 
 .social-icons a:hover { color: var(--primary-color); transform: scale(1.2); }
-
-/* ── Desktop: botón colapsado — aparece al deslizar, reemplaza la cápsula ── */
-.nav-collapsed-btn {
-  display: none; /* .is-visible lo muestra, solo en desktop (media query abajo) */
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  height: 46px;
-  width: 46px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: var(--nav-shadow);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-10px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  -webkit-tap-highlight-color: transparent;
-}
 
 /* ── Mobile: cápsula flotante ───────────────────────────────── */
 /* Siempre clara (antes cambiaba de oscura a clara al hacer scroll; ya no
@@ -199,8 +202,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.mobile-pill:active,
-.nav-collapsed-btn:active {
+.mobile-pill:active {
   transform: scale(0.94);
 }
 
@@ -215,13 +217,13 @@
   pointer-events: none;
 }
 
-/* Animación a X cuando está abierto (mobile y el botón colapsado de desktop) */
+/* Animación a X cuando está abierto (mobile y el shell colapsado de desktop) */
 .mobile-pill.abierto .pill-linea:nth-child(1),
-.nav-collapsed-btn.abierto .pill-linea:nth-child(1) { transform: translateY(7.5px) rotate(45deg); background: var(--bp-pink); }
+.navbar-shell.abierto .pill-linea:nth-child(1) { transform: translateY(7.5px) rotate(45deg); background: var(--bp-pink); }
 .mobile-pill.abierto .pill-linea:nth-child(2),
-.nav-collapsed-btn.abierto .pill-linea:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.navbar-shell.abierto .pill-linea:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .mobile-pill.abierto .pill-linea:nth-child(3),
-.nav-collapsed-btn.abierto .pill-linea:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); background: var(--bp-pink); }
+.navbar-shell.abierto .pill-linea:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); background: var(--bp-pink); }
 
 /* ── Fullscreen menu mobile ─────────────────────────────────── */
 .fullscreen-menu-overlay {
@@ -316,24 +318,12 @@
 
 /* ── Media queries ──────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Ocultar navbar de desktop */
-  .navbar-float { display: none; }
-  .nav-collapsed-btn { display: none !important; }
-
-  /* Mostrar cápsula flotante */
+  .navbar-shell { display: none; }
   .mobile-pill { display: flex; }
 }
 
 @media (min-width: 769px) {
-  /* Ocultar el botón mobile — el equivalente en desktop es .nav-collapsed-btn */
   .mobile-pill { display: none !important; }
-
-  .nav-collapsed-btn { display: flex; }
-  .nav-collapsed-btn.is-visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
 }
 
 /* ── Animaciones ────────────────────────────────────────────── */

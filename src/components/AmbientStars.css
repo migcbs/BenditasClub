@@ -1,0 +1,90 @@
+/* Portado del portafolio (AmbientBackground): mismo patrón de radial-gradients
+   apilados + drift lento, recoloreado de crema (#F5F3EE) a negro porque acá
+   el fondo base es claro (#fff8f0) en vez de casi-negro. Sin fondo propio en
+   .ambient-bg — deja ver el crema de body detrás de los puntos. */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ambient-bg-stars {
+  position: absolute;
+  inset: -150px;
+  background-image: radial-gradient(1.6px 1.6px at 266px 245px, rgba(0, 0, 0, 0.4), transparent 100%),
+    radial-gradient(1.1px 1.1px at 169px 216px, rgba(0, 0, 0, 0.14), transparent 100%),
+    radial-gradient(1.3px 1.3px at 211px 234px, rgba(0, 0, 0, 0.23), transparent 100%),
+    radial-gradient(1.6px 1.6px at 222px 284px, rgba(0, 0, 0, 0.45), transparent 100%),
+    radial-gradient(1.2px 1.2px at 55px 40px, rgba(0, 0, 0, 0.43), transparent 100%),
+    radial-gradient(0.8px 0.8px at 49px 133px, rgba(0, 0, 0, 0.3), transparent 100%),
+    radial-gradient(1.1px 1.1px at 201px 12px, rgba(0, 0, 0, 0.4), transparent 100%),
+    radial-gradient(0.5px 0.5px at 130px 220px, rgba(0, 0, 0, 0.45), transparent 100%),
+    radial-gradient(1.5px 1.5px at 143px 53px, rgba(0, 0, 0, 0.18), transparent 100%),
+    radial-gradient(0.7px 0.7px at 102px 229px, rgba(0, 0, 0, 0.13), transparent 100%),
+    radial-gradient(1.2px 1.2px at 294px 56px, rgba(0, 0, 0, 0.47), transparent 100%),
+    radial-gradient(0.5px 0.5px at 92px 196px, rgba(0, 0, 0, 0.14), transparent 100%),
+    radial-gradient(1.4px 1.4px at 125px 235px, rgba(0, 0, 0, 0.26), transparent 100%),
+    radial-gradient(1.5px 1.5px at 147px 46px, rgba(0, 0, 0, 0.35), transparent 100%),
+    radial-gradient(1.1px 1.1px at 97px 161px, rgba(0, 0, 0, 0.41), transparent 100%),
+    radial-gradient(1.6px 1.6px at 171px 229px, rgba(0, 0, 0, 0.29), transparent 100%),
+    radial-gradient(1.2px 1.2px at 189px 93px, rgba(0, 0, 0, 0.33), transparent 100%),
+    radial-gradient(0.4px 0.4px at 57px 148px, rgba(0, 0, 0, 0.13), transparent 100%),
+    radial-gradient(0.7px 0.7px at 139px 113px, rgba(0, 0, 0, 0.47), transparent 100%),
+    radial-gradient(0.9px 0.9px at 19px 95px, rgba(0, 0, 0, 0.3), transparent 100%),
+    radial-gradient(0.5px 0.5px at 173px 57px, rgba(0, 0, 0, 0.29), transparent 100%),
+    radial-gradient(0.9px 0.9px at 229px 85px, rgba(0, 0, 0, 0.31), transparent 100%),
+    radial-gradient(1.5px 1.5px at 139px 252px, rgba(0, 0, 0, 0.14), transparent 100%),
+    radial-gradient(1px 1px at 44px 89px, rgba(0, 0, 0, 0.4), transparent 100%),
+    radial-gradient(0.5px 0.5px at 41px 46px, rgba(0, 0, 0, 0.43), transparent 100%),
+    radial-gradient(1.4px 1.4px at 147px 165px, rgba(0, 0, 0, 0.45), transparent 100%),
+    radial-gradient(1.4px 1.4px at 171px 143px, rgba(0, 0, 0, 0.32), transparent 100%),
+    radial-gradient(1.5px 1.5px at 75px 196px, rgba(0, 0, 0, 0.32), transparent 100%),
+    radial-gradient(1.4px 1.4px at 245px 34px, rgba(0, 0, 0, 0.38), transparent 100%),
+    radial-gradient(1.4px 1.4px at 154px 119px, rgba(0, 0, 0, 0.32), transparent 100%),
+    radial-gradient(1.2px 1.2px at 232px 135px, rgba(0, 0, 0, 0.24), transparent 100%),
+    radial-gradient(1px 1px at 31px 58px, rgba(0, 0, 0, 0.17), transparent 100%),
+    radial-gradient(0.5px 0.5px at 192px 217px, rgba(0, 0, 0, 0.26), transparent 100%),
+    radial-gradient(1.4px 1.4px at 110px 63px, rgba(0, 0, 0, 0.44), transparent 100%),
+    radial-gradient(1.2px 1.2px at 6px 138px, rgba(0, 0, 0, 0.45), transparent 100%),
+    radial-gradient(0.8px 0.8px at 185px 37px, rgba(0, 0, 0, 0.39), transparent 100%),
+    radial-gradient(0.7px 0.7px at 212px 180px, rgba(0, 0, 0, 0.42), transparent 100%),
+    radial-gradient(1.4px 1.4px at 70px 173px, rgba(0, 0, 0, 0.35), transparent 100%),
+    radial-gradient(0.6px 0.6px at 34px 80px, rgba(0, 0, 0, 0.22), transparent 100%),
+    radial-gradient(1px 1px at 135px 86px, rgba(0, 0, 0, 0.42), transparent 100%),
+    radial-gradient(1.4px 1.4px at 123px 64px, rgba(0, 0, 0, 0.47), transparent 100%),
+    radial-gradient(0.8px 0.8px at 239px 245px, rgba(0, 0, 0, 0.37), transparent 100%),
+    radial-gradient(0.7px 0.7px at 80px 280px, rgba(0, 0, 0, 0.33), transparent 100%),
+    radial-gradient(0.6px 0.6px at 65px 10px, rgba(0, 0, 0, 0.33), transparent 100%),
+    radial-gradient(0.9px 0.9px at 99px 132px, rgba(0, 0, 0, 0.34), transparent 100%),
+    radial-gradient(0.7px 0.7px at 248px 64px, rgba(0, 0, 0, 0.39), transparent 100%),
+    radial-gradient(1.1px 1.1px at 95px 212px, rgba(0, 0, 0, 0.18), transparent 100%),
+    radial-gradient(0.6px 0.6px at 115px 241px, rgba(0, 0, 0, 0.38), transparent 100%),
+    radial-gradient(0.5px 0.5px at 238px 236px, rgba(0, 0, 0, 0.48), transparent 100%),
+    radial-gradient(1.3px 1.3px at 115px 270px, rgba(0, 0, 0, 0.26), transparent 100%),
+    radial-gradient(0.7px 0.7px at 187px 173px, rgba(0, 0, 0, 0.35), transparent 100%),
+    radial-gradient(0.9px 0.9px at 250px 97px, rgba(0, 0, 0, 0.47), transparent 100%),
+    radial-gradient(0.8px 0.8px at 23px 83px, rgba(0, 0, 0, 0.46), transparent 100%),
+    radial-gradient(0.7px 0.7px at 214px 127px, rgba(0, 0, 0, 0.16), transparent 100%),
+    radial-gradient(1.5px 1.5px at 184px 147px, rgba(0, 0, 0, 0.24), transparent 100%),
+    radial-gradient(1.6px 1.6px at 21px 152px, rgba(0, 0, 0, 0.26), transparent 100%),
+    radial-gradient(1.5px 1.5px at 96px 3px, rgba(0, 0, 0, 0.41), transparent 100%),
+    radial-gradient(0.7px 0.7px at 241px 286px, rgba(0, 0, 0, 0.41), transparent 100%),
+    radial-gradient(0.9px 0.9px at 7px 76px, rgba(0, 0, 0, 0.3), transparent 100%),
+    radial-gradient(1.4px 1.4px at 34px 1px, rgba(0, 0, 0, 0.22), transparent 100%);
+  background-repeat: repeat;
+  background-size: 300px 300px;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ambient-bg-stars {
+    animation: ambient-drift 220s linear infinite;
+  }
+}
+
+@keyframes ambient-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(-300px, -300px); }
+}

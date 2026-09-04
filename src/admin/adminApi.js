@@ -1,4 +1,8 @@
-const API_BASE = 'http://localhost:3001';
+// En build de producción (Vercel), sin REACT_APP_API_BASE configurado,
+// usa rutas relativas ('') — funciona solo porque frontend y backend
+// (api/index.js) se despliegan juntos en el mismo dominio. En desarrollo
+// local, apunta al Express que corre aparte en el puerto 3001.
+const API_BASE = process.env.REACT_APP_API_BASE ?? (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
 
 async function handle(response) {
   const body = await response.json().catch(() => ({}));
@@ -48,4 +52,6 @@ export const adminApi = {
   createVariant: (productId, payload, token) => fetch(`${API_BASE}/api/admin/products/${productId}/variants`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   updateVariant: (id, payload, token) => fetch(`${API_BASE}/api/admin/variants/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   updateVariantStock: (id, payload, token) => fetch(`${API_BASE}/api/admin/variants/${id}/stock`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  branchSettings: (token) => fetch(`${API_BASE}/api/admin/branch-settings`, { headers: auth(token) }).then(handle),
+  updateBranchSettings: (sucursal, payload, token) => fetch(`${API_BASE}/api/admin/branch-settings/${sucursal}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
 };

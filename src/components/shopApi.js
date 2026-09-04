@@ -1,7 +1,8 @@
 // src/components/shopApi.js
 // Cliente HTTP para el catálogo de merch (público) y el guardado en cuenta
 // de un pedido de merch cuando el cliente tiene sesión iniciada.
-const API_BASE = 'http://localhost:3001';
+// Ver src/admin/adminApi.js — mismo criterio: relativo en producción, localhost:3001 en dev.
+const API_BASE = process.env.REACT_APP_API_BASE ?? (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
 
 async function handle(response) {
   const body = await response.json().catch(() => ({}));

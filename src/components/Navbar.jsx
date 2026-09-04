@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaFacebookF, FaInstagram, FaWhatsapp } from 'react-icons/fa';
-import { CircleUserRound } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { UserRound } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CUSTOMER_TOKEN_KEY } from '../customer/CustomerAuth';
+import LoginPopup from '../customer/LoginPopup';
 import './Navbar.css';
 
 // Mismo ícono que la pestaña del navegador (logo192.jpg / .ico en public/) —
@@ -26,21 +27,32 @@ const LINKS = [
   { to: '/shop', section: null, label: 'Shop' },
 ];
 
-const NavLinks = ({ onClose }) => (
+// Resorte compartido por el shell y su contenido — la misma sensación
+// "elástica" en ambos es lo que vende el efecto de gota líquida al pasar
+// de píldora ancha a botón circular.
+const SHELL_SPRING = { type: 'spring', stiffness: 300, damping: 28, mass: 0.9 };
+
+const NavLinks = ({ onClose, onAccountClick }) => (
   <>
     <li><Link to="/#home"        onClick={onClose}>Home</Link></li>
     <li><Link to="/#menu"        onClick={onClose}>Menú</Link></li>
     <li><Link to="/#ubicaciones" onClick={onClose}>Ubicación</Link></li>
     <li><Link to="/shop"         onClick={onClose}>Shop</Link></li>
     <li className="navbar-cuenta-item">
-      <Link
-        to={clienteHaIniciadoSesion() ? '/perfil' : '/login'}
-        onClick={onClose}
-        className="navbar-cuenta-icon"
-        aria-label="Mi cuenta"
-      >
-        <CircleUserRound />
-      </Link>
+      {clienteHaIniciadoSesion() ? (
+        <Link to="/perfil" onClick={onClose} className="navbar-cuenta-icon" aria-label="Mi cuenta">
+          <UserRound />
+        </Link>
+      ) : (
+        <button
+          type="button"
+          className="navbar-cuenta-icon"
+          aria-label="Iniciar sesión"
+          onClick={() => { onClose(); onAccountClick(); }}
+        >
+          <UserRound />
+        </button>
+      )}
     </li>
     <li className="social-icons-item">
       <div className="social-icons">
@@ -56,12 +68,14 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [seccionActiva, setSeccionActiva] = useState('home');
+  const [showLogin, setShowLogin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const enLanding = location.pathname === '/';
 
   // Cerrar con tecla Escape
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') { setMenuOpen(false); setShowLogin(false); } };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
@@ -103,52 +117,79 @@ const Navbar = () => {
 
   const toggleMenu = () => setMenuOpen((p) => !p);
   const closeMenu  = () => setMenuOpen(false);
-  const cuentaTo = clienteHaIniciadoSesion() ? '/perfil' : '/login';
+
+  const handleLoginSuccess = () => {
+    setShowLogin(false);
+    navigate('/perfil');
+  };
 
   return (
     <>
-      {/* ── Desktop: cápsula flotante (logo · pill de links · cuenta) ──
-          Se oculta al hacer scroll; el botón colapsado la reemplaza. */}
-      <div className={`navbar-float ${isScrolled ? 'is-hidden' : ''}`}>
-        <motion.div
-          className="navbar-float-inner"
-          initial={{ opacity: 0, y: -18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <Link to="/#home" className="nav-logo-btn" aria-label="Benditas Club — inicio">
-            <img src={LOGO_ICON} alt="" width={46} height={46} />
-          </Link>
-
-          <ul className="nav-pill">
-            {LINKS.map(({ to, section, label }) => {
-              const activo = section
-                ? enLanding && seccionActiva === section
-                : location.pathname === '/shop';
-              return (
-                <li key={to}>
-                  <Link to={to} className={activo ? 'is-active' : ''}>{label}</Link>
-                </li>
-              );
-            })}
-          </ul>
-
-          <Link to={cuentaTo} className="nav-account-pill" aria-label="Mi cuenta">
-            <CircleUserRound size={18} />
-          </Link>
-        </motion.div>
-      </div>
-
-      {/* ── Desktop: botón colapsado (aparece al deslizar) ── */}
-      <button
-        className={`nav-collapsed-btn ${isScrolled ? 'is-visible' : ''} ${menuOpen ? 'abierto' : ''}`}
-        onClick={toggleMenu}
-        aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+      {/* ── Desktop: un solo "shell" que se transforma de píldora ancha a
+          botón circular al hacer scroll, en vez de dos elementos separados
+          que se cruzan en opacidad — layout + spring hacen que se sienta
+          como una gota que se contrae, no un simple fundido. ── */}
+      <motion.div
+        layout
+        transition={SHELL_SPRING}
+        className={`navbar-shell ${isScrolled ? 'is-collapsed' : 'is-expanded'} ${isScrolled && menuOpen ? 'abierto' : ''}`}
+        onClick={isScrolled ? toggleMenu : undefined}
+        role={isScrolled ? 'button' : undefined}
+        aria-label={isScrolled ? (menuOpen ? 'Cerrar menú' : 'Abrir menú') : undefined}
       >
-        <span className="pill-linea" />
-        <span className="pill-linea" />
-        <span className="pill-linea" />
-      </button>
+        <AnimatePresence mode="wait" initial={false}>
+          {!isScrolled ? (
+            <motion.div
+              key="expanded"
+              className="navbar-shell-row"
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Link to="/#home" className="nav-logo-btn" aria-label="Benditas Club — inicio">
+                <img src={LOGO_ICON} alt="" width={38} height={38} />
+              </Link>
+
+              <ul className="nav-pill">
+                {LINKS.map(({ to, section, label }) => {
+                  const activo = section
+                    ? enLanding && seccionActiva === section
+                    : location.pathname === '/shop';
+                  return (
+                    <li key={to}>
+                      <Link to={to} className={activo ? 'is-active' : ''}>{label}</Link>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {clienteHaIniciadoSesion() ? (
+                <Link to="/perfil" className="nav-account-pill" aria-label="Mi cuenta">
+                  <UserRound size={20} />
+                </Link>
+              ) : (
+                <button type="button" className="nav-account-pill" aria-label="Iniciar sesión" onClick={() => setShowLogin(true)}>
+                  <UserRound size={20} />
+                </button>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="collapsed"
+              className="navbar-shell-row is-collapsed-row"
+              initial={{ opacity: 0, scale: 0.4 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.4 }}
+              transition={{ duration: 0.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <span className="pill-linea" />
+              <span className="pill-linea" />
+              <span className="pill-linea" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {/* ── Mobile: cápsula flotante ── */}
       <button
@@ -167,10 +208,14 @@ const Navbar = () => {
           {/* Clic en el fondo cierra — clic en el contenido no */}
           <div className="fullscreen-menu-inner" onClick={e => e.stopPropagation()}>
             <ul className="mobile-menu-links">
-              <NavLinks onClose={closeMenu} />
+              <NavLinks onClose={closeMenu} onAccountClick={() => setShowLogin(true)} />
             </ul>
           </div>
         </div>
+      )}
+
+      {showLogin && (
+        <LoginPopup onClose={() => setShowLogin(false)} onSuccess={handleLoginSuccess} />
       )}
     </>
   );

@@ -7,7 +7,7 @@ const WHATSAPP_NUMEROS = {
   coatepec: "522284032836",
 };
 
-export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "0001") => {
+export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "0001", metodoPago = null) => {
   const {
     nombre      = "",
     telefono    = "",
@@ -67,6 +67,10 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
   texto += `\n━━━━━━━━━━━━━━━━━━━\n`;
   texto += `💰 *Total estimado: $${total.toFixed(2)} MXN*\n`;
 
+  if (metodoPago === "transferencia") {
+    texto += `🏦 *Pago: Transferencia* — adjunto la captura del comprobante en este chat.\n`;
+  }
+
   // ✅ Corregido: string directo en vez de TIPO_PEDIDO.DOMICILIO
   if (tipoPedido === "domicilio") {
     texto += `_(más costo de envío por confirmar)_\n`;
@@ -82,8 +86,8 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
   return `https://wa.me/${numeroWA}?text=${encodeURIComponent(texto)}`;
 };
 
-export const enviarPedidoWhatsApp = (cliente = {}, carrito = [], ordenId = "0001") => {
-  const link = generarMensajeWhatsApp(cliente, carrito, ordenId);
+export const enviarPedidoWhatsApp = (cliente = {}, carrito = [], ordenId = "0001", metodoPago = null) => {
+  const link = generarMensajeWhatsApp(cliente, carrito, ordenId, metodoPago);
   if (!link) {
     console.error("[WhatsApp] No se pudo generar el link — sucursal no reconocida.");
     return false;

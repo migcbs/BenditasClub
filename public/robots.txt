@@ -1,3 +1,11 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /perfil
+Disallow: /login
+Disallow: /registro
+Disallow: /pos
+Disallow: /cocina
+Disallow: /admin
+
+Sitemap: https://www.benditasclub.com/sitemap.xml

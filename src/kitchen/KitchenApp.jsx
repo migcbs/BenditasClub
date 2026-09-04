@@ -20,6 +20,12 @@ const describirPedido = (orden) => {
   return `Para llevar${orden.clienteNombre ? ` · ${orden.clienteNombre}` : ''}`;
 };
 
+const folio = (orden) => `#${orden.id.slice(0, 6).toUpperCase()}`;
+
+// Minutos desde que se creó el pedido — no una fecha, es lo que le importa
+// a cocina para priorizar ("esto lleva 12 min esperando").
+const minutosDesde = (fecha) => Math.max(0, Math.round((Date.now() - new Date(fecha).getTime()) / 60000));
+
 const KitchenApp = () => {
   const { user, login, logout } = useStaffAuth();
   const [orders, setOrders] = useState([]);
@@ -85,25 +91,63 @@ const KitchenApp = () => {
               <AnimatePresence initial={false}>
                 {orders.filter((o) => o.estadoCocina === col.estado).map((orden) => (
                   <motion.div key={orden.id} layout initial={{ opacity: 0.6, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
-                    <Card elevation={0} sx={{ ...glassSx, borderRadius: 3, p: 2, mb: 1.5 }}>
-                      <Typography sx={{ fontWeight: 700, mb: 0.5 }}>{describirPedido(orden)}</Typography>
-                      {orden.items.map((item) => (
-                        <Typography key={item.id} variant="body2" color="text.secondary">
-                          {item.cantidad}× {item.nombre}
-                          {item.sabores.length > 0 && ` — ${item.sabores.join(', ')}`}
-                        </Typography>
-                      ))}
-                      {orden.notas && <Typography variant="caption" fontStyle="italic">{orden.notas}</Typography>}
-                      {col.siguiente && user.role === 'cocina' && (
-                        <Button
-                          fullWidth
-                          variant="contained"
+                    <Card elevation={0} sx={{ ...glassSx, borderRadius: 3, p: 0, mb: 1.5, overflow: 'hidden' }}>
+                      {/* Encabezado de la comanda: folio, tipo/cliente, tiempo esperando */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 2, pt: 1.5, pb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                          <Typography sx={{ fontWeight: 800, fontFamily: 'monospace', flexShrink: 0 }}>{folio(orden)}</Typography>
+                          {orden.origen === 'online' && <Chip size="small" label="En línea" sx={{ bgcolor: '#E765B7', color: '#fff' }} />}
+                        </Box>
+                        <Chip
                           size="small"
-                          sx={{ mt: 1.5, background: '#E765B7', color: '#241a20' }}
-                          onClick={() => avanzar(orden, col.siguiente)}
-                        >
-                          {col.accion}
-                        </Button>
+                          variant="outlined"
+                          label={`${minutosDesde(orden.createdAt)} min`}
+                          color={minutosDesde(orden.createdAt) >= 15 ? 'error' : 'default'}
+                        />
+                      </Box>
+
+                      <Typography sx={{ fontWeight: 700, px: 2, pb: 1 }}>{describirPedido(orden)}</Typography>
+
+                      {orden.tipo === 'domicilio' && orden.direccion && (
+                        <Typography variant="body2" color="text.secondary" sx={{ px: 2, pb: 1 }}>
+                          📍 {orden.direccion}
+                        </Typography>
+                      )}
+
+                      {/* Detalle del pedido — línea punteada como una comanda de verdad */}
+                      <Box sx={{ borderTop: '1px dashed rgba(36,26,32,.25)', px: 2, py: 1.25 }}>
+                        {orden.items.map((item) => (
+                          <Box key={item.id} sx={{ mb: 0.75, '&:last-child': { mb: 0 } }}>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                              {item.cantidad}× {item.nombre}
+                            </Typography>
+                            {item.sabores.length > 0 && (
+                              <Typography variant="caption" color="text.secondary">
+                                🌶 {item.sabores.join(', ')}
+                              </Typography>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+
+                      {orden.notas && (
+                        <Box sx={{ borderTop: '1px dashed rgba(36,26,32,.25)', px: 2, py: 1 }}>
+                          <Typography variant="caption" fontStyle="italic">📝 {orden.notas}</Typography>
+                        </Box>
+                      )}
+
+                      {col.siguiente && user.role === 'cocina' && (
+                        <Box sx={{ px: 2, pb: 2, pt: orden.notas ? 0 : 1.5 }}>
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            size="small"
+                            sx={{ background: '#E765B7', color: '#241a20' }}
+                            onClick={() => avanzar(orden, col.siguiente)}
+                          >
+                            {col.accion}
+                          </Button>
+                        </Box>
                       )}
                     </Card>
                   </motion.div>

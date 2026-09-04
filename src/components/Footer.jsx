@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './Footer.css';
 import { FaFacebookF, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 
@@ -29,6 +30,11 @@ const Footer = () => {
             <a href="mailto:benditasclub@gmail.com" className="footer-email">
               benditasclub@gmail.com
             </a>
+            <div className="footer-legal-links">
+              <Link to="/terminos">Términos y condiciones</Link>
+              <span aria-hidden="true">·</span>
+              <Link to="/privacidad">Aviso de privacidad</Link>
+            </div>
             <p className="footer-copyright">
               &copy; {new Date().getFullYear()} Benditas Club. Todos los derechos reservados.
             </p>

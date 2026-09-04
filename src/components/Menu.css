@@ -30,47 +30,45 @@
   margin-top: 15px;
 }
 
-/* GRID ESTILO FEED INSTAGRAM */
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* MARQUEE DE FOTOS — dos filas que se deslizan solas y reaccionan a la
+   velocidad/dirección del scroll (ver ScrollVelocityRow en Menu.jsx),
+   reemplaza el grid fijo anterior. */
+.menu-marquee-wrap {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.menu-item {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  border-radius: 12px;
-  background: #111;
-  border: 2px solid rgba(231, 101, 183, 0.1);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.image-wrapper {
   width: 100%;
-  height: 100%;
 }
 
-.menu-item img {
+.menu-marquee-row {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.menu-marquee-track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
+  width: max-content;
+}
+
+.menu-marquee-item {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(220px, 30vw, 380px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #111;
+  border: 2px solid rgba(231, 101, 183, 0.15);
+}
+
+.menu-marquee-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease, filter 0.4s ease;
-  filter: brightness(0.8) contrast(1.1);
-}
-
-/* Hover suave y limpio */
-.menu-item:hover {
-  border-color: #E765B7;
-  box-shadow: 0 10px 30px rgba(231, 101, 183, 0.2);
-}
-
-.menu-item:hover img {
-  transform: scale(1.1);
-  filter: brightness(1.05) contrast(1);
+  filter: brightness(0.85) contrast(1.1);
 }
 
 /* BOTÓN "CONSULTA NUESTRO MENÚ" */
@@ -80,34 +78,46 @@
   margin-top: 70px;
 }
 
-/* Mismo lenguaje de botón que el resto de la plataforma (ver DESIGN.md):
-   píldora, relleno rosa, texto en tinta oscura, sombra suave — antes tenía
-   su propio "sticker" con borde de 4px y sombra dura offset, distinto de
-   cualquier otro botón del sitio. */
+/* Mismo lenguaje que el CTA del Hero (ver Home.css .home-order-btn):
+   píldora rosa + círculo oscuro con flecha, en vez del "sticker" de borde
+   grueso y sombra dura offset que tenía antes. */
 .open-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
   background-color: #E765B7;
-  color: #241a20;
-  border: 2px solid #241a20;
-  padding: 22px 60px;
+  color: #fff;
+  border: none;
+  padding: 8px 8px 8px 32px;
   border-radius: 999px;
   font-family: 'Titan One', cursive;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   cursor: pointer;
   box-shadow: 0 10px 30px rgba(36,26,32,0.25);
-  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), gap 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.open-menu-btn-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+  color: #241a20;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
 .open-menu-btn:hover {
   background-color: #C43D8F;
-  color: #fff8f0;
-  transform: translateY(-2px);
+  gap: 22px;
   box-shadow: 0 14px 36px rgba(36,26,32,0.3);
 }
 
-.open-menu-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 18px rgba(36,26,32,0.22);
-}
+.open-menu-btn:hover .open-menu-btn-icon { transform: scale(1.08); }
+
+.open-menu-btn:active .open-menu-btn-icon { transform: scale(0.96); }
 
 /* POPUP DEL MENÚ (SCROLL INTERNO) */
 /* Mismo scrim que el popup de pedido (rgba(10,8,10,.7)) — antes era casi
@@ -220,24 +230,20 @@
 /* MÓVIL OPTIMIZADO */
 @media (max-width: 768px) {
   .menu-container { padding: 60px 15px; }
-  
-  .menu-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0px;
-  }
-  
+
+  .menu-marquee-item { width: clamp(130px, 44vw, 190px); }
+
   .menu-title { font-size: 2.2rem; }
-  
+
   .popup-content {
     height: 100vh;
     border-radius: 20px;
   }
 
- 
-
   .open-menu-btn {
     width: 95%;
-    padding: 18px 20px;
-    font-size: 1.2rem;
+    justify-content: space-between;
+    padding: 8px 8px 8px 24px;
+    font-size: 1.1rem;
   }
 }

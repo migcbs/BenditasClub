@@ -1,8 +1,9 @@
 // src/components/pedido/hooks/usePedido.js
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCarrito } from "./useCarrito";
 import { useClienteForm } from "./useClienteForm";
+import { useCustomerAccount } from "./useCustomerAccount";
 
 export const usePedido = () => {
 
@@ -24,7 +25,20 @@ export const usePedido = () => {
     handleChange,
     validar,
     resetCliente,
+    setCliente,
   } = useClienteForm();
+
+  // Si hay sesión de cliente, precarga nombre/teléfono de la cuenta (el
+  // cliente sigue pudiendo editarlos para este pedido en particular).
+  const { cuenta, direcciones } = useCustomerAccount();
+  useEffect(() => {
+    if (!cuenta) return;
+    setCliente((prev) => ({
+      ...prev,
+      nombre: prev.nombre || cuenta.nombre || "",
+      telefono: prev.telefono || cuenta.telefono || "",
+    }));
+  }, [cuenta, setCliente]);
 
   const siguientePaso = () => {
     if (paso === 1) {
@@ -52,6 +66,7 @@ export const usePedido = () => {
     cliente,
     errores,
     handleChange,
+    direcciones,
     carrito,
     agregarProducto,
     eliminarProducto,

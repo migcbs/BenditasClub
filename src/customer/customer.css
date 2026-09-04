@@ -45,6 +45,17 @@
 .customer-reward-history summary { cursor:pointer; font-weight:800; color:#241a20; }
 .customer-reward-history p { margin-top:8px; }
 
+.customer-address-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
+.customer-address-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid rgba(36,26,32,.1); border-radius: 12px; background: #fff; }
+.customer-address-item em { color: #C43D8F; font-style: normal; font-weight: 700; font-size: 12px; }
+.customer-address-actions { display: flex; gap: 12px; flex-shrink: 0; }
+.customer-address-link { border: none; background: none; padding: 0; color: #C43D8F; font-weight: 750; cursor: pointer; font-size: 13px; }
+.customer-address-link:hover { text-decoration: underline; }
+.customer-address-danger { color: #8a102e; }
+.customer-address-form { border-top: 1px solid rgba(36,26,32,.09); padding-top: 14px; }
+.customer-address-checkbox { display: flex !important; flex-direction: row !important; align-items: center; gap: 8px; font-size: 13px; }
+.customer-address-checkbox input { width: auto; min-height: auto; }
+
 @media (max-width:520px) {
   .customer-page { padding-top:78px; }
   .customer-card,.customer-profile-hero { border-radius:16px; padding:17px; }

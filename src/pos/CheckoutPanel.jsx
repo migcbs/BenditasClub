@@ -67,6 +67,7 @@ const CheckoutPanel = ({ carrito, onOrderCreated }) => {
       {!dejarPendiente && (
         <TextField select size="small" label="Método de pago" value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}>
           <MenuItem value="efectivo">Efectivo</MenuItem>
+          <MenuItem value="transferencia">Transferencia</MenuItem>
           <MenuItem value="tarjeta">Tarjeta (terminal física)</MenuItem>
         </TextField>
       )}

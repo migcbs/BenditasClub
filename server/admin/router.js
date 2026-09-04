@@ -228,6 +228,28 @@ router.get('/loyalty/redemptions', async (req, res) => {
   }));
 });
 
+// ── Datos bancarios por sucursal (pago por transferencia) ──
+router.get('/branch-settings', async (req, res) => {
+  const rows = await prisma.branchSettings.findMany();
+  const bySucursal = Object.fromEntries(rows.map((r) => [r.sucursal, r]));
+  res.json(['xico', 'coatepec'].map((sucursal) => bySucursal[sucursal] || { sucursal, clabe: null, banco: null, titular: null }));
+});
+
+router.put('/branch-settings/:sucursal', async (req, res) => {
+  const { sucursal } = req.params;
+  if (!['xico', 'coatepec'].includes(sucursal)) return res.status(400).json({ error: 'Sucursal inválida' });
+  const { clabe, banco, titular } = req.body;
+  if (clabe && !/^\d{18}$/.test(clabe.replace(/\s/g, ''))) {
+    return res.status(400).json({ error: 'El CLABE debe tener 18 dígitos' });
+  }
+  const settings = await prisma.branchSettings.upsert({
+    where: { sucursal },
+    update: { clabe: clabe?.replace(/\s/g, '') || null, banco: banco?.trim() || null, titular: titular?.trim() || null },
+    create: { sucursal, clabe: clabe?.replace(/\s/g, '') || null, banco: banco?.trim() || null, titular: titular?.trim() || null },
+  });
+  res.json(settings);
+});
+
 router.use((error, _req, res, _next) => {
   console.error('Error en módulo administrativo:', error);
   res.status(500).json({ error: 'No pudimos completar la operación administrativa' });

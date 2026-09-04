@@ -113,6 +113,17 @@ export default function AdminApp({ api = defaultApi, storage = window.localStora
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // El dashboard no se refrescaba solo — un pedido nuevo o un cambio de
+  // estado no aparecía hasta cambiar de sucursal o recargar la página a
+  // mano. Efecto aparte (no se mete con el de arriba, que ya tiene un
+  // timing delicado) para no romper la restauración de sesión.
+  useEffect(() => {
+    if (!token || !user) return undefined;
+    const interval = setInterval(() => { loadDashboard(token, branch).catch(() => {}); }, 30000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, user, branch]);
+
   const login = async (email, password) => {
     const result = await api.login(email, password);
     if (result.user.role !== 'admin') throw new Error('Solo las cuentas administradoras pueden entrar.');
