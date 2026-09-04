@@ -312,6 +312,9 @@ function Loyalty({ api, token }) {
   const load = () => Promise.all([api.loyaltyRewards(token), api.loyaltyRedemptions(token)])
     .then(([r, red]) => { setRewards(r); setRedemptions(red); });
 
+  // `load` se recrea cada render — meterlo a las deps causaría un loop
+  // (dispara el efecto -> setRewards/setRedemptions -> re-render -> nuevo `load` -> ...).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load().catch((e) => setError(e.message)); }, [api, token]);
 
   const openForm = async () => {
@@ -429,6 +432,9 @@ function Merch({ api, token }) {
   const load = () => Promise.all([api.merchProducts(token), api.merchOrders(token), api.categories(token)])
     .then(([p, o, c]) => { setProducts(p); setOrders(o); setCategories(c); });
 
+  // Mismo motivo que en Loyalty() arriba: `load` no es estable entre
+  // renders, incluirla en las deps provocaría un loop.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load().catch((e) => setError(e.message)); }, [api, token]);
 
   const saveCategory = async () => {
