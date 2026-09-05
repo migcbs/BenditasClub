@@ -18,10 +18,16 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
     costoEnvio  = 0,
     envioExacto = false,
     elegibleDescuentoBienvenida = false,
+    cuponAplicado = false,
+    cuponCodigo = "",
+    descuentoCupon = 0,
   } = cliente;
 
   const total = calcularSubtotal(carrito);
-  const descuentoBienvenida = elegibleDescuentoBienvenida ? Math.round(total * 0.10) : 0;
+  // Un cupón reemplaza al 10% de bienvenida en vez de sumarse — mismo
+  // criterio que aplica el servidor al crear el pedido de verdad.
+  const descuentoBienvenida = !cuponAplicado && elegibleDescuentoBienvenida ? Math.round(total * 0.10) : 0;
+  const descuentoTotal = cuponAplicado ? descuentoCupon : descuentoBienvenida;
 
   let texto  = `🐣 *BENDITAS CLUB — Nuevo Pedido*\n`;
   texto     += `━━━━━━━━━━━━━━━━━━━\n`;
@@ -73,11 +79,13 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
   if (tipoPedido === "domicilio") {
     texto += `🍗 *Productos: $${total.toFixed(2)} MXN*\n`;
     if (descuentoBienvenida > 0) texto += `🎉 *10% de bienvenida: -$${descuentoBienvenida.toFixed(2)} MXN*\n`;
+    if (cuponAplicado && descuentoCupon > 0) texto += `🎟️ *Cupón ${cuponCodigo}: -$${descuentoCupon.toFixed(2)} MXN*\n`;
     texto += `🛵 *Envío${envioExacto ? "" : " estimado"}: $${Number(costoEnvio).toFixed(2)} MXN*\n`;
-    texto += `💰 *Total${envioExacto ? "" : " estimado"}: $${(total - descuentoBienvenida + Number(costoEnvio)).toFixed(2)} MXN*\n`;
+    texto += `💰 *Total${envioExacto ? "" : " estimado"}: $${(total - descuentoTotal + Number(costoEnvio)).toFixed(2)} MXN*\n`;
   } else {
     if (descuentoBienvenida > 0) texto += `🎉 *10% de bienvenida: -$${descuentoBienvenida.toFixed(2)} MXN*\n`;
-    texto += `💰 *Total estimado: $${(total - descuentoBienvenida).toFixed(2)} MXN*\n`;
+    if (cuponAplicado && descuentoCupon > 0) texto += `🎟️ *Cupón ${cuponCodigo}: -$${descuentoCupon.toFixed(2)} MXN*\n`;
+    texto += `💰 *Total estimado: $${(total - descuentoTotal).toFixed(2)} MXN*\n`;
   }
 
   if (metodoPago === "transferencia") {

@@ -51,6 +51,12 @@ export const customerApi = {
   }).then(handle),
   loyalty: (token) => fetch(`${API_BASE}/api/customer/loyalty`, { headers: auth(token) }).then(handle),
   deliveryFee: (sucursal, codigoPostal) => fetch(`${API_BASE}/api/delivery-zones/${sucursal}/${encodeURIComponent(codigoPostal)}`).then(handle),
+  couponsPublicos: () => fetch(`${API_BASE}/api/coupons/publicos`).then(handle),
+  validarCupon: (codigo, subtotal) => fetch(`${API_BASE}/api/coupons/validar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ codigo, subtotal }),
+  }).then(handle),
   canjearPuntos: (productId, token) => fetch(`${API_BASE}/api/customer/points/canjear`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...auth(token) },

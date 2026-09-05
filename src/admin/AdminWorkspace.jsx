@@ -932,15 +932,21 @@ function Loyalty({ api, token }) {
   const [birthdayForm, setBirthdayForm] = useState({ label: '', type: 'discount_percent', value: '', productId: '' });
   const [birthdayOpen, setBirthdayOpen] = useState(false);
   const [birthdayRedemptions, setBirthdayRedemptions] = useState(null);
+  const [coupons, setCoupons] = useState(null);
+  const [couponDialogOpen, setCouponDialogOpen] = useState(false);
+  const [couponForm, setCouponForm] = useState({ codigo: '', tipo: 'discount_percent', valor: '', descripcion: '', usosMaximos: '' });
+  const [couponError, setCouponError] = useState('');
+  const [savingCoupon, setSavingCoupon] = useState(false);
 
   const load = () => Promise.all([
     api.loyaltyRewards(token), api.loyaltyRedemptions(token), api.pointsRedemptions(token),
-    api.products(), api.birthdayRewards(token), api.birthdayRedemptions(token),
-  ]).then(([r, red, pointsRed, prods, bRewards, bRedemptions]) => {
+    api.products(), api.birthdayRewards(token), api.birthdayRedemptions(token), api.coupons(token),
+  ]).then(([r, red, pointsRed, prods, bRewards, bRedemptions, coup]) => {
     setRewards(r); setRedemptions(red); setPointsRedemptions(pointsRed);
     setProducts(prods);
     setPuntosPorProducto(Object.fromEntries(prods.map((p) => [p.id, p.costoPuntos ?? ''])));
     setBirthdayRewards(bRewards); setBirthdayRedemptions(bRedemptions);
+    setCoupons(coup);
   });
 
   // `load` se recrea cada render — meterlo a las deps causaría un loop
@@ -959,6 +965,36 @@ function Loyalty({ api, token }) {
     } finally {
       setSavingProductId('');
     }
+  };
+
+  const abrirCouponDialog = () => { setCouponForm({ codigo: '', tipo: 'discount_percent', valor: '', descripcion: '', usosMaximos: '' }); setCouponError(''); setCouponDialogOpen(true); };
+
+  const guardarCupon = async () => {
+    if (!couponForm.codigo.trim() || !(Number(couponForm.valor) > 0)) {
+      return setCouponError('Código y valor válidos son obligatorios.');
+    }
+    setSavingCoupon(true);
+    setCouponError('');
+    try {
+      await api.createCoupon({ ...couponForm, usosMaximos: couponForm.usosMaximos || undefined }, token);
+      await load();
+      setCouponDialogOpen(false);
+    } catch (requestError) {
+      setCouponError(requestError.message);
+    } finally {
+      setSavingCoupon(false);
+    }
+  };
+
+  const toggleCoupon = async (coupon) => {
+    try { await api.updateCoupon(coupon.id, { activo: !coupon.activo }, token); await load(); }
+    catch (requestError) { setError(requestError.message); }
+  };
+
+  const eliminarCupon = async (coupon) => {
+    if (!window.confirm(`¿Eliminar el cupón ${coupon.codigo}?`)) return;
+    try { await api.deleteCoupon(coupon.id, token); await load(); }
+    catch (requestError) { setError(requestError.message); }
   };
 
   const openBirthdayForm = () => {
@@ -1100,6 +1136,73 @@ function Loyalty({ api, token }) {
         </div>
       )) : <Empty>Sin canjes de puntos pendientes.</Empty>}
     </div>
+
+    <div className="admin-data-panel">
+      <div className="admin-data-heading">
+        <h2>Cupones</h2>
+        <Button size="small" startIcon={<Plus size={16} />} onClick={abrirCouponDialog}>Nuevo cupón</Button>
+      </div>
+      <p className="admin-panel-hint">Códigos que el cliente escribe a mano al confirmar su pedido — nada que ver con el 10% de bienvenida, que es automático.</p>
+      {!coupons ? <Loading /> : coupons.length ? coupons.map((c) => (
+        <div className="admin-list-row" key={c.id}>
+          <span>
+            <b>{c.codigo}</b>
+            <small>
+              {c.tipo === 'discount_percent' ? `${c.valor}% de descuento` : `${money.format(c.valor)} de descuento`}
+              {c.descripcion ? ` · ${c.descripcion}` : ''}
+              {' · '}{c.usosActuales}{c.usosMaximos ? `/${c.usosMaximos}` : ''} usos
+              {!c.activo ? ' · inactivo' : ''}
+            </small>
+          </span>
+          <div className="admin-row-actions">
+            <Switch size="small" checked={c.activo} onChange={() => toggleCoupon(c)} aria-label={`${c.activo ? 'Desactivar' : 'Activar'} cupón ${c.codigo}`} />
+            <Button size="small" color="error" onClick={() => eliminarCupon(c)}>Quitar</Button>
+          </div>
+        </div>
+      )) : <Empty>Sin cupones creados todavía.</Empty>}
+    </div>
+
+    <Dialog open={couponDialogOpen} onClose={() => !savingCoupon && setCouponDialogOpen(false)} fullWidth maxWidth="xs">
+      <DialogTitle>Nuevo cupón</DialogTitle>
+      <DialogContent className="admin-form-grid">
+        {couponError ? <Alert severity="error" sx={{ gridColumn: '1/-1' }}>{couponError}</Alert> : null}
+        <TextField
+          label="Código"
+          placeholder="BENDITASCLUB"
+          value={couponForm.codigo}
+          onChange={(e) => setCouponForm({ ...couponForm, codigo: e.target.value.toUpperCase() })}
+        />
+        <TextField select label="Tipo de descuento" value={couponForm.tipo} onChange={(e) => setCouponForm({ ...couponForm, tipo: e.target.value })}>
+          <MenuItem value="discount_percent">Porcentaje (%)</MenuItem>
+          <MenuItem value="discount_fixed">Monto fijo ($)</MenuItem>
+        </TextField>
+        <TextField
+          label={couponForm.tipo === 'discount_percent' ? 'Porcentaje de descuento' : 'Monto de descuento'}
+          type="number"
+          value={couponForm.valor}
+          onChange={(e) => setCouponForm({ ...couponForm, valor: e.target.value })}
+          slotProps={{ htmlInput: { min: 0 } }}
+        />
+        <TextField
+          label="Descripción (opcional)"
+          placeholder="Ej. Lanzamiento, redes sociales…"
+          value={couponForm.descripcion}
+          onChange={(e) => setCouponForm({ ...couponForm, descripcion: e.target.value })}
+        />
+        <TextField
+          label="Usos máximos (opcional)"
+          type="number"
+          helperText="Vacío = sin límite de usos"
+          value={couponForm.usosMaximos}
+          onChange={(e) => setCouponForm({ ...couponForm, usosMaximos: e.target.value })}
+          slotProps={{ htmlInput: { min: 1 } }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setCouponDialogOpen(false)} disabled={savingCoupon}>Cancelar</Button>
+        <Button variant="contained" onClick={guardarCupon} disabled={savingCoupon}>{savingCoupon ? 'Guardando...' : 'Guardar cupón'}</Button>
+      </DialogActions>
+    </Dialog>
 
     <header style={{ marginTop: 8 }}>
       <div><Typography component="h1" style={{ fontSize: 20 }}>Promoción de cumpleaños</Typography><Typography>Se activa sola el día del cumpleaños del cliente, si tiene su fecha de nacimiento registrada.</Typography></div>

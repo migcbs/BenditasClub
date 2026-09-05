@@ -43,6 +43,7 @@ let demoMerchProducts = [{ id: 'merch-1', nombre: 'Playera Monalisa', category: 
 let demoMerchOrders = [];
 let demoBranchSettings = [{ sucursal: 'xico', clabe: '', banco: '', titular: '', envioMinimo: 35 }, { sucursal: 'coatepec', clabe: '', banco: '', titular: '', envioMinimo: 35 }];
 let demoDeliveryZones = [{ id: 'dz1', sucursal: 'xico', distanciaMaxKm: 3, costoEnvio: 35, etiqueta: 'Centro', activo: true }, { id: 'dz2', sucursal: 'xico', distanciaMaxKm: 7, costoEnvio: 55, etiqueta: 'Zona media', activo: true }];
+let demoCoupons = [{ id: 'cp1', codigo: 'BENDITASCLUB', tipo: 'discount_percent', valor: 15, descripcion: 'Lanzamiento', activo: true, usosMaximos: null, usosActuales: 4 }];
 let demoResetRequests = [{ id: 'pr1', email: 'cliente@ejemplo.com', nombre: 'Cliente Demo', telefono: '2281234567', customerId: 'demo-customer', estado: 'pendiente', createdAt: new Date().toISOString() }];
 let demoCashShifts = [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, countedAmount: null, expectedAmount: null, difference: null, openedAt: new Date().toISOString(), closedAt: null, notes: null, movements: [{ id: 'm1', type: 'pay_in', amount: 300, concept: 'Depósito de cambio', createdAt: new Date().toISOString() }, { id: 'm2', type: 'pay_out', amount: 150, concept: 'Compra de hielo', createdAt: new Date().toISOString() }] }];
 const demoApi = {
@@ -129,6 +130,14 @@ const demoApi = {
     return zona;
   },
   deleteDeliveryZone: async (id) => { demoDeliveryZones = demoDeliveryZones.filter((z) => z.id !== id); },
+  coupons: async () => demoCoupons,
+  createCoupon: async (payload) => {
+    const cupon = { id: `cp-${Date.now()}`, activo: true, usosActuales: 0, usosMaximos: payload.usosMaximos ? Number(payload.usosMaximos) : null, ...payload, codigo: payload.codigo.toUpperCase(), valor: Number(payload.valor) };
+    demoCoupons = [...demoCoupons, cupon];
+    return cupon;
+  },
+  updateCoupon: async (id, payload) => { demoCoupons = demoCoupons.map((c) => c.id === id ? { ...c, ...payload } : c); return demoCoupons.find((c) => c.id === id); },
+  deleteCoupon: async (id) => { demoCoupons = demoCoupons.filter((c) => c.id !== id); },
   customers: async () => [{ id: 'cu1', nombre: 'Mariana López', email: 'mariana@ejemplo.com', telefono: '2281234567', fechaNacimiento: null, activo: true, createdAt: new Date().toISOString(), totalPedidos: 3, totalDirecciones: 1 }],
   customerDetail: async (id) => ({
     id, nombre: 'Mariana López', email: 'mariana@ejemplo.com', telefono: '2281234567', fechaNacimiento: null, activo: true, createdAt: new Date().toISOString(),

@@ -24,6 +24,7 @@ const { applyInventoryForOrder } = require('./server/admin/inventory-service');
 const { classifyInventoryHealth, calculateExpectedCash } = require('./server/admin/inventory');
 const { awardStampForOrder, awardPointsForOrder, generateRedemptionCode } = require('./server/loyalty/loyalty-service');
 const { calcularCostoEnvio } = require('./server/delivery');
+const { validarCupon, calcularDescuentoCupon } = require('./server/coupons');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
@@ -550,6 +551,38 @@ app.get('/api/delivery-zones/:sucursal/:codigoPostal', async (req, res) => {
   }
 });
 
+// Pública — la "cuponera" del perfil del cliente lista los códigos
+// vigentes para que no tenga que adivinarlos. Solo lo necesario para
+// mostrarlos, nada de usosActuales/usosMaximos (información interna).
+app.get('/api/coupons/publicos', async (req, res) => {
+  try {
+    const cupones = await prisma.couponCode.findMany({
+      where: { activo: true, OR: [{ expiraEn: null }, { expiraEn: { gt: new Date() } }] },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(cupones.map((c) => ({ codigo: c.codigo, tipo: c.tipo, valor: c.valor, descripcion: c.descripcion })));
+  } catch (e) {
+    console.error('❌ Error listando cupones:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+// Pública — el popup de pedido la usa para mostrar el descuento antes de
+// confirmar. El descuento real se vuelve a calcular en el servidor al
+// crear el pedido; esto es solo para que el cliente lo vea de antemano.
+app.post('/api/coupons/validar', async (req, res) => {
+  try {
+    const { codigo, subtotal } = req.body;
+    const resultado = await validarCupon(codigo);
+    if (!resultado.valido) return res.status(400).json({ valido: false, error: resultado.error });
+    const descuento = calcularDescuentoCupon(resultado.cupon, Number(subtotal) || 0);
+    res.json({ valido: true, descuento, tipo: resultado.cupon.tipo, valor: resultado.cupon.valor, descripcion: resultado.cupon.descripcion });
+  } catch (e) {
+    console.error('❌ Error validando cupón:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 app.get('/api/products', async (req, res) => {
   try {
     const products = await prisma.product.findMany({
@@ -671,7 +704,7 @@ app.post('/api/customer/shop-orders', verifyToken, requireRole('cliente'), async
 // BD ni a Recepción/Cocina/Admin, solo se mandaban por WhatsApp.
 app.post('/api/customer/orders', optionalAuth, async (req, res) => {
   try {
-    const { sucursal, tipo, direccion, codigoPostal, notas, items, nombre, telefono } = req.body;
+    const { sucursal, tipo, direccion, codigoPostal, notas, items, nombre, telefono, cuponCodigo } = req.body;
     if (!['xico', 'coatepec'].includes(sucursal) || !['para_llevar', 'domicilio'].includes(tipo)) {
       return res.status(400).json({ error: 'Sucursal y tipo de pedido válidos son obligatorios' });
     }
@@ -711,15 +744,27 @@ app.post('/api/customer/orders', optionalAuth, async (req, res) => {
     const subtotal = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);
     const costoEnvio = tipo === 'domicilio' ? (await calcularCostoEnvio(sucursal, codigoPostal)).costoEnvio : 0;
 
-    // 10% de bienvenida — solo cuentas con sesión (no invitados: "debe
-    // estar conectado al perfil del cliente") y solo si esta es la
-    // primera vez que esa cuenta registra un pedido no cancelado.
+    // Cupón escrito a mano tiene prioridad sobre el 10% de bienvenida —
+    // nunca se combinan los dos descuentos. Se vuelve a validar aquí
+    // (nunca se confía en lo que haya mostrado el cliente antes de enviar).
     let descuentoBienvenida = 0;
-    if (clienteId) {
+    let descuentoCupon = 0;
+    let cuponValido = null;
+    if (cuponCodigo?.trim()) {
+      const resultado = await validarCupon(cuponCodigo);
+      if (resultado.valido) {
+        cuponValido = resultado.cupon;
+        descuentoCupon = calcularDescuentoCupon(resultado.cupon, subtotal);
+      }
+    }
+    if (!cuponValido && clienteId) {
+      // 10% de bienvenida — solo cuentas con sesión (no invitados: "debe
+      // estar conectado al perfil del cliente") y solo si esta es la
+      // primera vez que esa cuenta registra un pedido no cancelado.
       const pedidosPrevios = await prisma.order.count({ where: { clienteId, estado: { not: 'cancelado' } } });
       if (pedidosPrevios === 0) descuentoBienvenida = Math.round(subtotal * 0.10);
     }
-    const total = subtotal - descuentoBienvenida;
+    const total = subtotal - descuentoBienvenida - descuentoCupon;
 
     const order = await prisma.order.create({
       data: {
@@ -732,6 +777,8 @@ app.post('/api/customer/orders', optionalAuth, async (req, res) => {
         codigoPostal: codigoPostal || null,
         costoEnvio,
         descuentoBienvenida,
+        cuponCodigo: cuponValido ? cuponValido.codigo : null,
+        descuentoCupon,
         notas: notas || null,
         total,
         origen: 'online',
@@ -742,6 +789,10 @@ app.post('/api/customer/orders', optionalAuth, async (req, res) => {
       },
       include: { items: true },
     });
+
+    if (cuponValido) {
+      await prisma.couponCode.update({ where: { id: cuponValido.id }, data: { usosActuales: { increment: 1 } } });
+    }
 
     res.status(201).json(order);
   } catch (e) {

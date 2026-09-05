@@ -48,17 +48,22 @@ const ScrollHandler = () => {
 const SiteChrome = ({ children }) => {
   const location = useLocation();
   const esPantallaStaff = location.pathname.startsWith('/pos') || location.pathname.startsWith('/cocina') || location.pathname.startsWith('/admin');
+  // Sin navbar en el registro: la pantalla ya tiene su propio flujo (crear
+  // cuenta / volver a entrar) y el navbar solo compite por atención. El
+  // pop-up de "regístrate y gana 10%" tampoco tiene sentido mostrarlo
+  // encima de la pantalla donde ya se están registrando.
+  const esRegistro = location.pathname.startsWith('/registro');
 
   if (esPantallaStaff) return children;
 
   return (
     <>
       <AmbientStars />
-      <Navbar />
+      {!esRegistro && <Navbar />}
       {children}
       <Footer />
       <CookieConsent />
-      <WelcomePromoPopup />
+      {!esRegistro && <WelcomePromoPopup />}
     </>
   );
 };

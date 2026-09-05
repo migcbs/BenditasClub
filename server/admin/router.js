@@ -494,6 +494,51 @@ router.get('/customers/:id', async (req, res) => {
   res.json({ ...customer, totalPedidosPagados: gastado._count, totalGastado: gastado._sum.total || 0 });
 });
 
+router.get('/coupons', async (_req, res) => {
+  res.json(await prisma.couponCode.findMany({ orderBy: { createdAt: 'desc' } }));
+});
+
+router.post('/coupons', async (req, res) => {
+  const { codigo, tipo, valor, descripcion, usosMaximos, expiraEn } = req.body;
+  if (!codigo?.trim() || !['discount_percent', 'discount_fixed'].includes(tipo) || !(Number(valor) > 0)) {
+    return res.status(400).json({ error: 'Código, tipo y valor válidos son obligatorios' });
+  }
+  try {
+    const cupon = await prisma.couponCode.create({
+      data: {
+        codigo: codigo.trim().toUpperCase(),
+        tipo,
+        valor: Number(valor),
+        descripcion: descripcion?.trim() || null,
+        usosMaximos: usosMaximos ? Number(usosMaximos) : null,
+        expiraEn: expiraEn ? new Date(expiraEn) : null,
+      },
+    });
+    res.status(201).json(cupon);
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe un cupón con ese código' });
+    throw error;
+  }
+});
+
+router.put('/coupons/:id', async (req, res) => {
+  const { activo, descripcion, usosMaximos, expiraEn } = req.body;
+  res.json(await prisma.couponCode.update({
+    where: { id: req.params.id },
+    data: {
+      ...(activo !== undefined ? { activo } : {}),
+      ...(descripcion !== undefined ? { descripcion: descripcion?.trim() || null } : {}),
+      ...(usosMaximos !== undefined ? { usosMaximos: usosMaximos ? Number(usosMaximos) : null } : {}),
+      ...(expiraEn !== undefined ? { expiraEn: expiraEn ? new Date(expiraEn) : null } : {}),
+    },
+  }));
+});
+
+router.delete('/coupons/:id', async (req, res) => {
+  await prisma.couponCode.delete({ where: { id: req.params.id } });
+  res.status(204).end();
+});
+
 router.use((error, _req, res, _next) => {
   console.error('Error en módulo administrativo:', error);
   res.status(500).json({ error: 'No pudimos completar la operación administrativa' });

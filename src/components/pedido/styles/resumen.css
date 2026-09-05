@@ -124,6 +124,77 @@
 }
 
 /* ─────────────────────────────────────────
+   CUPÓN (opcional)
+───────────────────────────────────────── */
+.resumen-cupon .cupon-form {
+  display: flex;
+  gap: 8px;
+}
+
+.resumen-cupon .cupon-form input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  border: 3px solid #000;
+  border-radius: 14px;
+  background: #fff;
+  outline: none;
+}
+
+.resumen-cupon .cupon-form input:focus {
+  border-color: #e78fbb;
+}
+
+.resumen-cupon .cupon-form button {
+  flex-shrink: 0;
+  height: 48px;
+  padding: 0 18px;
+  border: 3px solid #000;
+  border-radius: 14px;
+  background: #e78fbb;
+  color: #000;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.resumen-cupon .cupon-form button:disabled {
+  background: #ccc;
+  border-color: #aaa;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.resumen-cupon .cupon-aplicado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 3px dashed #e78fbb;
+  border-radius: 14px;
+  background: rgba(231, 143, 187, 0.1);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.resumen-cupon .cupon-aplicado button {
+  border: none;
+  background: none;
+  color: #b3261e;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────
    TOTAL
 ───────────────────────────────────────── */
 .resumen-total {
