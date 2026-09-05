@@ -38,7 +38,13 @@ app.use(cors({
     if (!origin) return callback(null, true); // curl / tests sin Origin
     if (/^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('No permitido por CORS'));
+    // callback(null, false) en vez de un Error: un origen no listado en
+    // ALLOWED_ORIGINS responde sin headers CORS (el navegador bloquea la
+    // lectura de la respuesta, como debe ser), en vez de reventar como un
+    // 500 genérico que tumba CUALQUIER llamada real — así, si algún día
+    // falta agregar un dominio a la lista, solo ese dominio se ve afectado
+    // y no el sitio entero.
+    callback(null, false);
   },
   credentials: true,
 }));
