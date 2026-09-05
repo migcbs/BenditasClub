@@ -65,6 +65,8 @@ export const adminApi = {
   branchSettings: (token) => fetch(`${API_BASE}/api/admin/branch-settings`, { headers: auth(token) }).then(handle),
   updateBranchSettings: (sucursal, payload, token) => fetch(`${API_BASE}/api/admin/branch-settings/${sucursal}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   deliveryZones: (token) => fetch(`${API_BASE}/api/admin/delivery-zones`, { headers: auth(token) }).then(handle),
+  customers: (token) => fetch(`${API_BASE}/api/admin/customers`, { headers: auth(token) }).then(handle),
+  customerDetail: (id, token) => fetch(`${API_BASE}/api/admin/customers/${id}`, { headers: auth(token) }).then(handle),
   createDeliveryZone: (payload, token) => fetch(`${API_BASE}/api/admin/delivery-zones`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   deleteDeliveryZone: (id, token) => fetch(`${API_BASE}/api/admin/delivery-zones/${id}`, { method: 'DELETE', headers: auth(token) }).then((res) => { if (!res.ok) throw new Error('No se pudo quitar la zona'); }),
   passwordResetRequests: (token) => fetch(`${API_BASE}/api/admin/password-reset-requests`, { headers: auth(token) }).then(handle),

@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navbar     from './components/Navbar';
 import AmbientStars from './components/AmbientStars';
 import CookieConsent from './components/CookieConsent';
+import WelcomePromoPopup from './components/WelcomePromoPopup';
 import Home       from './components/Home';
 import Banner     from './components/Banner';
 import Menu       from './components/Menu';
@@ -57,6 +58,7 @@ const SiteChrome = ({ children }) => {
       {children}
       <Footer />
       <CookieConsent />
+      <WelcomePromoPopup />
     </>
   );
 };

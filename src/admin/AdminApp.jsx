@@ -112,6 +112,14 @@ const demoApi = {
     return zona;
   },
   deleteDeliveryZone: async (id) => { demoDeliveryZones = demoDeliveryZones.filter((z) => z.id !== id); },
+  customers: async () => [{ id: 'cu1', nombre: 'Mariana López', email: 'mariana@ejemplo.com', telefono: '2281234567', fechaNacimiento: null, activo: true, createdAt: new Date().toISOString(), totalPedidos: 3, totalDirecciones: 1 }],
+  customerDetail: async (id) => ({
+    id, nombre: 'Mariana López', email: 'mariana@ejemplo.com', telefono: '2281234567', fechaNacimiento: null, activo: true, createdAt: new Date().toISOString(),
+    addresses: [{ id: 'a1', etiqueta: 'Casa', direccion: 'Av. Hidalgo #212, Centro, CP 91240', esPrincipal: true }],
+    loyaltyCard: { puntos: 42 },
+    customerOrders: [{ id: 'ord1', total: 279, estado: 'pagado', sucursal: 'xico', tipo: 'domicilio', createdAt: new Date().toISOString() }],
+    totalPedidosPagados: 3, totalGastado: 837,
+  }),
   passwordResetRequests: async () => demoResetRequests,
   resolvePasswordReset: async (id) => {
     demoResetRequests = demoResetRequests.map((r) => r.id === id ? { ...r, estado: 'atendida' } : r);

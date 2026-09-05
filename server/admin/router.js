@@ -460,6 +460,40 @@ router.post('/password-reset-requests/:id/resolver', async (req, res) => {
   }));
 });
 
+router.get('/customers', async (req, res) => {
+  const customers = await prisma.user.findMany({
+    where: { role: 'cliente' },
+    select: {
+      id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, activo: true, createdAt: true,
+      _count: { select: { customerOrders: true, addresses: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json(customers.map((c) => ({
+    id: c.id, nombre: c.nombre, email: c.email, telefono: c.telefono, fechaNacimiento: c.fechaNacimiento,
+    activo: c.activo, createdAt: c.createdAt, totalPedidos: c._count.customerOrders, totalDirecciones: c._count.addresses,
+  })));
+});
+
+router.get('/customers/:id', async (req, res) => {
+  const customer = await prisma.user.findUnique({
+    where: { id: req.params.id, role: 'cliente' },
+    select: {
+      id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, activo: true, createdAt: true,
+      addresses: { orderBy: [{ esPrincipal: 'desc' }, { createdAt: 'asc' }] },
+      loyaltyCard: true,
+      customerOrders: { orderBy: { createdAt: 'desc' }, take: 10, select: { id: true, total: true, estado: true, sucursal: true, tipo: true, createdAt: true } },
+    },
+  });
+  if (!customer) return res.status(404).json({ error: 'Cliente no encontrado' });
+  const gastado = await prisma.order.aggregate({
+    where: { clienteId: customer.id, estado: 'pagado' },
+    _sum: { total: true },
+    _count: true,
+  });
+  res.json({ ...customer, totalPedidosPagados: gastado._count, totalGastado: gastado._sum.total || 0 });
+});
+
 router.use((error, _req, res, _next) => {
   console.error('Error en módulo administrativo:', error);
   res.status(500).json({ error: 'No pudimos completar la operación administrativa' });

@@ -30,15 +30,16 @@ export const usePedido = () => {
 
   // Si hay sesión de cliente, precarga nombre/teléfono de la cuenta (el
   // cliente sigue pudiendo editarlos para este pedido en particular).
-  const { cuenta, direcciones } = useCustomerAccount();
+  const { cuenta, direcciones, elegibleDescuentoBienvenida } = useCustomerAccount();
   useEffect(() => {
     if (!cuenta) return;
     setCliente((prev) => ({
       ...prev,
       nombre: prev.nombre || cuenta.nombre || "",
       telefono: prev.telefono || cuenta.telefono || "",
+      elegibleDescuentoBienvenida,
     }));
-  }, [cuenta, setCliente]);
+  }, [cuenta, elegibleDescuentoBienvenida, setCliente]);
 
   const siguientePaso = () => {
     if (paso === 1) {

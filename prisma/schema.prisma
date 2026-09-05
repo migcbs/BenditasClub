@@ -306,6 +306,13 @@ model Order {
   // pass-through al repartidor. Se calcula en el servidor al crear el
   // pedido (ver server/delivery.js), nunca se confía en lo que mande el cliente.
   costoEnvio          Int            @default(0)
+  // 10% de bienvenida — se calcula solo, en el servidor, cuando el pedido
+  // es de un cliente con cuenta (clienteId) y es el primer pedido no
+  // cancelado que registra esa cuenta. `total` ya viene con el descuento
+  // restado (así los puntos de fidelidad, 2% de `total`, se calculan sobre
+  // lo que de verdad pagó); este campo es solo el registro de cuánto se
+  // descontó, para mostrarlo en el ticket/WhatsApp/admin.
+  descuentoBienvenida Int            @default(0)
   notas               String?
   total               Int
   empleadoId          String?

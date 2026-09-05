@@ -281,7 +281,11 @@ app.get('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res
       select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, role: true, activo: true, createdAt: true },
     });
     if (!user || !user.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
-    res.json({ user });
+    // Solo informativo para el popup de pedido (mostrar el 10% antes de
+    // enviar) — el descuento real se vuelve a calcular y aplicar en el
+    // servidor al crear el pedido, nunca se confía en este flag desde el cliente.
+    const pedidosPrevios = await prisma.order.count({ where: { clienteId: user.id, estado: { not: 'cancelado' } } });
+    res.json({ user, elegibleDescuentoBienvenida: pedidosPrevios === 0 });
   } catch (e) {
     console.error('❌ Error perfil cliente:', e);
     res.status(500).json({ error: 'Error en servidor' });
@@ -681,8 +685,19 @@ app.post('/api/customer/orders', optionalAuth, async (req, res) => {
       return res.status(error.status || 500).json({ error: error.message });
     }
 
-    const total = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);
+    const subtotal = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);
     const costoEnvio = tipo === 'domicilio' ? (await calcularCostoEnvio(sucursal, codigoPostal)).costoEnvio : 0;
+
+    // 10% de bienvenida — solo cuentas con sesión (no invitados: "debe
+    // estar conectado al perfil del cliente") y solo si esta es la
+    // primera vez que esa cuenta registra un pedido no cancelado.
+    let descuentoBienvenida = 0;
+    if (clienteId) {
+      const pedidosPrevios = await prisma.order.count({ where: { clienteId, estado: { not: 'cancelado' } } });
+      if (pedidosPrevios === 0) descuentoBienvenida = Math.round(subtotal * 0.10);
+    }
+    const total = subtotal - descuentoBienvenida;
+
     const order = await prisma.order.create({
       data: {
         sucursal,
@@ -693,6 +708,7 @@ app.post('/api/customer/orders', optionalAuth, async (req, res) => {
         direccion: direccion || null,
         codigoPostal: codigoPostal || null,
         costoEnvio,
+        descuentoBienvenida,
         notas: notas || null,
         total,
         origen: 'online',

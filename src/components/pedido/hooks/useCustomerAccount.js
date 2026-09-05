@@ -10,6 +10,7 @@ import { CUSTOMER_TOKEN_KEY } from "../../../customer/CustomerAuth";
 export const useCustomerAccount = () => {
   const [cuenta, setCuenta] = useState(null);
   const [direcciones, setDirecciones] = useState([]);
+  const [elegibleDescuentoBienvenida, setElegibleDescuentoBienvenida] = useState(false);
 
   useEffect(() => {
     const token = window.localStorage.getItem(CUSTOMER_TOKEN_KEY);
@@ -21,6 +22,9 @@ export const useCustomerAccount = () => {
         if (!live) return;
         setCuenta(profile.user);
         setDirecciones(addressList);
+        // Solo para mostrar el 10% en el resumen antes de enviar — el
+        // servidor vuelve a decidir esto de verdad al crear el pedido.
+        setElegibleDescuentoBienvenida(!!profile.elegibleDescuentoBienvenida);
       })
       .catch(() => {
         // Sesión vencida/ inválida: se sigue como invitado, sin bloquear el pedido.
@@ -28,5 +32,5 @@ export const useCustomerAccount = () => {
     return () => { live = false; };
   }, []);
 
-  return { cuenta, direcciones };
+  return { cuenta, direcciones, elegibleDescuentoBienvenida };
 };
