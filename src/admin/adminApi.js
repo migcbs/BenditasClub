@@ -38,6 +38,7 @@ export const adminApi = {
   receivePurchase: (id, payload, token) => fetch(`${API_BASE}/api/admin/purchases/${id}/receive`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   cashShifts: (branch, token) => fetch(`${API_BASE}/api/admin/cash-shifts?branch=${branch}`, { headers: auth(token) }).then(handle),
   closeCashShift: (id, payload, token) => fetch(`${API_BASE}/api/admin/cash-shifts/${id}/close`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  openCashShift: (payload, token) => fetch(`${API_BASE}/api/admin/cash-shifts`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   expenses: (branch, token) => fetch(`${API_BASE}/api/admin/expenses?branch=${branch}`, { headers: auth(token) }).then(handle),
   users: (token) => fetch(`${API_BASE}/api/admin/users`, { headers: auth(token) }).then(handle),
   createUser: (payload, token) => fetch(`${API_BASE}/api/admin/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),

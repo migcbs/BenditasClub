@@ -365,9 +365,17 @@ function Finance({ api, token, branch, dashboard }) {
   const [closeForm, setCloseForm] = useState({ countedAmount: '', notes: '' });
   const [closing, setClosing] = useState(false);
   const [closeError, setCloseError] = useState('');
+  const [openDialogBranch, setOpenDialogBranch] = useState(null);
+  const [openingAmount, setOpeningAmount] = useState('');
+  const [opening, setOpening] = useState(false);
+  const [openingError, setOpeningError] = useState('');
 
-  const cargar = () => Promise.all([api.cashShifts(branch, token), api.expenses(branch, token)])
-    .then(([shifts, expenses]) => setData({ shifts, expenses }));
+  // Los botones de abrir/cerrar necesitan saber qué sucursales tienen caja
+  // abierta AHORA MISMO, sin importar el filtro de sucursal del dashboard
+  // — por eso se pide 'all' aparte en vez de reusar data.shifts (que sí
+  // respeta ese filtro para la lista de "Últimos 30").
+  const cargar = () => Promise.all([api.cashShifts(branch, token), api.expenses(branch, token), api.cashShifts('all', token)])
+    .then(([shifts, expenses, allShifts]) => setData({ shifts, expenses, allShifts }));
 
   useEffect(() => {
     let live = true;
@@ -377,6 +385,25 @@ function Finance({ api, token, branch, dashboard }) {
   }, [api, token, branch]);
 
   const abrirDetalle = (shift) => { setShiftDetail(shift); setCloseForm({ countedAmount: '', notes: '' }); setCloseError(''); };
+
+  const abrirCajaDialog = (sucursal) => { setOpenDialogBranch(sucursal); setOpeningAmount(''); setOpeningError(''); };
+
+  const confirmarApertura = async () => {
+    if (openingAmount === '' || Number.isNaN(Number(openingAmount)) || Number(openingAmount) < 0) {
+      return setOpeningError('Escribe el fondo inicial de la caja.');
+    }
+    setOpening(true);
+    setOpeningError('');
+    try {
+      await api.openCashShift({ sucursal: openDialogBranch, openingAmount: Number(openingAmount) }, token);
+      await cargar();
+      setOpenDialogBranch(null);
+    } catch (requestError) {
+      setOpeningError(requestError.message);
+    } finally {
+      setOpening(false);
+    }
+  };
 
   const cerrarCaja = async () => {
     if (!closeForm.countedAmount || Number.isNaN(Number(closeForm.countedAmount))) {
@@ -408,6 +435,16 @@ function Finance({ api, token, branch, dashboard }) {
     <div className="admin-two-columns">
       <div className="admin-data-panel">
         <div className="admin-data-heading"><h2>Turnos de caja</h2><span>Últimos 30</span></div>
+        <div className="admin-row-actions" style={{ padding: '0 18px 14px' }}>
+          {['xico', 'coatepec'].map((sucursal) => {
+            const abierta = data.allShifts.find((s) => s.sucursal === sucursal && s.status === 'open');
+            return abierta ? (
+              <Button key={sucursal} size="small" color="warning" variant="outlined" onClick={() => abrirDetalle(abierta)}>Cerrar caja {SUCURSAL_LABEL[sucursal]}</Button>
+            ) : (
+              <Button key={sucursal} size="small" variant="contained" onClick={() => abrirCajaDialog(sucursal)}>Abrir caja {SUCURSAL_LABEL[sucursal]}</Button>
+            );
+          })}
+        </div>
         {data.shifts.length ? data.shifts.map((shift) => (
           <ButtonBase key={shift.id} className="admin-list-row admin-list-row--clickable" onClick={() => abrirDetalle(shift)}>
             <span><b>{SUCURSAL_LABEL[shift.sucursal] || shift.sucursal} · {shift.status === 'open' ? 'Abierta' : 'Cerrada'}</b><small>Fondo {money.format(Number(shift.openingAmount))}{shift.difference != null ? ` · diferencia ${money.format(Number(shift.difference))}` : ''}</small></span>
@@ -481,6 +518,27 @@ function Finance({ api, token, branch, dashboard }) {
         </DialogContent>
         <DialogActions><Button onClick={() => setShiftDetail(null)}>Cerrar ventana</Button></DialogActions>
       </>}
+    </Dialog>
+
+    <Dialog open={Boolean(openDialogBranch)} onClose={() => !opening && setOpenDialogBranch(null)} fullWidth maxWidth="xs">
+      <DialogTitle>Abrir caja {SUCURSAL_LABEL[openDialogBranch] || ''}</DialogTitle>
+      <DialogContent>
+        {openingError ? <Alert severity="error" onClose={() => setOpeningError('')} sx={{ mb: 1.5 }}>{openingError}</Alert> : null}
+        <TextField
+          autoFocus
+          fullWidth
+          label="Fondo inicial"
+          type="number"
+          value={openingAmount}
+          onChange={(e) => setOpeningAmount(e.target.value)}
+          slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+          disabled={opening}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setOpenDialogBranch(null)} disabled={opening}>Cancelar</Button>
+        <Button variant="contained" onClick={confirmarApertura} disabled={opening}>{opening ? 'Abriendo...' : 'Abrir caja'}</Button>
+      </DialogActions>
     </Dialog>
 
     <Dialog open={Boolean(expenseDetail)} onClose={() => setExpenseDetail(null)} fullWidth maxWidth="xs">

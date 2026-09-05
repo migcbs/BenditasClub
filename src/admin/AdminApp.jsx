@@ -36,6 +36,7 @@ let demoMerchProducts = [{ id: 'merch-1', nombre: 'Playera Monalisa', category: 
 let demoMerchOrders = [];
 let demoBranchSettings = [{ sucursal: 'xico', clabe: '', banco: '', titular: '' }, { sucursal: 'coatepec', clabe: '', banco: '', titular: '' }];
 let demoResetRequests = [{ id: 'pr1', email: 'cliente@ejemplo.com', nombre: 'Cliente Demo', telefono: '2281234567', customerId: 'demo-customer', estado: 'pendiente', createdAt: new Date().toISOString() }];
+let demoCashShifts = [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, countedAmount: null, expectedAmount: null, difference: null, openedAt: new Date().toISOString(), closedAt: null, notes: null, movements: [{ id: 'm1', type: 'pay_in', amount: 300, concept: 'Depósito de cambio', createdAt: new Date().toISOString() }, { id: 'm2', type: 'pay_out', amount: 150, concept: 'Compra de hielo', createdAt: new Date().toISOString() }] }];
 const demoApi = {
   inventory: async () => demoInventory,
   addStock: async ({ ingredientId, quantity, reason }) => { const ingredient = demoInventory.find((item) => item.id === ingredientId); demoInventory = demoInventory.map((item) => item.id === ingredientId ? { ...item, quantity: item.quantity + quantity, health: stockHealth(item.quantity + quantity, item.reorderPoint) } : item); demoMovements.unshift({ id:`m-${Date.now()}`, quantity, reason, createdAt:new Date().toISOString(), ingredient:{nombre:ingredient.nombre,unit:ingredient.unit} }); },
@@ -50,8 +51,16 @@ const demoApi = {
   purchases: async () => demoPurchases,
   createPurchase: async (payload) => { const supplier=demoSuppliers.find((item)=>item.id===payload.supplierId); demoPurchases=[{id:`po-${Date.now()}`,status:'draft',supplier,items:payload.items,total:payload.items.reduce((sum,item)=>sum+item.quantityOrdered*item.unitCost,0)},...demoPurchases]; },
   receivePurchase: async (id,payload) => { demoPurchases=demoPurchases.map((purchase)=>purchase.id===id?{...purchase,status:'received',receivedAt:new Date().toISOString(),items:purchase.items.map((item)=>({ ...item, quantityReceived:(payload.items.find((entry)=>entry.id===item.id)?.quantityReceived || item.quantityOrdered) }))}:purchase); },
-  cashShifts: async () => [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, difference: null, openedAt: new Date().toISOString(), closedAt: null, movements: [{ id: 'm1', type: 'pay_in', amount: 300, concept: 'Depósito de cambio', createdAt: new Date().toISOString() }, { id: 'm2', type: 'pay_out', amount: 150, concept: 'Compra de hielo', createdAt: new Date().toISOString() }] }],
-  closeCashShift: async (id, { countedAmount, notes }) => ({ id, sucursal: 'xico', status: 'closed', openingAmount: 1500, expectedAmount: 1650, countedAmount, difference: countedAmount - 1650, notes: notes || null, openedAt: new Date().toISOString(), closedAt: new Date().toISOString(), movements: [] }),
+  cashShifts: async (sucursal) => sucursal && sucursal !== 'all' ? demoCashShifts.filter((s) => s.sucursal === sucursal) : demoCashShifts,
+  openCashShift: async ({ sucursal, openingAmount }) => {
+    const shift = { id: `c-${Date.now()}`, sucursal, status: 'open', openingAmount: Number(openingAmount), countedAmount: null, expectedAmount: null, difference: null, openedAt: new Date().toISOString(), closedAt: null, notes: null, movements: [] };
+    demoCashShifts = [shift, ...demoCashShifts];
+    return shift;
+  },
+  closeCashShift: async (id, { countedAmount, notes }) => {
+    demoCashShifts = demoCashShifts.map((s) => s.id === id ? { ...s, status: 'closed', expectedAmount: Number(s.openingAmount), countedAmount, difference: countedAmount - Number(s.openingAmount), notes: notes || null, closedAt: new Date().toISOString() } : s);
+    return demoCashShifts.find((s) => s.id === id);
+  },
   expenses: async () => [{ id: 'e1', concept: 'Gas', category: 'Servicios', paymentMethod: 'efectivo', amount: 620, sucursal: 'xico', occurredAt: new Date().toISOString(), receiptRef: null }],
   users: async () => [{ id: 'u1', nombre: 'Ana', role: 'empleado', sucursal: 'xico', activo: true }, { id: 'u2', nombre: 'Luis', role: 'cocina', sucursal: 'xico', activo: true }],
   createUser: async () => {},
