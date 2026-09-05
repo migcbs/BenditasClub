@@ -21,6 +21,7 @@ const adminRouter = require('./server/admin/router');
 const { applyInventoryForOrder } = require('./server/admin/inventory-service');
 const { classifyInventoryHealth, calculateExpectedCash } = require('./server/admin/inventory');
 const { awardStampForOrder, awardPointsForOrder, generateRedemptionCode } = require('./server/loyalty/loyalty-service');
+const { calcularCostoEnvio } = require('./server/delivery');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
@@ -345,16 +346,37 @@ app.get('/api/customer/addresses', verifyToken, requireRole('cliente'), async (r
   }
 });
 
+// Compone el string plano que ya consumen WhatsApp/ticket/comandas/admin a
+// partir de los campos sueltos — así esos consumidores no necesitan tocarse.
+function componerDireccion({ calle, numero, colonia, referencias, codigoPostal }) {
+  const calleNumero = [calle?.trim(), numero?.trim()].filter(Boolean).join(' #');
+  const partes = [calleNumero, colonia?.trim(), codigoPostal?.trim() ? `CP ${codigoPostal.trim()}` : ''].filter(Boolean);
+  let texto = partes.join(', ');
+  if (referencias?.trim()) texto += (texto ? ' — ' : '') + `Ref: ${referencias.trim()}`;
+  return texto;
+}
+
 app.post('/api/customer/addresses', verifyToken, requireRole('cliente'), async (req, res) => {
   try {
-    const { etiqueta, direccion, esPrincipal } = req.body;
-    if (!direccion?.trim()) return res.status(400).json({ error: 'La dirección es obligatoria' });
+    const { etiqueta, direccion, calle, numero, colonia, referencias, codigoPostal, esPrincipal } = req.body;
+    const direccionFinal = (direccion?.trim()) || componerDireccion({ calle, numero, colonia, referencias, codigoPostal });
+    if (!direccionFinal) return res.status(400).json({ error: 'La dirección es obligatoria (calle y número, al menos)' });
 
     if (esPrincipal) {
       await prisma.address.updateMany({ where: { userId: req.user.id }, data: { esPrincipal: false } });
     }
     const address = await prisma.address.create({
-      data: { userId: req.user.id, etiqueta: etiqueta?.trim() || null, direccion: direccion.trim(), esPrincipal: !!esPrincipal },
+      data: {
+        userId: req.user.id,
+        etiqueta: etiqueta?.trim() || null,
+        direccion: direccionFinal,
+        calle: calle?.trim() || null,
+        numero: numero?.trim() || null,
+        colonia: colonia?.trim() || null,
+        referencias: referencias?.trim() || null,
+        codigoPostal: codigoPostal?.trim() || null,
+        esPrincipal: !!esPrincipal,
+      },
     });
     res.status(201).json(address);
   } catch (e) {
@@ -368,7 +390,16 @@ app.put('/api/customer/addresses/:id', verifyToken, requireRole('cliente'), asyn
     const existing = await prisma.address.findUnique({ where: { id: req.params.id } });
     if (!existing || existing.userId !== req.user.id) return res.status(404).json({ error: 'Dirección no encontrada' });
 
-    const { etiqueta, direccion, esPrincipal } = req.body;
+    const { etiqueta, direccion, calle, numero, colonia, referencias, codigoPostal, esPrincipal } = req.body;
+    const tocaCampos = [calle, numero, colonia, referencias, codigoPostal].some((v) => v !== undefined);
+    const direccionFinal = direccion !== undefined
+      ? direccion.trim()
+      : tocaCampos
+        ? componerDireccion({
+            calle: calle ?? existing.calle, numero: numero ?? existing.numero, colonia: colonia ?? existing.colonia,
+            referencias: referencias ?? existing.referencias, codigoPostal: codigoPostal ?? existing.codigoPostal,
+          })
+        : undefined;
     if (esPrincipal) {
       await prisma.address.updateMany({ where: { userId: req.user.id }, data: { esPrincipal: false } });
     }
@@ -376,7 +407,12 @@ app.put('/api/customer/addresses/:id', verifyToken, requireRole('cliente'), asyn
       where: { id: req.params.id },
       data: {
         ...(etiqueta !== undefined ? { etiqueta: etiqueta?.trim() || null } : {}),
-        ...(direccion !== undefined ? { direccion: direccion.trim() } : {}),
+        ...(direccionFinal !== undefined ? { direccion: direccionFinal } : {}),
+        ...(calle !== undefined ? { calle: calle?.trim() || null } : {}),
+        ...(numero !== undefined ? { numero: numero?.trim() || null } : {}),
+        ...(colonia !== undefined ? { colonia: colonia?.trim() || null } : {}),
+        ...(referencias !== undefined ? { referencias: referencias?.trim() || null } : {}),
+        ...(codigoPostal !== undefined ? { codigoPostal: codigoPostal?.trim() || null } : {}),
         ...(esPrincipal !== undefined ? { esPrincipal: !!esPrincipal } : {}),
       },
     });
@@ -470,6 +506,19 @@ app.get('/api/branch-settings/:sucursal', async (req, res) => {
     });
   } catch (e) {
     console.error('❌ Error obteniendo datos de transferencia:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+// Pública — el popup de pedido la usa para mostrar un estimado de envío en
+// cuanto el cliente escribe su código postal, antes de confirmar el pedido.
+app.get('/api/delivery-zones/:sucursal/:codigoPostal', async (req, res) => {
+  try {
+    const { sucursal, codigoPostal } = req.params;
+    if (!['xico', 'coatepec'].includes(sucursal)) return res.status(400).json({ error: 'Sucursal inválida' });
+    res.json(await calcularCostoEnvio(sucursal, codigoPostal));
+  } catch (e) {
+    console.error('❌ Error calculando costo de envío:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
@@ -595,7 +644,7 @@ app.post('/api/customer/shop-orders', verifyToken, requireRole('cliente'), async
 // BD ni a Recepción/Cocina/Admin, solo se mandaban por WhatsApp.
 app.post('/api/customer/orders', optionalAuth, async (req, res) => {
   try {
-    const { sucursal, tipo, direccion, notas, items, nombre, telefono } = req.body;
+    const { sucursal, tipo, direccion, codigoPostal, notas, items, nombre, telefono } = req.body;
     if (!['xico', 'coatepec'].includes(sucursal) || !['para_llevar', 'domicilio'].includes(tipo)) {
       return res.status(400).json({ error: 'Sucursal y tipo de pedido válidos son obligatorios' });
     }
@@ -633,6 +682,7 @@ app.post('/api/customer/orders', optionalAuth, async (req, res) => {
     }
 
     const total = orderItemsData.reduce((acc, i) => acc + i.subtotal, 0);
+    const costoEnvio = tipo === 'domicilio' ? (await calcularCostoEnvio(sucursal, codigoPostal)).costoEnvio : 0;
     const order = await prisma.order.create({
       data: {
         sucursal,
@@ -641,6 +691,8 @@ app.post('/api/customer/orders', optionalAuth, async (req, res) => {
         clienteNombre,
         clienteTelefono,
         direccion: direccion || null,
+        codigoPostal: codigoPostal || null,
+        costoEnvio,
         notas: notas || null,
         total,
         origen: 'online',

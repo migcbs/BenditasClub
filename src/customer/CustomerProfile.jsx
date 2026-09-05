@@ -45,7 +45,7 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
   const [saving, setSaving] = useState(false);
 
   const [addresses, setAddresses] = useState([]);
-  const [addressForm, setAddressForm] = useState({ etiqueta: '', direccion: '', esPrincipal: false });
+  const [addressForm, setAddressForm] = useState({ etiqueta: '', calle: '', numero: '', colonia: '', referencias: '', codigoPostal: '', esPrincipal: false });
   const [savingAddress, setSavingAddress] = useState(false);
 
   const [passwordForm, setPasswordForm] = useState({ passwordActual: '', passwordNueva: '', passwordConfirmar: '' });
@@ -98,12 +98,12 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
 
   const agregarDireccion = async (event) => {
     event.preventDefault();
-    if (!addressForm.direccion.trim()) return;
+    if (!addressForm.calle.trim() || !addressForm.numero.trim()) return;
     setSavingAddress(true);
     setError('');
     try {
       await api.createAddress(addressForm, token);
-      setAddressForm({ etiqueta: '', direccion: '', esPrincipal: false });
+      setAddressForm({ etiqueta: '', calle: '', numero: '', colonia: '', referencias: '', codigoPostal: '', esPrincipal: false });
       await cargarDirecciones();
     } catch (requestError) {
       setError(requestError.message);
@@ -293,8 +293,21 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
               <input value={addressForm.etiqueta} onChange={updateAddressForm('etiqueta')} placeholder="Casa, trabajo..." />
             </label>
             <label>
-              Dirección
-              <input value={addressForm.direccion} onChange={updateAddressForm('direccion')} placeholder="Calle, número, colonia..." required />
+              Calle
+              <input value={addressForm.calle} onChange={updateAddressForm('calle')} placeholder="Av. Hidalgo" required />
+            </label>
+            <label>
+              Número
+              <input value={addressForm.numero} onChange={updateAddressForm('numero')} placeholder="123" required />
+            </label>
+            <label>
+              Colonia y referencias
+              <input value={addressForm.colonia} onChange={updateAddressForm('colonia')} placeholder="Centro" />
+            </label>
+            <input value={addressForm.referencias} onChange={updateAddressForm('referencias')} placeholder="Referencias: entre calles, color de casa, portón..." />
+            <label>
+              Código postal
+              <input value={addressForm.codigoPostal} onChange={updateAddressForm('codigoPostal')} placeholder="91240" inputMode="numeric" maxLength={5} />
             </label>
             <label className="customer-address-checkbox">
               <input type="checkbox" checked={addressForm.esPrincipal} onChange={updateAddressForm('esPrincipal')} />

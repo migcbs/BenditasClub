@@ -280,6 +280,30 @@ export const calcularTotalConEnvio = (carrito = [], costoEnvio = 0) => {
 };
 
 /**
+ * Compone el string de dirección que consumen WhatsApp/ticket/comandas a
+ * partir de los campos sueltos (Calle, Número, Colonia y referencias,
+ * Código postal) — espejo exacto de componerDireccion() en index.js, para
+ * que el cliente vea de inmediato el mismo texto que se va a guardar.
+ */
+export const componerDireccion = ({ calle, numero, colonia, referencias, codigoPostal } = {}) => {
+  const calleNumero = [calle?.trim(), numero?.trim()].filter(Boolean).join(' #');
+  const partes = [calleNumero, colonia?.trim(), codigoPostal?.trim() ? `CP ${codigoPostal.trim()}` : ''].filter(Boolean);
+  let texto = partes.join(', ');
+  if (referencias?.trim()) texto += (texto ? ' — ' : '') + `Ref: ${referencias.trim()}`;
+  return texto;
+};
+
+/**
+ * Estimado de envío por código postal — sin geocodificación, ver
+ * server/delivery.js. Público, sin auth.
+ */
+export async function getDeliveryFee(sucursal, codigoPostal) {
+  const res = await fetch(`${API_BASE}/api/delivery-zones/${sucursal}/${encodeURIComponent(codigoPostal)}`);
+  if (!res.ok) throw new Error('No se pudo estimar el costo de envío');
+  return res.json();
+}
+
+/**
  * Formatea número como moneda MXN.
  */
 export const formatearMoneda = (cantidad = 0) => {
@@ -330,6 +354,7 @@ export async function guardarPedidoEnCuenta(cliente, carrito) {
       sucursal: cliente.sucursal,
       tipo: cliente.tipoPedido === "domicilio" ? "domicilio" : "para_llevar",
       direccion: cliente.tipoPedido === "domicilio" ? cliente.direccion : undefined,
+      codigoPostal: cliente.tipoPedido === "domicilio" ? cliente.codigoPostal : undefined,
       notas: cliente.comentarios || undefined,
       nombre: cliente.nombre,
       telefono: cliente.telefono,

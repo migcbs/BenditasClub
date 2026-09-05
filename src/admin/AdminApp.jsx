@@ -34,7 +34,8 @@ let demoRedemptions = [{ id: 'red1', code: 'AB12-CD34', redeemed: false, reward:
 let demoCategories = [{ id: 'cat-merch-1', nombre: 'Playeras', orden: 100 }];
 let demoMerchProducts = [{ id: 'merch-1', nombre: 'Playera Monalisa', category: { nombre: 'Playeras' }, variants: [{ id: 'var-1', nombre: 'Única', precio: 249, activo: true, stocks: [{ sucursal: 'xico', quantity: 5 }, { sucursal: 'coatepec', quantity: 3 }] }] }];
 let demoMerchOrders = [];
-let demoBranchSettings = [{ sucursal: 'xico', clabe: '', banco: '', titular: '' }, { sucursal: 'coatepec', clabe: '', banco: '', titular: '' }];
+let demoBranchSettings = [{ sucursal: 'xico', clabe: '', banco: '', titular: '', envioMinimo: 35 }, { sucursal: 'coatepec', clabe: '', banco: '', titular: '', envioMinimo: 35 }];
+let demoDeliveryZones = [{ id: 'dz1', sucursal: 'xico', codigoPostal: '91240', costoEnvio: 35, etiqueta: 'Centro', activo: true }];
 let demoResetRequests = [{ id: 'pr1', email: 'cliente@ejemplo.com', nombre: 'Cliente Demo', telefono: '2281234567', customerId: 'demo-customer', estado: 'pendiente', createdAt: new Date().toISOString() }];
 let demoCashShifts = [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, countedAmount: null, expectedAmount: null, difference: null, openedAt: new Date().toISOString(), closedAt: null, notes: null, movements: [{ id: 'm1', type: 'pay_in', amount: 300, concept: 'Depósito de cambio', createdAt: new Date().toISOString() }, { id: 'm2', type: 'pay_out', amount: 150, concept: 'Compra de hielo', createdAt: new Date().toISOString() }] }];
 const demoApi = {
@@ -101,9 +102,16 @@ const demoApi = {
   },
   branchSettings: async () => demoBranchSettings,
   updateBranchSettings: async (sucursal, payload) => {
-    demoBranchSettings = demoBranchSettings.map((r) => r.sucursal === sucursal ? { ...r, ...payload } : r);
+    demoBranchSettings = demoBranchSettings.map((r) => r.sucursal === sucursal ? { ...r, ...payload, envioMinimo: payload.envioMinimo !== undefined ? Number(payload.envioMinimo) : r.envioMinimo } : r);
     return demoBranchSettings.find((r) => r.sucursal === sucursal);
   },
+  deliveryZones: async () => demoDeliveryZones,
+  createDeliveryZone: async (payload) => {
+    const zona = { id: `dz-${Date.now()}`, activo: true, ...payload };
+    demoDeliveryZones = [...demoDeliveryZones, zona];
+    return zona;
+  },
+  deleteDeliveryZone: async (id) => { demoDeliveryZones = demoDeliveryZones.filter((z) => z.id !== id); },
   passwordResetRequests: async () => demoResetRequests,
   resolvePasswordReset: async (id) => {
     demoResetRequests = demoResetRequests.map((r) => r.id === id ? { ...r, estado: 'atendida' } : r);

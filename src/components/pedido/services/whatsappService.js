@@ -15,6 +15,8 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
     comentarios = "",
     sucursal    = "",
     tipoPedido  = "",
+    costoEnvio  = 0,
+    envioExacto = false,
   } = cliente;
 
   const total = calcularSubtotal(carrito);
@@ -65,15 +67,17 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
   }
 
   texto += `\n━━━━━━━━━━━━━━━━━━━\n`;
-  texto += `💰 *Total estimado: $${total.toFixed(2)} MXN*\n`;
+
+  if (tipoPedido === "domicilio") {
+    texto += `🍗 *Productos: $${total.toFixed(2)} MXN*\n`;
+    texto += `🛵 *Envío${envioExacto ? "" : " estimado"}: $${Number(costoEnvio).toFixed(2)} MXN*\n`;
+    texto += `💰 *Total${envioExacto ? "" : " estimado"}: $${(total + Number(costoEnvio)).toFixed(2)} MXN*\n`;
+  } else {
+    texto += `💰 *Total estimado: $${total.toFixed(2)} MXN*\n`;
+  }
 
   if (metodoPago === "transferencia") {
     texto += `🏦 *Pago: Transferencia* — adjunto la captura del comprobante en este chat.\n`;
-  }
-
-  // ✅ Corregido: string directo en vez de TIPO_PEDIDO.DOMICILIO
-  if (tipoPedido === "domicilio") {
-    texto += `_(más costo de envío por confirmar)_\n`;
   }
 
   const numeroWA = WHATSAPP_NUMEROS[sucursal.toLowerCase()];

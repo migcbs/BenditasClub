@@ -377,22 +377,68 @@ router.delete('/orders/:id', async (req, res) => {
 router.get('/branch-settings', async (req, res) => {
   const rows = await prisma.branchSettings.findMany();
   const bySucursal = Object.fromEntries(rows.map((r) => [r.sucursal, r]));
-  res.json(['xico', 'coatepec'].map((sucursal) => bySucursal[sucursal] || { sucursal, clabe: null, banco: null, titular: null }));
+  res.json(['xico', 'coatepec'].map((sucursal) => bySucursal[sucursal] || { sucursal, clabe: null, banco: null, titular: null, envioMinimo: 35 }));
 });
 
 router.put('/branch-settings/:sucursal', async (req, res) => {
   const { sucursal } = req.params;
   if (!['xico', 'coatepec'].includes(sucursal)) return res.status(400).json({ error: 'Sucursal inválida' });
-  const { clabe, banco, titular } = req.body;
+  const { clabe, banco, titular, envioMinimo } = req.body;
   if (clabe && !/^\d{18}$/.test(clabe.replace(/\s/g, ''))) {
     return res.status(400).json({ error: 'El CLABE debe tener 18 dígitos' });
   }
+  if (envioMinimo !== undefined && (Number.isNaN(Number(envioMinimo)) || Number(envioMinimo) < 0)) {
+    return res.status(400).json({ error: 'El envío mínimo debe ser un número válido' });
+  }
+  const data = { clabe: clabe?.replace(/\s/g, '') || null, banco: banco?.trim() || null, titular: titular?.trim() || null };
+  if (envioMinimo !== undefined) data.envioMinimo = Number(envioMinimo);
   const settings = await prisma.branchSettings.upsert({
     where: { sucursal },
-    update: { clabe: clabe?.replace(/\s/g, '') || null, banco: banco?.trim() || null, titular: titular?.trim() || null },
-    create: { sucursal, clabe: clabe?.replace(/\s/g, '') || null, banco: banco?.trim() || null, titular: titular?.trim() || null },
+    update: data,
+    create: { sucursal, ...data },
   });
   res.json(settings);
+});
+
+router.get('/delivery-zones', async (req, res) => {
+  const where = req.query.branch && req.query.branch !== 'all' ? { sucursal: req.query.branch } : {};
+  res.json(await prisma.deliveryZone.findMany({ where, orderBy: [{ sucursal: 'asc' }, { codigoPostal: 'asc' }] }));
+});
+
+router.post('/delivery-zones', async (req, res) => {
+  const { sucursal, codigoPostal, costoEnvio, etiqueta } = req.body;
+  if (!['xico', 'coatepec'].includes(sucursal) || !codigoPostal?.trim() || Number(costoEnvio) < 0 || Number.isNaN(Number(costoEnvio))) {
+    return res.status(400).json({ error: 'Sucursal, código postal y costo de envío válidos son obligatorios' });
+  }
+  try {
+    const zona = await prisma.deliveryZone.create({
+      data: { sucursal, codigoPostal: codigoPostal.trim(), costoEnvio: Number(costoEnvio), etiqueta: etiqueta?.trim() || null },
+    });
+    res.status(201).json(zona);
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe una zona para ese código postal en esa sucursal' });
+    throw error;
+  }
+});
+
+router.put('/delivery-zones/:id', async (req, res) => {
+  const { costoEnvio, etiqueta, activo } = req.body;
+  if (costoEnvio !== undefined && (Number.isNaN(Number(costoEnvio)) || Number(costoEnvio) < 0)) {
+    return res.status(400).json({ error: 'Costo de envío inválido' });
+  }
+  res.json(await prisma.deliveryZone.update({
+    where: { id: req.params.id },
+    data: {
+      ...(costoEnvio !== undefined ? { costoEnvio: Number(costoEnvio) } : {}),
+      ...(etiqueta !== undefined ? { etiqueta: etiqueta?.trim() || null } : {}),
+      ...(activo !== undefined ? { activo } : {}),
+    },
+  }));
+});
+
+router.delete('/delivery-zones/:id', async (req, res) => {
+  await prisma.deliveryZone.delete({ where: { id: req.params.id } });
+  res.status(204).end();
 });
 
 router.get('/password-reset-requests', async (_req, res) => {

@@ -101,6 +101,24 @@
 }
 .btn-usar-guardada:hover { text-decoration: underline; }
 
+.direccion-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.envio-estimado {
+  margin: 6px 0 0;
+  padding: 10px 14px;
+  border: var(--border-thick) solid var(--benditas-black);
+  border-radius: 12px;
+  background: #fdf3f8;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
 .paso-cliente textarea {
   min-height: 72px;
   resize: none;

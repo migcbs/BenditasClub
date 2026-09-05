@@ -572,13 +572,19 @@ function BranchSettings({ api, token }) {
   const [resetBusy, setResetBusy] = useState('');
   const [resetError, setResetError] = useState('');
 
+  const [zonas, setZonas] = useState(null);
+  const [zonaDialog, setZonaDialog] = useState(false);
+  const [zonaForm, setZonaForm] = useState({ sucursal: 'xico', codigoPostal: '', costoEnvio: '', etiqueta: '' });
+  const [zonaError, setZonaError] = useState('');
+  const [zonaSaving, setZonaSaving] = useState(false);
+
   useEffect(() => {
     let live = true;
     api.branchSettings(token)
       .then((rows) => {
         if (!live) return;
         setSettings(rows);
-        setForms(Object.fromEntries(rows.map((r) => [r.sucursal, { clabe: r.clabe || '', banco: r.banco || '', titular: r.titular || '' }])));
+        setForms(Object.fromEntries(rows.map((r) => [r.sucursal, { clabe: r.clabe || '', banco: r.banco || '', titular: r.titular || '', envioMinimo: String(r.envioMinimo ?? 35) }])));
       })
       .catch((requestError) => live && setError(requestError.message));
     return () => { live = false; };
@@ -587,6 +593,35 @@ function BranchSettings({ api, token }) {
   const cargarSolicitudes = () => api.passwordResetRequests(token).then(setRequests).catch((requestError) => setResetError(requestError.message));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { cargarSolicitudes(); }, [api, token]);
+
+  const cargarZonas = () => api.deliveryZones(token).then(setZonas).catch((requestError) => setZonaError(requestError.message));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { cargarZonas(); }, [api, token]);
+
+  const abrirZonaDialog = () => { setZonaForm({ sucursal: 'xico', codigoPostal: '', costoEnvio: '', etiqueta: '' }); setZonaError(''); setZonaDialog(true); };
+
+  const guardarZona = async () => {
+    if (!/^\d{4,5}$/.test(zonaForm.codigoPostal.trim()) || zonaForm.costoEnvio === '' || Number(zonaForm.costoEnvio) < 0) {
+      return setZonaError('Código postal y costo de envío válidos son obligatorios.');
+    }
+    setZonaSaving(true);
+    setZonaError('');
+    try {
+      await api.createDeliveryZone({ ...zonaForm, costoEnvio: Number(zonaForm.costoEnvio) }, token);
+      await cargarZonas();
+      setZonaDialog(false);
+    } catch (requestError) {
+      setZonaError(requestError.message);
+    } finally {
+      setZonaSaving(false);
+    }
+  };
+
+  const eliminarZona = async (zona) => {
+    if (!window.confirm(`¿Quitar la zona CP ${zona.codigoPostal} (${SUCURSAL_LABEL[zona.sucursal]})?`)) return;
+    try { await api.deleteDeliveryZone(zona.id, token); await cargarZonas(); }
+    catch (requestError) { setZonaError(requestError.message); }
+  };
 
   const updateField = (sucursal, field) => (event) => {
     setForms((current) => ({ ...current, [sucursal]: { ...current[sucursal], [field]: event.target.value } }));
@@ -675,6 +710,14 @@ function BranchSettings({ api, token }) {
                 value={forms[row.sucursal]?.titular || ''}
                 onChange={updateField(row.sucursal, 'titular')}
               />
+              <TextField
+                label="Envío mínimo"
+                type="number"
+                helperText="Se usa para cualquier código postal sin zona configurada abajo"
+                value={forms[row.sucursal]?.envioMinimo ?? ''}
+                onChange={updateField(row.sucursal, 'envioMinimo')}
+                slotProps={{ htmlInput: { min: 0 } }}
+              />
               <Button
                 variant="contained"
                 onClick={() => guardar(row.sucursal)}
@@ -712,6 +755,60 @@ function BranchSettings({ api, token }) {
           </div>
         )) : <Empty>No hay solicitudes pendientes.</Empty>}
       </div>
+
+      <div className="admin-data-panel">
+        <div className="admin-data-heading">
+          <h2>Zonas de entrega</h2>
+          <Button size="small" startIcon={<Plus size={16} />} onClick={abrirZonaDialog}>Agregar zona</Button>
+        </div>
+        {zonaError ? <Alert severity="error" onClose={() => setZonaError('')} sx={{ m: 2 }}>{zonaError}</Alert> : null}
+        {!zonas ? <Loading /> : zonas.length ? zonas.map((zona) => (
+          <div className="admin-list-row" key={zona.id}>
+            <span>
+              <b>CP {zona.codigoPostal} · {SUCURSAL_LABEL[zona.sucursal]}</b>
+              <small>{zona.etiqueta || 'Sin nombre de zona'}{!zona.activo ? ' · inactiva' : ''}</small>
+            </span>
+            <div className="admin-row-actions">
+              <b>{money.format(zona.costoEnvio)}</b>
+              <Button size="small" color="error" onClick={() => eliminarZona(zona)}>Quitar</Button>
+            </div>
+          </div>
+        )) : <Empty>Sin zonas configuradas — los pedidos a domicilio usarán el envío mínimo de cada sucursal.</Empty>}
+      </div>
+
+      <Dialog open={zonaDialog} onClose={() => !zonaSaving && setZonaDialog(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Nueva zona de entrega</DialogTitle>
+        <DialogContent className="admin-form-grid">
+          {zonaError ? <Alert severity="error" sx={{ gridColumn: '1/-1' }}>{zonaError}</Alert> : null}
+          <TextField select label="Sucursal" value={zonaForm.sucursal} onChange={(e) => setZonaForm({ ...zonaForm, sucursal: e.target.value })}>
+            <MenuItem value="xico">Xico</MenuItem>
+            <MenuItem value="coatepec">Coatepec</MenuItem>
+          </TextField>
+          <TextField
+            label="Código postal"
+            value={zonaForm.codigoPostal}
+            onChange={(e) => setZonaForm({ ...zonaForm, codigoPostal: e.target.value })}
+            slotProps={{ htmlInput: { maxLength: 5, inputMode: 'numeric' } }}
+          />
+          <TextField
+            label="Costo de envío"
+            type="number"
+            value={zonaForm.costoEnvio}
+            onChange={(e) => setZonaForm({ ...zonaForm, costoEnvio: e.target.value })}
+            slotProps={{ htmlInput: { min: 0 } }}
+          />
+          <TextField
+            label="Nombre de la zona (opcional)"
+            placeholder="Ej. Centro, El Castillo…"
+            value={zonaForm.etiqueta}
+            onChange={(e) => setZonaForm({ ...zonaForm, etiqueta: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setZonaDialog(false)} disabled={zonaSaving}>Cancelar</Button>
+          <Button variant="contained" onClick={guardarZona} disabled={zonaSaving}>{zonaSaving ? 'Guardando...' : 'Guardar zona'}</Button>
+        </DialogActions>
+      </Dialog>
     </section>
   );
 }

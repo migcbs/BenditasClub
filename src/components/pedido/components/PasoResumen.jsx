@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState } from "react";
 import { enviarPedidoWhatsApp } from "../services/whatsappService";
-import { calcularSubtotal, calcularSubtotalItem, formatearMoneda, guardarPedidoEnCuenta } from "../services/pedidoServices";
+import { calcularSubtotal, calcularSubtotalItem, calcularTotalConEnvio, formatearMoneda, guardarPedidoEnCuenta } from "../services/pedidoServices";
 import { TIPO_PEDIDO } from "../utils/constants";
 import TransferenciaPopup from "./TransferenciaPopup";
 import "../styles/resumen.css";
@@ -15,6 +15,10 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
   const total       = useMemo(() => calcularSubtotal(carrito), [carrito]);
   const carritoVacio = !carrito || carrito.length === 0;
   const [showTransferencia, setShowTransferencia] = useState(false);
+
+  const esDomicilio = cliente.tipoPedido === TIPO_PEDIDO.DOMICILIO;
+  const costoEnvio = esDomicilio ? (cliente.costoEnvio || 0) : 0;
+  const totalConEnvio = useMemo(() => calcularTotalConEnvio(carrito, costoEnvio), [carrito, costoEnvio]);
 
   const confirmarPedido = (metodoPago = null) => {
     if (carritoVacio) return;
@@ -106,9 +110,17 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
 
       {/* ── Total ── */}
       <div className="resumen-total">
-        <h3>Total: {formatearMoneda(total)}</h3>
-        {cliente.tipoPedido === TIPO_PEDIDO.DOMICILIO && (
-          <p className="resumen-envio-nota">+ costo de envío por confirmar</p>
+        {esDomicilio ? (
+          <>
+            <p className="resumen-envio-nota">Productos: {formatearMoneda(total)}</p>
+            <p className="resumen-envio-nota">
+              🛵 Envío{cliente.envioExacto ? "" : " estimado"}: {formatearMoneda(costoEnvio)}
+              {!cliente.envioExacto && " (se confirma al recibir tu pedido)"}
+            </p>
+            <h3>Total: {formatearMoneda(totalConEnvio)}</h3>
+          </>
+        ) : (
+          <h3>Total: {formatearMoneda(total)}</h3>
         )}
       </div>
 
