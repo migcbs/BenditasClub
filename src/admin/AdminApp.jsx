@@ -31,6 +31,13 @@ let demoPurchases = [];
 let demoRecipes = [{ id: 'r1', productId: 'p1', yield: 1, product: { id: 'p1', nombre: '8 Alitas' }, items: [{}, {}, {}, {}] }, { id: 'r2', productId: 'p2', yield: 1, product: { id: 'p2', nombre: 'Boneless 250g' }, items: [{}, {}, {}] }];
 let demoRewards = [{ id: 'lr1', label: '20% de descuento', type: 'discount_percent', value: 20, stampsRequired: 6, activo: true }];
 let demoRedemptions = [{ id: 'red1', code: 'AB12-CD34', redeemed: false, reward: { type: 'discount_percent', value: 20 }, customer: { nombre: 'Mariana' } }];
+let demoPointsRedemptions = [];
+let demoBirthdayRewards = [{ id: 'br1', label: '10% de descuento', type: 'discount_percent', value: 10, activo: true }];
+let demoBirthdayRedemptions = [];
+let demoProducts = [
+  { id: 'p1', nombre: '8 Alitas', tipo: 'comida', precio: 99, costoPuntos: null },
+  { id: 'p2', nombre: 'Boneless 250g', tipo: 'comida', precio: 139, costoPuntos: 80 },
+];
 let demoCategories = [{ id: 'cat-merch-1', nombre: 'Playeras', orden: 100 }];
 let demoMerchProducts = [{ id: 'merch-1', nombre: 'Playera Monalisa', category: { nombre: 'Playeras' }, variants: [{ id: 'var-1', nombre: 'Única', precio: 249, activo: true, stocks: [{ sucursal: 'xico', quantity: 5 }, { sucursal: 'coatepec', quantity: 3 }] }] }];
 let demoMerchOrders = [];
@@ -44,7 +51,8 @@ const demoApi = {
   createIngredient: async (payload) => { const quantity = Number(Object.values(payload.initialStock || {})[0] || 0); demoInventory = [...demoInventory, { id: `demo-${Date.now()}`, ...payload, quantity, health: stockHealth(quantity, payload.reorderPoint) }]; },
   updateIngredient: async (id,payload) => { demoInventory=demoInventory.map((item)=>item.id===id?{...item,...payload,health:stockHealth(item.quantity,payload.reorderPoint)}:item); },
   inventoryMovements: async () => demoMovements,
-  products: async () => [{id:'p1',nombre:'8 Alitas'},{id:'p2',nombre:'Boneless 250g'}],
+  products: async () => demoProducts,
+  updateProduct: async (id, payload) => { demoProducts = demoProducts.map((p) => p.id === id ? { ...p, ...payload } : p); return demoProducts.find((p) => p.id === id); },
   saveRecipe: async (productId,payload) => { const product=(await demoApi.products()).find((item)=>item.id===productId); const record={id:`r-${Date.now()}`,productId,yield:payload.yield,product,items:payload.items}; demoRecipes=demoRecipes.some((item)=>item.productId===productId)?demoRecipes.map((item)=>item.productId===productId?{...item,...record,id:item.id}:item):[...demoRecipes,record]; },
   recipes: async () => demoRecipes,
   suppliers: async () => demoSuppliers,
@@ -74,6 +82,15 @@ const demoApi = {
   loyaltyRedemptions: async () => demoRedemptions,
   createLoyaltyReward: async (payload) => { demoRewards = [...demoRewards.map((r) => ({ ...r, activo: false })), { id: `lr-${Date.now()}`, ...payload, activo: true }]; },
   updateLoyaltyReward: async (id, payload) => { demoRewards = demoRewards.map((r) => (payload.activo ? { ...r, activo: r.id === id } : r.id === id ? { ...r, ...payload } : r)); },
+  pointsRedemptions: async () => demoPointsRedemptions,
+  birthdayRewards: async () => demoBirthdayRewards,
+  birthdayRedemptions: async () => demoBirthdayRedemptions,
+  createBirthdayReward: async (payload) => {
+    demoBirthdayRewards = [...demoBirthdayRewards.map((r) => ({ ...r, activo: false })), { id: `br-${Date.now()}`, ...payload, activo: true }];
+  },
+  updateBirthdayReward: async (id, payload) => {
+    demoBirthdayRewards = demoBirthdayRewards.map((r) => (payload.activo ? { ...r, activo: r.id === id } : r.id === id ? { ...r, ...payload } : r));
+  },
   categories: async () => demoCategories,
   createCategory: async (payload) => { const category = { id: `cat-${Date.now()}`, ...payload }; demoCategories = [...demoCategories, category]; return category; },
   merchProducts: async () => demoMerchProducts,

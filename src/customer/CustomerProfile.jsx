@@ -58,6 +58,7 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [fotoError, setFotoError] = useState('');
   const [mostrarCanje, setMostrarCanje] = useState(false);
+  const [mostrarAjustes, setMostrarAjustes] = useState(false);
 
   const cargarDirecciones = () => api.addresses(token).then(setAddresses);
 
@@ -262,7 +263,7 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
       <nav className="customer-tabs" aria-label="Secciones de mi cuenta">
         <button type="button" className={tab === 'perfil' ? 'is-active' : ''} onClick={() => setTab('perfil')}>Mi cuenta</button>
         <button type="button" className={tab === 'direcciones' ? 'is-active' : ''} onClick={() => setTab('direcciones')}>Direcciones</button>
-        <button type="button" className={tab === 'ajustes' ? 'is-active' : ''} onClick={() => setTab('ajustes')}>Ajustes</button>
+        <button type="button" onClick={() => setMostrarAjustes(true)}>Ajustes</button>
       </nav>
 
       {tab === 'perfil' && (
@@ -326,7 +327,7 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
                     </div>
                   )}
 
-                  <button type="button" className="customer-primary" onClick={() => setMostrarCanje(true)}>
+                  <button type="button" className="customer-primary customer-canje-btn" onClick={() => setMostrarCanje(true)}>
                     Ver productos para canjear
                   </button>
 
@@ -456,71 +457,76 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
         </section>
       )}
 
-      {tab === 'ajustes' && (
-        <section className="customer-grid">
-          <article className="customer-card">
-            <h2>Foto de perfil</h2>
-            {fotoError ? <div className="customer-alert">{fotoError}</div> : null}
-            <div className="customer-foto-row">
-              {user?.fotoUrl ? (
-                <img src={user.fotoUrl} alt="" className="customer-avatar customer-avatar-lg" />
-              ) : (
-                <div className="customer-avatar customer-avatar-lg customer-avatar-placeholder" aria-hidden="true">{(user?.nombre || 'C').trim()[0]?.toUpperCase()}</div>
-              )}
-              <label className="customer-ghost customer-foto-upload">
-                {subiendoFoto ? 'Subiendo...' : 'Cambiar foto'}
-                <input type="file" accept="image/*" hidden onChange={subirFoto} disabled={subiendoFoto} />
-              </label>
-            </div>
-          </article>
+      {mostrarAjustes && (
+        <div className="login-popup-overlay" role="dialog" aria-modal="true" aria-label="Ajustes de la cuenta" onClick={() => setMostrarAjustes(false)}>
+          <div className="login-popup-card login-popup-card-wide" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="login-popup-close" onClick={() => setMostrarAjustes(false)} aria-label="Cerrar">×</button>
+            <h2 className="login-popup-title">Ajustes</h2>
 
-          <article className="customer-card">
-            <h2>Datos de contacto</h2>
-            <form className="customer-form" onSubmit={save}>
-              <label>
-                Nombre
-                <input value={form.nombre} onChange={update('nombre')} required />
-              </label>
-              <label>
-                Teléfono
-                <input value={form.telefono} onChange={update('telefono')} inputMode="tel" />
-              </label>
-              <button className="customer-primary" disabled={saving}>{saving ? 'Guardando...' : 'Guardar datos'}</button>
-            </form>
-          </article>
+            <section className="customer-settings-block">
+              <h3>Foto de perfil</h3>
+              {fotoError ? <div className="customer-alert">{fotoError}</div> : null}
+              <div className="customer-foto-row">
+                {user?.fotoUrl ? (
+                  <img src={user.fotoUrl} alt="" className="customer-avatar customer-avatar-lg" />
+                ) : (
+                  <div className="customer-avatar customer-avatar-lg customer-avatar-placeholder" aria-hidden="true">{(user?.nombre || 'C').trim()[0]?.toUpperCase()}</div>
+                )}
+                <label className="customer-ghost customer-foto-upload">
+                  {subiendoFoto ? 'Subiendo...' : 'Cambiar foto'}
+                  <input type="file" accept="image/*" hidden onChange={subirFoto} disabled={subiendoFoto} />
+                </label>
+              </div>
+            </section>
 
-          <article className="customer-card">
-            <h2>Cambiar contraseña</h2>
-            {passwordError ? <div className="customer-alert">{passwordError}</div> : null}
-            {passwordSuccess ? <p className="customer-empty">Tu contraseña se actualizó correctamente.</p> : null}
-            <form className="customer-form" onSubmit={cambiarPassword}>
-              <label>
-                Contraseña actual
-                <input type="password" value={passwordForm.passwordActual} onChange={updatePasswordForm('passwordActual')} autoComplete="current-password" required />
-              </label>
-              <label>
-                Nueva contraseña
-                <input type="password" value={passwordForm.passwordNueva} onChange={updatePasswordForm('passwordNueva')} autoComplete="new-password" minLength={8} required />
-              </label>
-              <label>
-                Confirmar nueva contraseña
-                <input type="password" value={passwordForm.passwordConfirmar} onChange={updatePasswordForm('passwordConfirmar')} autoComplete="new-password" minLength={8} required />
-              </label>
-              <button className="customer-primary" disabled={savingPassword}>{savingPassword ? 'Guardando...' : 'Cambiar contraseña'}</button>
-            </form>
-          </article>
+            <section className="customer-settings-block">
+              <h3>Datos de contacto</h3>
+              <form className="customer-form" onSubmit={save}>
+                <label>
+                  Nombre
+                  <input value={form.nombre} onChange={update('nombre')} required />
+                </label>
+                <label>
+                  Teléfono
+                  <input value={form.telefono} onChange={update('telefono')} inputMode="tel" />
+                </label>
+                <button className="customer-primary" disabled={saving}>{saving ? 'Guardando...' : 'Guardar datos'}</button>
+              </form>
+            </section>
 
-          <article className="customer-card">
-            <h2>Sesión</h2>
-            <p className="customer-empty">Cierra sesión en este dispositivo.</p>
-            <button type="button" className="customer-logout-btn customer-logout-btn-block" onClick={logout}>Cerrar sesión</button>
-          </article>
-        </section>
+            <section className="customer-settings-block">
+              <h3>Cambiar contraseña</h3>
+              {passwordError ? <div className="customer-alert">{passwordError}</div> : null}
+              {passwordSuccess ? <p className="customer-empty">Tu contraseña se actualizó correctamente.</p> : null}
+              <form className="customer-form" onSubmit={cambiarPassword}>
+                <label>
+                  Contraseña actual
+                  <input type="password" value={passwordForm.passwordActual} onChange={updatePasswordForm('passwordActual')} autoComplete="current-password" required />
+                </label>
+                <label>
+                  Nueva contraseña
+                  <input type="password" value={passwordForm.passwordNueva} onChange={updatePasswordForm('passwordNueva')} autoComplete="new-password" minLength={8} required />
+                </label>
+                <label>
+                  Confirmar nueva contraseña
+                  <input type="password" value={passwordForm.passwordConfirmar} onChange={updatePasswordForm('passwordConfirmar')} autoComplete="new-password" minLength={8} required />
+                </label>
+                <button className="customer-primary" disabled={savingPassword}>{savingPassword ? 'Guardando...' : 'Cambiar contraseña'}</button>
+              </form>
+            </section>
+
+            <section className="customer-settings-block">
+              <h3>Sesión</h3>
+              <p className="customer-empty">Cierra sesión en este dispositivo.</p>
+              <button type="button" className="customer-logout-btn customer-logout-btn-block" onClick={logout}>Cerrar sesión</button>
+            </section>
+          </div>
+        </div>
       )}
 
       {mostrarCanje && (
         <div className="login-popup-overlay" role="dialog" aria-modal="true" aria-label="Productos para canjear" onClick={() => setMostrarCanje(false)}>
-          <div className="login-popup-card" onClick={(e) => e.stopPropagation()}>
+          <div className="login-popup-card login-popup-card-wide" onClick={(e) => e.stopPropagation()}>
             <button type="button" className="login-popup-close" onClick={() => setMostrarCanje(false)} aria-label="Cerrar">×</button>
             <h2 className="login-popup-title">Canjear puntos</h2>
             <p className="login-popup-sub">Llevas <b>{loyalty?.puntos.toFixed(2)}</b> puntos.</p>

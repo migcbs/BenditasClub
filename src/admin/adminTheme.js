@@ -23,7 +23,15 @@ export const adminTheme = createTheme({
   components: {
     MuiButton: {
       styleOverrides: {
-        root: { minHeight: 48, borderRadius: 999 },
+        // minHeight vivía en `root`, así que hasta un Button size="small"
+        // quedaba forzado a 48px — se veía sobredimensionado en filas
+        // compactas (ej. "Abrir caja Xico" junto a otros chips/botones).
+        // 48px sigue siendo el estándar para el tamaño medio/CTA principal;
+        // "small" ahora sí es chico de verdad.
+        root: { borderRadius: 999 },
+        sizeMedium: { minHeight: 48 },
+        sizeLarge: { minHeight: 56 },
+        sizeSmall: { minHeight: 36 },
         containedPrimary: { color: '#241A20', '&:hover': { backgroundColor: '#C43D8F' } },
       },
     },
