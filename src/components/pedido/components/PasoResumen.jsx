@@ -6,6 +6,7 @@
 import React, { useMemo, useState } from "react";
 import { enviarPedidoWhatsApp } from "../services/whatsappService";
 import { calcularSubtotal, calcularSubtotalItem, calcularTotalConEnvio, formatearMoneda, guardarPedidoEnCuenta } from "../services/pedidoServices";
+import { customerApi } from "../../../customer/customerApi";
 import { TIPO_PEDIDO } from "../utils/constants";
 import TransferenciaPopup from "./TransferenciaPopup";
 import "../styles/resumen.css";
@@ -15,14 +16,51 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
   const total       = useMemo(() => calcularSubtotal(carrito), [carrito]);
   const carritoVacio = !carrito || carrito.length === 0;
   const [showTransferencia, setShowTransferencia] = useState(false);
+  const [cuponInput, setCuponInput] = useState(cliente.cuponCodigo || "");
+  const [aplicandoCupon, setAplicandoCupon] = useState(false);
+  const [cuponError, setCuponError] = useState("");
 
   const esDomicilio = cliente.tipoPedido === TIPO_PEDIDO.DOMICILIO;
   const costoEnvio = esDomicilio ? (cliente.costoEnvio || 0) : 0;
-  // El 10% se calcula sobre productos, nunca sobre el envío — y se vuelve
-  // a decidir y aplicar en el servidor al crear el pedido (esto es solo
-  // para que el cliente lo vea antes de mandar el WhatsApp).
-  const descuentoBienvenida = cliente.elegibleDescuentoBienvenida ? Math.round(total * 0.10) : 0;
-  const totalConEnvio = useMemo(() => calcularTotalConEnvio(carrito, costoEnvio) - descuentoBienvenida, [carrito, costoEnvio, descuentoBienvenida]);
+  // Un cupón escrito a mano reemplaza al 10% de bienvenida en vez de
+  // sumarse — mismo criterio que el servidor al crear el pedido de
+  // verdad (ver index.js), esto es solo para que el cliente vea el
+  // mismo total antes de mandar el WhatsApp.
+  const descuentoBienvenida = !cliente.cuponAplicado && cliente.elegibleDescuentoBienvenida ? Math.round(total * 0.10) : 0;
+  const descuentoCupon = cliente.cuponAplicado ? (cliente.descuentoCupon || 0) : 0;
+  const totalConEnvio = useMemo(
+    () => calcularTotalConEnvio(carrito, costoEnvio) - descuentoBienvenida - descuentoCupon,
+    [carrito, costoEnvio, descuentoBienvenida, descuentoCupon]
+  );
+
+  const aplicarCupon = async () => {
+    if (!cuponInput.trim()) return;
+    setAplicandoCupon(true);
+    setCuponError("");
+    try {
+      const resultado = await customerApi.validarCupon(cuponInput.trim(), total);
+      if (!resultado.valido) {
+        setCuponError(resultado.error || "Cupón no válido");
+        handleChange({ target: { name: "cuponAplicado", value: false } });
+        return;
+      }
+      handleChange({ target: { name: "cuponCodigo", value: cuponInput.trim().toUpperCase() } });
+      handleChange({ target: { name: "descuentoCupon", value: resultado.descuento } });
+      handleChange({ target: { name: "cuponAplicado", value: true } });
+    } catch (error) {
+      setCuponError("No se pudo validar el cupón — inténtalo de nuevo.");
+    } finally {
+      setAplicandoCupon(false);
+    }
+  };
+
+  const quitarCupon = () => {
+    setCuponInput("");
+    setCuponError("");
+    handleChange({ target: { name: "cuponAplicado", value: false } });
+    handleChange({ target: { name: "cuponCodigo", value: "" } });
+    handleChange({ target: { name: "descuentoCupon", value: 0 } });
+  };
 
   const confirmarPedido = (metodoPago = null) => {
     if (carritoVacio) return;
@@ -112,11 +150,38 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
         )}
       </div>
 
+      {/* ── Cupón (opcional) ── */}
+      <div className="resumen-seccion resumen-cupon">
+        <h3>¿Tienes un cupón?</h3>
+        {cliente.cuponAplicado ? (
+          <div className="cupon-aplicado">
+            <span>🎟️ <b>{cliente.cuponCodigo}</b> aplicado — −{formatearMoneda(descuentoCupon)}</span>
+            <button type="button" onClick={quitarCupon}>Quitar</button>
+          </div>
+        ) : (
+          <div className="cupon-form">
+            <input
+              type="text"
+              placeholder="Código de cupón (opcional)"
+              value={cuponInput}
+              onChange={(e) => { setCuponInput(e.target.value.toUpperCase()); setCuponError(""); }}
+            />
+            <button type="button" onClick={aplicarCupon} disabled={aplicandoCupon || !cuponInput.trim()}>
+              {aplicandoCupon ? "..." : "Aplicar"}
+            </button>
+          </div>
+        )}
+        {cuponError && <span className="error">{cuponError}</span>}
+      </div>
+
       {/* ── Total ── */}
       <div className="resumen-total">
         {esDomicilio && <p className="resumen-envio-nota">Productos: {formatearMoneda(total)}</p>}
         {descuentoBienvenida > 0 && (
           <p className="resumen-envio-nota resumen-descuento">🎉 10% de bienvenida: −{formatearMoneda(descuentoBienvenida)}</p>
+        )}
+        {descuentoCupon > 0 && (
+          <p className="resumen-envio-nota resumen-descuento">🎟️ Cupón {cliente.cuponCodigo}: −{formatearMoneda(descuentoCupon)}</p>
         )}
         {esDomicilio && (
           <p className="resumen-envio-nota">
@@ -124,7 +189,7 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
             {!cliente.envioExacto && " (se confirma al recibir tu pedido)"}
           </p>
         )}
-        <h3>Total: {formatearMoneda(esDomicilio ? totalConEnvio : total - descuentoBienvenida)}</h3>
+        <h3>Total: {formatearMoneda(esDomicilio ? totalConEnvio : total - descuentoBienvenida - descuentoCupon)}</h3>
       </div>
 
       {/* ── Notas (se piden hasta el último paso, justo antes de enviar) ── */}

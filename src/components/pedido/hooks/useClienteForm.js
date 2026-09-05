@@ -20,6 +20,9 @@ const initialState = {
   codigoPostal:"",
   costoEnvio:  0,
   envioExacto: false,
+  cuponCodigo: "",
+  descuentoCupon: 0,
+  cuponAplicado: false,
   comentarios:"",
   sucursal:   "",
   tipoPedido: "",   // "domicilio" | "recoger"

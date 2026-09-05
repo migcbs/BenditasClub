@@ -358,6 +358,7 @@ export async function guardarPedidoEnCuenta(cliente, carrito) {
       notas: cliente.comentarios || undefined,
       nombre: cliente.nombre,
       telefono: cliente.telefono,
+      cuponCodigo: cliente.cuponAplicado ? cliente.cuponCodigo : undefined,
       items,
     }, token || undefined);
   } catch (error) {

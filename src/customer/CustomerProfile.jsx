@@ -40,6 +40,7 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loyalty, setLoyalty] = useState(null);
+  const [cupones, setCupones] = useState(null);
   const [canjeandoPuntos, setCanjeandoPuntos] = useState(false);
   const [form, setForm] = useState({ nombre: '', telefono: '' });
   const [error, setError] = useState('');
@@ -69,14 +70,15 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
     }
 
     let live = true;
-    Promise.all([api.profile(token), api.orders(token), api.loyalty(token), api.addresses(token)])
-      .then(([profile, history, loyaltyStatus, addressList]) => {
+    Promise.all([api.profile(token), api.orders(token), api.loyalty(token), api.addresses(token), api.couponsPublicos()])
+      .then(([profile, history, loyaltyStatus, addressList, cuponesList]) => {
         if (!live) return;
         setUser(profile.user);
         setForm({ nombre: profile.user.nombre || '', telefono: profile.user.telefono || '' });
         setOrders(history);
         setLoyalty(loyaltyStatus);
         setAddresses(addressList);
+        setCupones(cuponesList);
       })
       .catch((requestError) => {
         if (!live) return;
@@ -341,6 +343,26 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
                   )}
                 </>
               ) : <small>Cargando tus puntos...</small>}
+            </article>
+
+            <article className="customer-card">
+              <h2>Cuponera</h2>
+              {cupones ? (
+                cupones.length ? (
+                  <ul className="customer-coupon-list">
+                    {cupones.map((c) => (
+                      <li key={c.codigo} className="customer-coupon-item">
+                        <span className="customer-coupon-code">{c.codigo}</span>
+                        <span className="customer-coupon-info">
+                          <b>{c.tipo === 'discount_percent' ? `${c.valor}% de descuento` : `${money.format(c.valor)} de descuento`}</b>
+                          {c.descripcion && <small>{c.descripcion}</small>}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="customer-empty">No hay cupones disponibles por ahora.</p>
+              ) : <small>Cargando cupones...</small>}
+              <p className="customer-coupon-hint">Escribe el código al final de tu pedido en línea, antes de enviarlo.</p>
             </article>
 
             {loyalty?.activeBirthdayReward && (() => {

@@ -271,6 +271,25 @@ model DeliveryZone {
   @@unique([sucursal, distanciaMaxKm])
 }
 
+// Código de cupón público (ej. "BENDITASCLUB") — a diferencia del 10% de
+// bienvenida (automático, ligado a la cuenta, solo primer pedido), esto es
+// un código que el cliente escribe a mano al pagar, cualquiera con el
+// código lo puede usar cuantas veces quiera mientras no exceda usosMaximos
+// (null = sin límite) ni pase expiraEn.
+model CouponCode {
+  id           String    @id @default(uuid())
+  codigo       String    @unique
+  tipo         String // 'discount_percent' | 'discount_fixed'
+  valor        Int
+  descripcion  String?
+  activo       Boolean   @default(true)
+  usosMaximos  Int?
+  usosActuales Int       @default(0)
+  expiraEn     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
 // Cache permanente de geocodificación por CP — Nominatim pide no repetir
 // la misma consulta (política de uso: 1 request/seg, cachear resultados),
 // y un código postal nunca cambia de coordenadas, así que cachear para
@@ -329,6 +348,10 @@ model Order {
   // lo que de verdad pagó); este campo es solo el registro de cuánto se
   // descontó, para mostrarlo en el ticket/WhatsApp/admin.
   descuentoBienvenida Int            @default(0)
+  // Cupón escrito a mano al pagar — si es válido, reemplaza al 10% de
+  // bienvenida en vez de sumarse (nunca se combinan los dos descuentos).
+  cuponCodigo         String?
+  descuentoCupon      Int            @default(0)
   notas               String?
   total               Int
   empleadoId          String?
