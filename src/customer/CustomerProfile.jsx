@@ -48,6 +48,11 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
   const [addressForm, setAddressForm] = useState({ etiqueta: '', direccion: '', esPrincipal: false });
   const [savingAddress, setSavingAddress] = useState(false);
 
+  const [passwordForm, setPasswordForm] = useState({ passwordActual: '', passwordNueva: '', passwordConfirmar: '' });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+
   const cargarDirecciones = () => api.addresses(token).then(setAddresses);
 
   useEffect(() => {
@@ -180,6 +185,29 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
     }
   };
 
+  const updatePasswordForm = (field) => (event) => {
+    setPasswordForm((current) => ({ ...current, [field]: event.target.value }));
+    setPasswordSuccess(false);
+  };
+
+  const cambiarPassword = async (event) => {
+    event.preventDefault();
+    setPasswordError('');
+    if (passwordForm.passwordNueva !== passwordForm.passwordConfirmar) {
+      return setPasswordError('La confirmación no coincide con la nueva contraseña.');
+    }
+    setSavingPassword(true);
+    try {
+      await api.changePassword({ passwordActual: passwordForm.passwordActual, passwordNueva: passwordForm.passwordNueva }, token);
+      setPasswordForm({ passwordActual: '', passwordNueva: '', passwordConfirmar: '' });
+      setPasswordSuccess(true);
+    } catch (requestError) {
+      setPasswordError(requestError.message);
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   const logout = () => {
     storage.removeItem(CUSTOMER_TOKEN_KEY);
     navigate('/login');
@@ -213,6 +241,27 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
               <input value={form.telefono} onChange={update('telefono')} inputMode="tel" />
             </label>
             <button className="customer-primary" disabled={saving}>{saving ? 'Guardando...' : 'Guardar datos'}</button>
+          </form>
+        </article>
+
+        <article className="customer-card">
+          <h2>Cambiar contraseña</h2>
+          {passwordError ? <div className="customer-alert">{passwordError}</div> : null}
+          {passwordSuccess ? <p className="customer-empty">Tu contraseña se actualizó correctamente.</p> : null}
+          <form className="customer-form" onSubmit={cambiarPassword}>
+            <label>
+              Contraseña actual
+              <input type="password" value={passwordForm.passwordActual} onChange={updatePasswordForm('passwordActual')} autoComplete="current-password" required />
+            </label>
+            <label>
+              Nueva contraseña
+              <input type="password" value={passwordForm.passwordNueva} onChange={updatePasswordForm('passwordNueva')} autoComplete="new-password" minLength={8} required />
+            </label>
+            <label>
+              Confirmar nueva contraseña
+              <input type="password" value={passwordForm.passwordConfirmar} onChange={updatePasswordForm('passwordConfirmar')} autoComplete="new-password" minLength={8} required />
+            </label>
+            <button className="customer-primary" disabled={savingPassword}>{savingPassword ? 'Guardando...' : 'Cambiar contraseña'}</button>
           </form>
         </article>
 

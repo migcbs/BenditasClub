@@ -312,6 +312,23 @@ app.put('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res
   }
 });
 
+app.put('/api/customer/password', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const { passwordActual, passwordNueva } = req.body;
+    if (!passwordActual || !passwordNueva) return res.status(400).json({ error: 'La contraseña actual y la nueva son obligatorias' });
+    if (passwordNueva.length < 8) return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres' });
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user?.password || !(await bcrypt.compare(passwordActual, user.password))) {
+      return res.status(401).json({ error: 'La contraseña actual no es correcta' });
+    }
+    await prisma.user.update({ where: { id: req.user.id }, data: { password: await bcrypt.hash(passwordNueva, 10) } });
+    res.json({ success: true });
+  } catch (e) {
+    console.error('❌ Error cambiando contraseña de cliente:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 // ── Direcciones guardadas del cliente (una cuenta puede tener varias:
 // casa, trabajo, etc.) — se usan al pedir a domicilio en vez de escribir
 // la dirección cada vez. ──
