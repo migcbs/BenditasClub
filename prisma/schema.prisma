@@ -213,25 +213,57 @@ model MerchOrderItem {
 // Direcciones guardadas del cliente para pedidos a domicilio — puede tener
 // varias (casa, trabajo, etc.) y elegir cuál usar al pedir, en vez de un
 // solo campo `direccion` fijo en User.
+// `direccion` sigue siendo el string completo que ya usan WhatsApp, el
+// ticket impreso, las comandas de cocina y los pop-ups del admin — se
+// compone en el backend a partir de los campos sueltos de abajo para no
+// tener que tocar todos esos consumidores. Los campos sueltos existen
+// para poder re-editarlos por separado y, sobre todo, para tener
+// codigoPostal como clave de búsqueda del costo de envío (ver DeliveryZone).
 model Address {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  etiqueta    String?
-  direccion   String
-  esPrincipal Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  etiqueta     String?
+  direccion    String
+  calle        String?
+  numero       String?
+  colonia      String?
+  referencias  String?
+  codigoPostal String?
+  esPrincipal  Boolean  @default(false)
+  createdAt    DateTime @default(now())
 }
 
 // Datos bancarios por sucursal para pedidos pagados por transferencia — el
 // admin los edita, y el popup de "Confirmar pedido" los muestra al cliente
 // según a qué sucursal está pidiendo.
 model BranchSettings {
-  sucursal  SucursalNombre @id
-  clabe     String?
-  banco     String?
-  titular   String?
-  updatedAt DateTime       @updatedAt
+  sucursal    SucursalNombre @id
+  clabe       String?
+  banco       String?
+  titular     String?
+  // Costo de envío para cualquier código postal que NO tenga una fila en
+  // DeliveryZone — un valor base/estimado en vez de bloquear el pedido
+  // mientras el admin no haya mapeado esa colonia todavía.
+  envioMinimo Int            @default(35)
+  updatedAt   DateTime       @updatedAt
+}
+
+// Tarifa de envío por radio de distancia, aproximada por código postal —
+// sin geocodificación real (nada de coordenadas ni de API de mapas de
+// paga): el admin conoce sus colonias y les asigna una tarifa fija. Un CP
+// sin fila aquí usa BranchSettings.envioMinimo como estimado.
+model DeliveryZone {
+  id           String         @id @default(uuid())
+  sucursal     SucursalNombre
+  codigoPostal String
+  costoEnvio   Int
+  etiqueta     String?
+  activo       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([sucursal, codigoPostal])
 }
 
 // Sin correo saliente configurado: el cliente pide el restablecimiento
@@ -268,6 +300,12 @@ model Order {
   clienteId           String?
   cliente             User?          @relation("CustomerOrders", fields: [clienteId], references: [id])
   direccion           String?
+  codigoPostal        String?
+  // Tarifa del motociclista — NO cuenta como venta del restaurante (no
+  // suma a `total`, no genera puntos, no entra al sales/dashboard): es un
+  // pass-through al repartidor. Se calcula en el servidor al crear el
+  // pedido (ver server/delivery.js), nunca se confía en lo que mande el cliente.
+  costoEnvio          Int            @default(0)
   notas               String?
   total               Int
   empleadoId          String?

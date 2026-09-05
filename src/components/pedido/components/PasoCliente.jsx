@@ -1,6 +1,7 @@
 // src/components/pedido/components/PasoCliente.jsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getDeliveryFee, formatearMoneda } from "../services/pedidoServices";
 import "../styles/cliente.css";
 
 // Valores locales — sin depender del import de constants
@@ -17,16 +18,45 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, direcciones = [
   // direcciones y el cliente no pidió lo contrario.
   const [modoManualOtra, setModoManualOtra] = useState(false);
   const mostrarSelectorGuardadas = direcciones.length > 0 && !modoManualOtra;
+  const [envioError, setEnvioError] = useState("");
+  const [buscandoEnvio, setBuscandoEnvio] = useState(false);
 
   const handleDireccionGuardada = (e) => {
-    const valor = e.target.value;
-    if (valor === OTRA_DIRECCION) {
+    const idSeleccionado = e.target.value;
+    if (idSeleccionado === OTRA_DIRECCION) {
       setModoManualOtra(true);
       handleChange({ target: { name: "direccion", value: "" } });
+      handleChange({ target: { name: "codigoPostal", value: "" } });
     } else {
-      handleChange({ target: { name: "direccion", value: valor } });
+      const guardada = direcciones.find((d) => d.id === idSeleccionado);
+      handleChange({ target: { name: "direccion", value: guardada?.direccion || "" } });
+      handleChange({ target: { name: "codigoPostal", value: guardada?.codigoPostal || "" } });
     }
   };
+
+  // Estimado por CP en cuanto hay 5 dígitos y ya se sabe la sucursal — sin
+  // geocodificación real, ver server/delivery.js. Un CP de 4 dígitos
+  // (todavía escribiéndose) no dispara la búsqueda.
+  useEffect(() => {
+    if (cliente.tipoPedido !== DOMICILIO || !cliente.sucursal || !/^\d{5}$/.test(cliente.codigoPostal || "")) {
+      return undefined;
+    }
+    let vivo = true;
+    setBuscandoEnvio(true);
+    setEnvioError("");
+    const timeout = setTimeout(() => {
+      getDeliveryFee(cliente.sucursal, cliente.codigoPostal)
+        .then((resultado) => {
+          if (!vivo) return;
+          handleChange({ target: { name: "costoEnvio", value: resultado.costoEnvio } });
+          handleChange({ target: { name: "envioExacto", value: resultado.exacto } });
+        })
+        .catch(() => { if (vivo) setEnvioError("No se pudo estimar el envío — se confirma por WhatsApp."); })
+        .finally(() => { if (vivo) setBuscandoEnvio(false); });
+    }, 400);
+    return () => { vivo = false; clearTimeout(timeout); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cliente.tipoPedido, cliente.sucursal, cliente.codigoPostal]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -137,7 +167,7 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, direcciones = [
             >
               <option value="" disabled>Elige una dirección guardada</option>
               {direcciones.map((d) => (
-                <option key={d.id} value={d.direccion}>
+                <option key={d.id} value={d.id}>
                   {d.etiqueta ? `${d.etiqueta}: ` : ""}{d.direccion}
                 </option>
               ))}
@@ -145,15 +175,49 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, direcciones = [
             </select>
           ) : (
             <>
-              <input
-                type="text"
-                name="direccion"
-                placeholder="Calle, número, colonia..."
-                value={cliente.direccion || ""}
-                onChange={handleChange}
-                className={errores.direccion ? "input-error shake" : ""}
-                autoComplete="street-address"
-              />
+              <div className="direccion-campos">
+                <input
+                  type="text"
+                  name="calle"
+                  placeholder="Calle"
+                  value={cliente.calle || ""}
+                  onChange={handleChange}
+                  className={errores.direccion ? "input-error shake" : ""}
+                  autoComplete="address-line1"
+                />
+                <input
+                  type="text"
+                  name="numero"
+                  placeholder="Número"
+                  value={cliente.numero || ""}
+                  onChange={handleChange}
+                  className={errores.direccion ? "input-error shake" : ""}
+                />
+                <input
+                  type="text"
+                  name="colonia"
+                  placeholder="Colonia y referencias"
+                  value={cliente.colonia || ""}
+                  onChange={handleChange}
+                  autoComplete="address-line2"
+                />
+                <input
+                  type="text"
+                  name="referencias"
+                  placeholder="Referencias: entre calles, portón, color de casa..."
+                  value={cliente.referencias || ""}
+                  onChange={handleChange}
+                />
+                <input
+                  type="text"
+                  name="codigoPostal"
+                  placeholder="Código postal"
+                  value={cliente.codigoPostal || ""}
+                  onChange={handleChange}
+                  inputMode="numeric"
+                  maxLength={5}
+                />
+              </div>
               {direcciones.length > 0 && (
                 <button type="button" className="btn-usar-guardada" onClick={() => setModoManualOtra(false)}>
                   Usar una dirección guardada
@@ -162,6 +226,17 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, direcciones = [
             </>
           )}
           {errores.direccion && <span className="error">{errores.direccion}</span>}
+
+          {cliente.codigoPostal && (
+            <p className="envio-estimado">
+              {buscandoEnvio ? "Calculando envío..." : envioError ? envioError : (
+                <>
+                  🛵 Envío {cliente.envioExacto ? "" : "estimado "}: <strong>{formatearMoneda(cliente.costoEnvio || 0)}</strong>
+                  {!cliente.envioExacto && " (se confirma al recibir tu pedido)"}
+                </>
+              )}
+            </p>
+          )}
         </div>
       )}
 
