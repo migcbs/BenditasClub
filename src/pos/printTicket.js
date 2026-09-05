@@ -95,6 +95,7 @@ export function imprimirComanda(orden, opciones = {}) {
   </div>
   <div class="linea"></div>
   <div class="bloque">
+    ${escapeHtml(tipoLabel)}<br/>
     Cliente: ${escapeHtml(orden.clienteNombre || 'Público en general')}<br/>
     ${orden.direccion ? `${escapeHtml(orden.direccion)}<br/>` : ''}
     ${orden.clienteTelefono ? escapeHtml(orden.clienteTelefono) : ''}
