@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Avatar, ButtonBase, Card, Chip, Typography } from '@mui/material';
-import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Gauge, House, PackageSearch, ReceiptText, Settings, ShoppingBag, Sparkles, UsersRound } from 'lucide-react';
+import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Gauge, House, PackageSearch, ReceiptText, Settings, ShoppingBag, Sparkles, User, UsersRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AdminWorkspace from './AdminWorkspace';
 
@@ -11,7 +11,7 @@ const brand = `${process.env.PUBLIC_URL}/logo192.jpg`;
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 
 const nav = [
-  ['Inicio', House], ['Operación', Gauge], ['Finanzas', ReceiptText], ['Inventario', PackageSearch], ['Merch', ShoppingBag], ['Fidelidad', Sparkles], ['Equipo', UsersRound], ['Configuración', Settings],
+  ['Inicio', House], ['Operación', Gauge], ['Finanzas', ReceiptText], ['Inventario', PackageSearch], ['Merch', ShoppingBag], ['Fidelidad', Sparkles], ['Clientes', User], ['Equipo', UsersRound], ['Configuración', Settings],
 ];
 
 function AlertRow({ icon: Icon, tone, title, detail, action, onClick }) {

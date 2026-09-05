@@ -17,9 +17,11 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
     tipoPedido  = "",
     costoEnvio  = 0,
     envioExacto = false,
+    elegibleDescuentoBienvenida = false,
   } = cliente;
 
   const total = calcularSubtotal(carrito);
+  const descuentoBienvenida = elegibleDescuentoBienvenida ? Math.round(total * 0.10) : 0;
 
   let texto  = `🐣 *BENDITAS CLUB — Nuevo Pedido*\n`;
   texto     += `━━━━━━━━━━━━━━━━━━━\n`;
@@ -70,10 +72,12 @@ export const generarMensajeWhatsApp = (cliente = {}, carrito = [], ordenId = "00
 
   if (tipoPedido === "domicilio") {
     texto += `🍗 *Productos: $${total.toFixed(2)} MXN*\n`;
+    if (descuentoBienvenida > 0) texto += `🎉 *10% de bienvenida: -$${descuentoBienvenida.toFixed(2)} MXN*\n`;
     texto += `🛵 *Envío${envioExacto ? "" : " estimado"}: $${Number(costoEnvio).toFixed(2)} MXN*\n`;
-    texto += `💰 *Total${envioExacto ? "" : " estimado"}: $${(total + Number(costoEnvio)).toFixed(2)} MXN*\n`;
+    texto += `💰 *Total${envioExacto ? "" : " estimado"}: $${(total - descuentoBienvenida + Number(costoEnvio)).toFixed(2)} MXN*\n`;
   } else {
-    texto += `💰 *Total estimado: $${total.toFixed(2)} MXN*\n`;
+    if (descuentoBienvenida > 0) texto += `🎉 *10% de bienvenida: -$${descuentoBienvenida.toFixed(2)} MXN*\n`;
+    texto += `💰 *Total estimado: $${(total - descuentoBienvenida).toFixed(2)} MXN*\n`;
   }
 
   if (metodoPago === "transferencia") {

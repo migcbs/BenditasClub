@@ -52,7 +52,7 @@ body:has(.admin-app-shell), body:has(.admin-login-page) { margin: 0; background:
 .admin-summary-card small { color:#6e5c66; }
 .admin-summary-card b { font-size:21px; }
 .admin-summary-card em { color:#8a5c06; font-size:12px; font-style:normal; }
-.admin-bottom-nav { position:fixed; z-index:30; right:0; bottom:0; left:0; height:76px; display:grid; grid-template-columns:repeat(8,1fr); padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); border-top:1px solid rgba(36,26,32,.08); background:rgba(255,255,255,.92); backdrop-filter:blur(18px) saturate(135%); overflow-x:auto; }
+.admin-bottom-nav { position:fixed; z-index:30; right:0; bottom:0; left:0; height:76px; display:grid; grid-template-columns:repeat(9,1fr); padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); border-top:1px solid rgba(36,26,32,.08); background:rgba(255,255,255,.92); backdrop-filter:blur(18px) saturate(135%); overflow-x:auto; }
 .admin-bottom-nav button { min-width:0; }
 .admin-bottom-nav button span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .admin-bottom-nav button { display:flex; flex-direction:column; gap:4px; color:#8a7680; border-radius:12px; }

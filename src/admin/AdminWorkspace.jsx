@@ -1364,6 +1364,109 @@ function Merch({ api, token }) {
   </section>;
 }
 
+function Customers({ api, token }) {
+  const [customers, setCustomers] = useState(null);
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [detail, setDetail] = useState(null);
+  const [detailError, setDetailError] = useState('');
+
+  useEffect(() => {
+    let live = true;
+    api.customers(token).then((rows) => live && setCustomers(rows)).catch((requestError) => live && setError(requestError.message));
+    return () => { live = false; };
+  }, [api, token]);
+
+  const abrirDetalle = async (customer) => {
+    setDetail({ loading: true, id: customer.id, nombre: customer.nombre });
+    setDetailError('');
+    try {
+      const full = await api.customerDetail(customer.id, token);
+      setDetail(full);
+    } catch (requestError) {
+      setDetailError(requestError.message);
+    }
+  };
+
+  if (error) return <Alert severity="error">{error}</Alert>;
+  if (!customers) return <Loading />;
+
+  const filtrados = customers.filter((c) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return c.nombre?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.telefono?.includes(q);
+  });
+
+  return (
+    <section className="admin-module">
+      <header>
+        <div>
+          <Typography component="h1">Clientes</Typography>
+          <Typography>Cuentas registradas en la plataforma.</Typography>
+        </div>
+        <Chip label={`${customers.length} registrados`} color="secondary" />
+      </header>
+      <div className="admin-data-panel">
+        <div className="admin-toolbar-row" style={{ gridTemplateColumns: '1fr' }}>
+          <TextField size="small" label="Buscar por nombre, correo o teléfono" value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+        {filtrados.length ? filtrados.map((customer) => (
+          <ButtonBase key={customer.id} className="admin-list-row admin-list-row--clickable" onClick={() => abrirDetalle(customer)}>
+            <span>
+              <b>{customer.nombre}</b>
+              <small>{customer.email} · {customer.telefono || 'sin teléfono'} · Desde {fechaHora(customer.createdAt)}</small>
+            </span>
+            <div className="admin-row-actions">
+              <Chip size="small" label={`${customer.totalPedidos} pedido${customer.totalPedidos !== 1 ? 's' : ''}`} />
+              {!customer.activo && <Chip size="small" color="default" label="Inactivo" />}
+            </div>
+          </ButtonBase>
+        )) : <Empty>No hay clientes que coincidan con la búsqueda.</Empty>}
+      </div>
+
+      <Dialog open={Boolean(detail)} onClose={() => setDetail(null)} fullWidth maxWidth="sm">
+        {detail && (
+          <>
+            <DialogTitle>{detail.nombre}</DialogTitle>
+            <DialogContent>
+              {detail.loading ? <Loading /> : detailError ? <Alert severity="error">{detailError}</Alert> : (
+                <>
+                  <p style={{ margin: '0 0 12px', fontSize: 14, lineHeight: 1.8 }}>
+                    Correo: {detail.email}<br />
+                    Teléfono: {detail.telefono || '—'}<br />
+                    Fecha de nacimiento: {detail.fechaNacimiento ? new Date(detail.fechaNacimiento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '—'}<br />
+                    Registrado: {fechaHora(detail.createdAt)}<br />
+                    Estado: {detail.activo ? 'Activo' : 'Inactivo'}
+                  </p>
+                  <div className="admin-module-stats" style={{ marginBottom: 16 }}>
+                    <article><PackageCheck /><span><b>{detail.totalPedidosPagados}</b><small>Pedidos pagados</small></span></article>
+                    <article><CircleDollarSign /><span><b>{money.format(detail.totalGastado)}</b><small>Total gastado</small></span></article>
+                    <article><Sparkles /><span><b>{detail.loyaltyCard ? Number(detail.loyaltyCard.puntos).toFixed(0) : 0}</b><small>Puntos</small></span></article>
+                  </div>
+                  <div className="admin-data-heading" style={{ padding: '8px 0' }}><h2>Direcciones</h2><span>{detail.addresses?.length || 0}</span></div>
+                  {detail.addresses?.length ? detail.addresses.map((a) => (
+                    <div className="admin-list-row" key={a.id}>
+                      <span><b>{a.etiqueta || 'Dirección'}{a.esPrincipal ? ' · Principal' : ''}</b><small>{a.direccion}</small></span>
+                    </div>
+                  )) : <Empty>Sin direcciones guardadas.</Empty>}
+                  <div className="admin-data-heading" style={{ padding: '8px 0' }}><h2>Pedidos recientes</h2><span>{detail.customerOrders?.length || 0}</span></div>
+                  {detail.customerOrders?.length ? detail.customerOrders.map((order) => (
+                    <div className="admin-list-row" key={order.id}>
+                      <span><b>#{order.id.slice(0, 6).toUpperCase()} · {order.tipo}</b><small>{SUCURSAL_LABEL[order.sucursal]} · {fechaHora(order.createdAt)}</small></span>
+                      <b>{money.format(order.total)}</b>
+                    </div>
+                  )) : <Empty>Sin pedidos todavía.</Empty>}
+                </>
+              )}
+            </DialogContent>
+            <DialogActions><Button onClick={() => setDetail(null)}>Cerrar</Button></DialogActions>
+          </>
+        )}
+      </Dialog>
+    </section>
+  );
+}
+
 export default function AdminWorkspace({ section, api, token, branch, dashboard }) {
   if (section === 'Operación') return <Operation dashboard={dashboard} api={api} token={token} />;
   if (section === 'Finanzas') return <Finance api={api} token={token} branch={branch} dashboard={dashboard} />;
@@ -1371,6 +1474,7 @@ export default function AdminWorkspace({ section, api, token, branch, dashboard 
   if (section === 'Merch') return <Merch api={api} token={token} />;
   if (section === 'Fidelidad') return <Loyalty api={api} token={token} />;
   if (section === 'Equipo') return <Team api={api} token={token} />;
+  if (section === 'Clientes') return <Customers api={api} token={token} />;
   if (section === 'Configuración') return <BranchSettings api={api} token={token} />;
   return null;
 }

@@ -1,0 +1,115 @@
+.promo-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 12, 16, 0.6);
+  backdrop-filter: blur(4px);
+  animation: promoFadeIn 0.25s ease;
+}
+
+.promo-popup-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  padding: 40px 28px 32px;
+  border-radius: 28px;
+  text-align: center;
+  background: linear-gradient(160deg, #E765B7 0%, #C43D8F 100%);
+  box-shadow: 0 30px 70px rgba(196, 61, 143, 0.5);
+  animation: promoPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.promo-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.promo-popup-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 18px;
+}
+
+.promo-popup-title {
+  margin: 0 0 12px;
+  font-family: 'Titan One', cursive;
+  color: #fff;
+  font-size: 2.1rem;
+  line-height: 1.15;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+}
+
+.promo-popup-text {
+  margin: 0 0 26px;
+  color: #fff8f0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+  opacity: 0.95;
+}
+
+.promo-popup-cta {
+  width: 100%;
+  border: none;
+  padding: 16px;
+  border-radius: 999px;
+  background: #241a20;
+  color: #fff;
+  font-family: 'Titan One', cursive;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+.promo-popup-cta:hover { transform: translateY(-2px); }
+.promo-popup-cta:active { transform: translateY(0); }
+
+.promo-popup-later {
+  display: block;
+  margin: 14px auto 0;
+  border: none;
+  background: none;
+  color: #fff8f0;
+  opacity: 0.8;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@keyframes promoFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes promoPop {
+  from { opacity: 0; transform: scale(0.85) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (max-width: 380px) {
+  .promo-popup-title { font-size: 1.7rem; }
+}

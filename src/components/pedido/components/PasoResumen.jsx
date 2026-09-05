@@ -18,7 +18,11 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
 
   const esDomicilio = cliente.tipoPedido === TIPO_PEDIDO.DOMICILIO;
   const costoEnvio = esDomicilio ? (cliente.costoEnvio || 0) : 0;
-  const totalConEnvio = useMemo(() => calcularTotalConEnvio(carrito, costoEnvio), [carrito, costoEnvio]);
+  // El 10% se calcula sobre productos, nunca sobre el envío — y se vuelve
+  // a decidir y aplicar en el servidor al crear el pedido (esto es solo
+  // para que el cliente lo vea antes de mandar el WhatsApp).
+  const descuentoBienvenida = cliente.elegibleDescuentoBienvenida ? Math.round(total * 0.10) : 0;
+  const totalConEnvio = useMemo(() => calcularTotalConEnvio(carrito, costoEnvio) - descuentoBienvenida, [carrito, costoEnvio, descuentoBienvenida]);
 
   const confirmarPedido = (metodoPago = null) => {
     if (carritoVacio) return;
@@ -110,18 +114,17 @@ const PasoResumen = ({ cliente = {}, carrito = [], pasoAnterior, resetPedido, on
 
       {/* ── Total ── */}
       <div className="resumen-total">
-        {esDomicilio ? (
-          <>
-            <p className="resumen-envio-nota">Productos: {formatearMoneda(total)}</p>
-            <p className="resumen-envio-nota">
-              🛵 Envío{cliente.envioExacto ? "" : " estimado"}: {formatearMoneda(costoEnvio)}
-              {!cliente.envioExacto && " (se confirma al recibir tu pedido)"}
-            </p>
-            <h3>Total: {formatearMoneda(totalConEnvio)}</h3>
-          </>
-        ) : (
-          <h3>Total: {formatearMoneda(total)}</h3>
+        {esDomicilio && <p className="resumen-envio-nota">Productos: {formatearMoneda(total)}</p>}
+        {descuentoBienvenida > 0 && (
+          <p className="resumen-envio-nota resumen-descuento">🎉 10% de bienvenida: −{formatearMoneda(descuentoBienvenida)}</p>
         )}
+        {esDomicilio && (
+          <p className="resumen-envio-nota">
+            🛵 Envío{cliente.envioExacto ? "" : " estimado"}: {formatearMoneda(costoEnvio)}
+            {!cliente.envioExacto && " (se confirma al recibir tu pedido)"}
+          </p>
+        )}
+        <h3>Total: {formatearMoneda(esDomicilio ? totalConEnvio : total - descuentoBienvenida)}</h3>
       </div>
 
       {/* ── Notas (se piden hasta el último paso, justo antes de enviar) ── */}
