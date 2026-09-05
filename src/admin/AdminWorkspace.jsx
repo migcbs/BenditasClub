@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, ButtonBase, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, MenuItem, Switch, TextField, Typography } from '@mui/material';
-import { ArrowDownRight, ArrowUpRight, Banknote, ChefHat, CircleDollarSign, ClipboardList, Edit3, Gift, PackageCheck, Plus, ReceiptText, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
+import { Alert, Button, ButtonBase, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, MenuItem, Switch, TextField, Typography } from '@mui/material';
+import { ArrowDownRight, ArrowUpRight, Banknote, ChefHat, CircleDollarSign, ClipboardList, Edit3, Gift, HelpCircle, PackageCheck, Plus, ReceiptText, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const PINK = '#E765B7';
@@ -582,6 +582,7 @@ function BranchSettings({ api, token }) {
 
   const [zonas, setZonas] = useState(null);
   const [zonaDialog, setZonaDialog] = useState(false);
+  const [zonaHelpOpen, setZonaHelpOpen] = useState(false);
   const [zonaForm, setZonaForm] = useState({ sucursal: 'xico', distanciaMaxKm: '', costoEnvio: '', etiqueta: '' });
   const [zonaError, setZonaError] = useState('');
   const [zonaSaving, setZonaSaving] = useState(false);
@@ -767,11 +768,13 @@ function BranchSettings({ api, token }) {
       <div className="admin-data-panel">
         <div className="admin-data-heading">
           <h2>Zonas de entrega por distancia</h2>
-          <Button size="small" startIcon={<Plus size={16} />} onClick={abrirZonaDialog}>Agregar tramo</Button>
+          <div className="admin-row-actions">
+            <IconButton size="small" onClick={() => setZonaHelpOpen(true)} aria-label="Cómo funcionan las zonas de entrega">
+              <HelpCircle size={18} />
+            </IconButton>
+            <Button size="small" startIcon={<Plus size={16} />} onClick={abrirZonaDialog}>Agregar tramo</Button>
+          </div>
         </div>
-        <p className="admin-panel-hint">
-          El código postal del cliente se ubica automáticamente (OpenStreetMap) y se compara contra la sucursal para calcular la distancia — cada tramo es "hasta X km cuesta $Y".
-        </p>
         {zonaError ? <Alert severity="error" onClose={() => setZonaError('')} sx={{ m: 2 }}>{zonaError}</Alert> : null}
         {!zonas ? <Loading /> : zonas.length ? zonas.map((zona) => (
           <div className="admin-list-row" key={zona.id}>
@@ -821,6 +824,16 @@ function BranchSettings({ api, token }) {
           <Button onClick={() => setZonaDialog(false)} disabled={zonaSaving}>Cancelar</Button>
           <Button variant="contained" onClick={guardarZona} disabled={zonaSaving}>{zonaSaving ? 'Guardando...' : 'Guardar tramo'}</Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog open={zonaHelpOpen} onClose={() => setZonaHelpOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>¿Cómo funcionan las zonas de entrega?</DialogTitle>
+        <DialogContent>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: '#241a20' }}>
+            El código postal que escribe el cliente se ubica automáticamente (OpenStreetMap, gratis) y se compara contra la sucursal para calcular la distancia. Cada tramo que agregues aquí significa "hasta esta cantidad de kilómetros, cobra este precio".
+          </p>
+        </DialogContent>
+        <DialogActions><Button onClick={() => setZonaHelpOpen(false)}>Entendido</Button></DialogActions>
       </Dialog>
     </section>
   );

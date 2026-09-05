@@ -222,11 +222,19 @@ export default function AdminApp({ api = defaultApi, storage = window.localStora
     setDashboard(demoDashboard);
   };
 
+  const logout = () => {
+    storage.removeItem(TOKEN_KEY);
+    setToken(null);
+    setUser(null);
+    setDashboard(null);
+    setViewApi(api);
+  };
+
   return (
     <ThemeProvider theme={adminTheme}>
       {restoring ? <div className="admin-loading"><CircularProgress /><span>Recuperando tu turno…</span></div>
         : !user ? <AdminLogin onLogin={login} onDemo={openDemo} />
-          : dashboard ? <AdminDashboard user={user} data={dashboard} branch={branch} onBranchChange={changeBranch} api={viewApi} token={token} error={branchError} />
+          : dashboard ? <AdminDashboard user={user} data={dashboard} branch={branch} onBranchChange={changeBranch} api={viewApi} token={token} error={branchError} onLogout={logout} />
             : <div className="admin-loading"><CircularProgress /><span>Preparando el panel…</span></div>}
     </ThemeProvider>
   );

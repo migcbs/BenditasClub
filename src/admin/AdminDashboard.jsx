@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Avatar, ButtonBase, Card, Chip, Typography } from '@mui/material';
-import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Gauge, House, PackageSearch, ReceiptText, Settings, ShoppingBag, Sparkles, User, UsersRound } from 'lucide-react';
+import { Alert, Avatar, ButtonBase, Card, Chip, IconButton, Typography } from '@mui/material';
+import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Gauge, House, LogOut, PackageSearch, ReceiptText, Settings, ShoppingBag, Sparkles, User, UsersRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AdminWorkspace from './AdminWorkspace';
 
@@ -24,7 +24,7 @@ function AlertRow({ icon: Icon, tone, title, detail, action, onClick }) {
   );
 }
 
-export default function AdminDashboard({ user, data, branch, onBranchChange, api, token, error }) {
+export default function AdminDashboard({ user, data, branch, onBranchChange, api, token, error, onLogout }) {
   const [section, setSection] = useState('Inicio');
   const summary = data.summary;
   const stockAlerts = data.alerts?.filter((alert) => alert.type === 'stock').length || 0;
@@ -41,6 +41,9 @@ export default function AdminDashboard({ user, data, branch, onBranchChange, api
           </select>
         </label>
         <Avatar aria-label={`Cuenta de ${user.nombre}`}>{user.nombre?.[0] || 'A'}</Avatar>
+        <IconButton className="admin-logout-btn" onClick={onLogout} aria-label="Cerrar sesión">
+          <LogOut size={20} />
+        </IconButton>
       </header>
 
       {error && <Alert severity="error" sx={{ mx: 2, mt: 1 }}>{error}</Alert>}
