@@ -39,7 +39,7 @@ const ProductGrid = ({ onAgregar }) => {
   };
 
   return (
-    <Box sx={{ flex: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {error && <Alert severity="error" sx={{ m: 1.5 }}>{error}</Alert>}
       <Box sx={{ display: 'flex', gap: 1, p: 1.5, overflowX: 'auto' }}>
         {categorias.map((cat) => (

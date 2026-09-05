@@ -1,8 +1,8 @@
 // src/pos/PosApp.jsx
 import React, { useState } from 'react';
-import { ThemeProvider, Box, AppBar, Toolbar, Typography, Tabs, Tab, Card, IconButton } from '@mui/material';
+import { ThemeProvider, Box, AppBar, Toolbar, Typography, Tabs, Tab, Card, IconButton, Dialog, Button, Badge } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Minus, Plus, X } from 'lucide-react';
+import { ArrowLeft, LogOut, Minus, Plus, ShoppingCart, X } from 'lucide-react';
 import ProductGrid from './ProductGrid';
 import CheckoutPanel from './CheckoutPanel';
 import OrdersList from './OrdersList';
@@ -21,6 +21,9 @@ const PosApp = () => {
   const carrito = usePosCarrito();
   const [tab, setTab] = useState('tomar');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [verPedido, setVerPedido] = useState(false);
+
+  const cantidadItems = carrito.items.reduce((sum, item) => sum + item.cantidad, 0);
 
   if (!user) {
     return (
@@ -62,45 +65,80 @@ const PosApp = () => {
             instante). La animación se reserva para micro-interacciones
             (tarjetas, items) donde una demora no oculta contenido crítico. */}
         {tab === 'tomar' ? (
-            <Box
-              component="main"
-              sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}
-            >
+            <Box component="main" sx={{ position: 'relative', display: 'flex', flex: 1, overflow: 'hidden' }}>
               <ProductGrid onAgregar={carrito.agregarItem} />
-              <Card elevation={0} sx={{ ...glassSx, flex: 1, minWidth: 320, borderRadius: 0, p: 2.5, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                <Typography variant="h2" sx={{ fontSize: 18, mb: 1.5 }}>Pedido actual</Typography>
-                <AnimatePresence initial={false}>
-                  {carrito.items.map((item) => (
-                    <motion.div
-                      key={item.key}
-                      layout
-                      initial={{ opacity: 0.6, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                    >
-                      <Card elevation={0} sx={{ background: 'rgba(36,26,32,0.04)', borderRadius: 3, p: 1.5, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Box>
-                          <Typography sx={{ fontWeight: 600 }}>{item.cantidad}× {item.nombre}</Typography>
-                          {item.sabores.length > 0 && (
-                            <Typography variant="caption" color="text.secondary">{item.sabores.join(', ')}</Typography>
-                          )}
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Typography sx={{ fontWeight: 700, mr: 1 }}>${item.precio * item.cantidad}</Typography>
-                          <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad - 1)}><Minus size={14} /></IconButton>
-                          <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad + 1)}><Plus size={14} /></IconButton>
-                          <IconButton size="small" onClick={() => carrito.quitarItem(item.key)}><X size={14} /></IconButton>
-                        </Box>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 20, my: 1.5 }}>
-                  <span>Total</span>
-                  <span>${carrito.total}</span>
+
+              {/* Paso 2 ("Pedido actual") es un pop-up de pantalla completa en
+                  vez de un panel fijo al lado del catálogo — en celular
+                  (donde el mesero realmente usa esto) los dos apretados no
+                  cabían y se sentía roto. Solo se abre cuando el mesero
+                  decide verlo, no de golpe con cada producto agregado. */}
+              {cantidadItems > 0 && !verPedido && (
+                <Button
+                  variant="contained"
+                  onClick={() => setVerPedido(true)}
+                  startIcon={
+                    <Badge badgeContent={cantidadItems} color="error" sx={{ '& .MuiBadge-badge': { right: -2, top: -2 } }}>
+                      <ShoppingCart size={20} />
+                    </Badge>
+                  }
+                  sx={{
+                    position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: 20, zIndex: 20,
+                    borderRadius: 999, px: 3, py: 1.25, boxShadow: '0 10px 30px rgba(196,61,143,0.35)',
+                  }}
+                >
+                  Ver pedido · ${carrito.total}
+                </Button>
+              )}
+
+              <Dialog fullScreen open={verPedido} onClose={() => setVerPedido(false)}>
+                <AppBar position="static" color="transparent" elevation={0} sx={{ ...glassSx, boxShadow: 'none' }}>
+                  <Toolbar>
+                    <IconButton onClick={() => setVerPedido(false)} sx={{ mr: 1 }} aria-label="Regresar a productos">
+                      <ArrowLeft size={22} />
+                    </IconButton>
+                    <Typography sx={{ fontWeight: 700 }}>Pedido actual</Typography>
+                  </Toolbar>
+                </AppBar>
+                <Box sx={{ p: 2.5, overflowY: 'auto', flex: 1 }}>
+                  <AnimatePresence initial={false}>
+                    {carrito.items.map((item) => (
+                      <motion.div
+                        key={item.key}
+                        layout
+                        initial={{ opacity: 0.6, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                      >
+                        <Card elevation={0} sx={{ background: 'rgba(36,26,32,0.04)', borderRadius: 3, p: 1.5, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Box>
+                            <Typography sx={{ fontWeight: 600 }}>{item.cantidad}× {item.nombre}</Typography>
+                            {item.sabores.length > 0 && (
+                              <Typography variant="caption" color="text.secondary">{item.sabores.join(', ')}</Typography>
+                            )}
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Typography sx={{ fontWeight: 700, mr: 1 }}>${item.precio * item.cantidad}</Typography>
+                            <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad - 1)}><Minus size={14} /></IconButton>
+                            <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad + 1)}><Plus size={14} /></IconButton>
+                            <IconButton size="small" onClick={() => carrito.quitarItem(item.key)}><X size={14} /></IconButton>
+                          </Box>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  {carrito.items.length === 0 && (
+                    <Typography color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>
+                      Ya no hay productos en el pedido.
+                    </Typography>
+                  )}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 20, my: 1.5 }}>
+                    <span>Total</span>
+                    <span>${carrito.total}</span>
+                  </Box>
+                  <CheckoutPanel carrito={carrito} onOrderCreated={() => { setRefreshKey((k) => k + 1); setVerPedido(false); }} />
                 </Box>
-                <CheckoutPanel carrito={carrito} onOrderCreated={() => setRefreshKey((k) => k + 1)} />
-              </Card>
+              </Dialog>
             </Box>
         ) : tab === 'lista' ? (
             <Box sx={{ flex: 1, overflow: 'hidden' }}>
