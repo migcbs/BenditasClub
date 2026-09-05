@@ -78,6 +78,7 @@ body:has(.admin-app-shell), body:has(.admin-login-page) { margin: 0; background:
 .admin-data-heading { min-height:64px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 18px; border-bottom:1px solid rgba(36,26,32,.08); }
 .admin-data-heading h2 { margin:0; font-size:17px; }
 .admin-data-heading span { color:#6e5c66; font-size:12px; text-transform:capitalize; }
+.admin-panel-hint { margin:0; padding:0 18px 18px; color:#6e5c66; font:500 13px/1.5 'Inter',sans-serif; }
 .admin-stock-row,.admin-list-row { min-height:74px; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:16px; padding:14px 18px; border-bottom:1px solid rgba(36,26,32,.07); }
 .admin-list-row--clickable { width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer; border-radius:0; transition:background .15s; }
 .admin-list-row--clickable:hover,.admin-list-row--clickable:focus-visible { background:rgba(231,101,183,.07); }
@@ -124,7 +125,7 @@ body:has(.admin-app-shell), body:has(.admin-login-page) { margin: 0; background:
 .admin-detail-grid dd { grid-column:2; margin:0; align-self:center; color:#241a20; font:600 14px 'Inter',sans-serif; }
 .admin-detail-grid dd small { display:block; margin-top:2px; color:#6e5c66; font-size:12px; font-weight:500; }
 .admin-merch-variant { flex-wrap:wrap; }
-.admin-stock-controls { flex-wrap:wrap; }
+.admin-stock-controls { display:flex; gap:8px; flex-wrap:wrap; }
 
 @media (max-width:699px) {
   .admin-module>header { flex-direction:column; }

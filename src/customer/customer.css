@@ -42,6 +42,21 @@ button.customer-secondary-link { background:none; border:0; padding:0; font:inhe
 
 .customer-foto-row { display:flex; align-items:center; gap:16px; margin-top:8px; }
 .customer-foto-upload { display:inline-flex; align-items:center; justify-content:center; padding:0 18px; cursor:pointer; }
+
+/* Pop-up de Ajustes: mismo lenguaje que el pop-up de canje (login-popup-*)
+   pero más ancho, porque agrupa 4 bloques (foto, datos, contraseña,
+   sesión) en vez de una sola pregunta. */
+.login-popup-card-wide { max-width:520px; }
+.customer-settings-block { padding-top:20px; margin-top:20px; border-top:1px solid rgba(36,26,32,.08); }
+.customer-settings-block:first-of-type { padding-top:0; margin-top:8px; border-top:0; }
+.customer-settings-block h3 { margin:0 0 4px; font-family:'Fredoka',sans-serif; font-weight:700; font-size:16px; color:#241a20; }
+
+/* Botón de "Ver productos para canjear": el resto de .customer-primary usa
+   texto tinta sobre rosa (ver DESIGN.md), pero este se pidió con texto
+   blanco a propósito para que destaque como su propia acción dentro de
+   la tarjeta de puntos — y más ancho para que el título no se vea apretado. */
+.customer-canje-btn { width:100%; padding:0 24px; color:#fff; }
+.customer-canje-btn:hover:not(:disabled) { color:#fff; }
 .customer-grid { width:min(100%,940px); margin:0 auto; display:grid; grid-template-columns:1fr; gap:16px; }
 .customer-loyalty small { display:block; margin-top:12px; color:#6e5c66; }
 /* Una sola fila de círculos — se ve bien tanto con 6 (el default) como con

@@ -530,8 +530,8 @@ function Finance({ api, token, branch, dashboard }) {
 
     <Dialog open={Boolean(openDialogBranch)} onClose={() => !opening && setOpenDialogBranch(null)} fullWidth maxWidth="xs">
       <DialogTitle>Abrir caja {SUCURSAL_LABEL[openDialogBranch] || ''}</DialogTitle>
-      <DialogContent>
-        {openingError ? <Alert severity="error" onClose={() => setOpeningError('')} sx={{ mb: 1.5 }}>{openingError}</Alert> : null}
+      <DialogContent sx={{ pt: '20px !important', pb: 1 }}>
+        {openingError ? <Alert severity="error" onClose={() => setOpeningError('')} sx={{ mb: 2 }}>{openingError}</Alert> : null}
         <TextField
           autoFocus
           fullWidth
@@ -769,7 +769,7 @@ function BranchSettings({ api, token }) {
           <h2>Zonas de entrega por distancia</h2>
           <Button size="small" startIcon={<Plus size={16} />} onClick={abrirZonaDialog}>Agregar tramo</Button>
         </div>
-        <p style={{ margin: '0 0 8px', padding: '0 18px', fontSize: 13, color: '#6e5c66' }}>
+        <p className="admin-panel-hint">
           El código postal del cliente se ubica automáticamente (OpenStreetMap) y se compara contra la sucursal para calcular la distancia — cada tramo es "hasta X km cuesta $Y".
         </p>
         {zonaError ? <Alert severity="error" onClose={() => setZonaError('')} sx={{ m: 2 }}>{zonaError}</Alert> : null}
@@ -927,6 +927,7 @@ function Loyalty({ api, token }) {
   const [pointsRedemptions, setPointsRedemptions] = useState(null);
   const [puntosPorProducto, setPuntosPorProducto] = useState({});
   const [savingProductId, setSavingProductId] = useState('');
+  const [puntosDialogOpen, setPuntosDialogOpen] = useState(false);
   const [birthdayRewards, setBirthdayRewards] = useState(null);
   const [birthdayForm, setBirthdayForm] = useState({ label: '', type: 'discount_percent', value: '', productId: '' });
   const [birthdayOpen, setBirthdayOpen] = useState(false);
@@ -1059,26 +1060,37 @@ function Loyalty({ api, token }) {
     </div>
 
     <div className="admin-data-panel">
-      <div className="admin-data-heading"><h2>Puntos por producto</h2><span>2% de cada pedido pagado — sin canjeable si se deja vacío</span></div>
-      {products.filter((p) => p.tipo !== 'merch').map((p) => (
-        <div className="admin-list-row" key={p.id}>
-          <span><b>{p.nombre}</b><small>{money.format(p.precio)}</small></span>
-          <div className="admin-row-actions">
-            <TextField
-              size="small"
-              label="Puntos"
-              type="number"
-              style={{ width: 110 }}
-              value={puntosPorProducto[p.id] ?? ''}
-              onChange={(e) => setPuntosPorProducto({ ...puntosPorProducto, [p.id]: e.target.value })}
-            />
-            <Button size="small" variant="outlined" disabled={savingProductId === p.id} onClick={() => guardarCostoPuntos(p.id)}>
-              {savingProductId === p.id ? '...' : 'Guardar'}
-            </Button>
-          </div>
-        </div>
-      ))}
+      <div className="admin-data-heading">
+        <h2>Puntos por producto</h2>
+        <Button size="small" onClick={() => setPuntosDialogOpen(true)}>Configurar puntos</Button>
+      </div>
+      <p className="admin-panel-hint">2% de cada pedido pagado se convierte en puntos — un producto sin puntos asignados no se puede canjear.</p>
     </div>
+
+    <Dialog open={puntosDialogOpen} onClose={() => setPuntosDialogOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Puntos por producto</DialogTitle>
+      <DialogContent>
+        {products.filter((p) => p.tipo !== 'merch').map((p) => (
+          <div className="admin-list-row" key={p.id}>
+            <span><b>{p.nombre}</b><small>{money.format(p.precio)}</small></span>
+            <div className="admin-row-actions">
+              <TextField
+                size="small"
+                label="Puntos"
+                type="number"
+                style={{ width: 110 }}
+                value={puntosPorProducto[p.id] ?? ''}
+                onChange={(e) => setPuntosPorProducto({ ...puntosPorProducto, [p.id]: e.target.value })}
+              />
+              <Button size="small" variant="outlined" disabled={savingProductId === p.id} onClick={() => guardarCostoPuntos(p.id)}>
+                {savingProductId === p.id ? '...' : 'Guardar'}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </DialogContent>
+      <DialogActions><Button onClick={() => setPuntosDialogOpen(false)}>Cerrar</Button></DialogActions>
+    </Dialog>
 
     <div className="admin-data-panel">
       <div className="admin-data-heading"><h2>Canjes de puntos pendientes</h2><span>{pointsRedemptions?.filter((r) => !r.redeemed).length ?? 0}</span></div>
