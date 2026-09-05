@@ -234,6 +234,24 @@ model BranchSettings {
   updatedAt DateTime       @updatedAt
 }
 
+// Sin correo saliente configurado: el cliente pide el restablecimiento
+// aquí, el admin lo ve en Configuración y cambia la contraseña a mano,
+// y el seguimiento real pasa por WhatsApp (ver mensaje en el popup del
+// cliente). customerId no es una relación de Prisma a propósito — solo
+// un id de referencia para que el admin pueda ubicar la cuenta, sin
+// forzar integridad referencial sobre User por una feature tan simple.
+model PasswordResetRequest {
+  id           String    @id @default(uuid())
+  email        String
+  nombre       String?
+  telefono     String?
+  customerId   String?
+  estado       String    @default("pendiente")
+  createdAt    DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+}
+
 model Order {
   id                  String         @id @default(uuid())
   sucursal            SucursalNombre

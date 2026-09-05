@@ -109,6 +109,10 @@ body:has(.admin-app-shell), body:has(.admin-login-page) { margin: 0; background:
 .admin-merch-variant { display:flex; align-items:center; gap:14px; padding:12px 0 12px 14px; margin-left:8px; border-left:2px solid rgba(231,101,183,.25); }
 .admin-merch-variant-info { display:flex; flex-direction:column; gap:6px; min-width:180px; }
 .admin-thumb--placeholder { display:grid; place-items:center; color:#c9a9bb; background:rgba(231,101,183,.08); }
+.admin-branch-card { overflow:hidden; }
+.admin-branch-card-head { display:flex; align-items:center; gap:12px; padding:16px 18px; background:linear-gradient(135deg,rgba(231,101,183,.14),rgba(231,101,183,.03)); color:var(--admin-pink-deep); border-bottom:1px solid rgba(36,26,32,.07); }
+.admin-branch-card-head b { display:block; font:700 16px 'Fredoka',sans-serif; color:#241a20; }
+.admin-branch-card-head small { color:#8a7680; }
 .admin-merch-variant { flex-wrap:wrap; }
 .admin-stock-controls { flex-wrap:wrap; }
 

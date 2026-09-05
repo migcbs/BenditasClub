@@ -20,6 +20,11 @@ export const customerApi = {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   }).then(handle),
+  solicitarRestablecimiento: (payload) => fetch(`${API_BASE}/api/auth/solicitar-restablecimiento`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).then(handle),
   profile: (token) => fetch(`${API_BASE}/api/customer/me`, { headers: auth(token) }).then(handle),
   updateProfile: (payload, token) => fetch(`${API_BASE}/api/customer/me`, {
     method: 'PUT',

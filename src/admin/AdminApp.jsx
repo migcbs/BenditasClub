@@ -34,6 +34,8 @@ let demoRedemptions = [{ id: 'red1', code: 'AB12-CD34', redeemed: false, reward:
 let demoCategories = [{ id: 'cat-merch-1', nombre: 'Playeras', orden: 100 }];
 let demoMerchProducts = [{ id: 'merch-1', nombre: 'Playera Monalisa', category: { nombre: 'Playeras' }, variants: [{ id: 'var-1', nombre: 'Única', precio: 249, activo: true, stocks: [{ sucursal: 'xico', quantity: 5 }, { sucursal: 'coatepec', quantity: 3 }] }] }];
 let demoMerchOrders = [];
+let demoBranchSettings = [{ sucursal: 'xico', clabe: '', banco: '', titular: '' }, { sucursal: 'coatepec', clabe: '', banco: '', titular: '' }];
+let demoResetRequests = [{ id: 'pr1', email: 'cliente@ejemplo.com', nombre: 'Cliente Demo', telefono: '2281234567', customerId: 'demo-customer', estado: 'pendiente', createdAt: new Date().toISOString() }];
 const demoApi = {
   inventory: async () => demoInventory,
   addStock: async ({ ingredientId, quantity, reason }) => { const ingredient = demoInventory.find((item) => item.id === ingredientId); demoInventory = demoInventory.map((item) => item.id === ingredientId ? { ...item, quantity: item.quantity + quantity, health: stockHealth(item.quantity + quantity, item.reorderPoint) } : item); demoMovements.unshift({ id:`m-${Date.now()}`, quantity, reason, createdAt:new Date().toISOString(), ingredient:{nombre:ingredient.nombre,unit:ingredient.unit} }); },
@@ -86,6 +88,15 @@ const demoApi = {
         ? { ...v, stocks: v.stocks.some((s) => s.sucursal === sucursal) ? v.stocks.map((s) => s.sucursal === sucursal ? { ...s, quantity } : s) : [...v.stocks, { sucursal, quantity }] }
         : v),
     }));
+  },
+  branchSettings: async () => demoBranchSettings,
+  updateBranchSettings: async (sucursal, payload) => {
+    demoBranchSettings = demoBranchSettings.map((r) => r.sucursal === sucursal ? { ...r, ...payload } : r);
+    return demoBranchSettings.find((r) => r.sucursal === sucursal);
+  },
+  passwordResetRequests: async () => demoResetRequests,
+  resolvePasswordReset: async (id) => {
+    demoResetRequests = demoResetRequests.map((r) => r.id === id ? { ...r, estado: 'atendida' } : r);
   },
 };
 

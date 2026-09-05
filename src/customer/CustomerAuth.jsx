@@ -6,6 +6,15 @@ import './customer.css';
 
 export const CUSTOMER_TOKEN_KEY = 'bc_customer_token';
 
+// Sin correo saliente configurado: el restablecimiento real de contraseña
+// lo hace el admin a mano desde Configuración, y el seguimiento pasa por
+// WhatsApp — por eso el mensaje de éxito manda a estos números en vez de
+// prometer un correo que nunca llegará. Mismos números que whatsappService.js.
+const SUCURSAL_WHATSAPP = [
+  { label: 'Xico', numero: '522283544463' },
+  { label: 'Coatepec', numero: '522284032836' },
+];
+
 export default function CustomerAuth({ mode = 'login', api = defaultApi, storage = window.localStorage }) {
   const navigate = useNavigate();
   const isRegister = mode === 'register';
@@ -16,6 +25,9 @@ export default function CustomerAuth({ mode = 'login', api = defaultApi, storage
   const [form, setForm] = useState({ nombre: '', email: '', password: '', telefono: '', direccion: '', fechaNacimiento: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgot, setForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
 
   const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
 
@@ -36,6 +48,58 @@ export default function CustomerAuth({ mode = 'login', api = defaultApi, storage
       setLoading(false);
     }
   };
+
+  const submitForgot = async (event) => {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await api.solicitarRestablecimiento({ email: forgotEmail });
+      setForgotSent(true);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (forgot) {
+    return (
+      <main className="customer-page">
+        <section className="customer-card customer-auth-card">
+          <span className="customer-kicker">Benditas Club</span>
+          <h1>Recuperar contraseña</h1>
+          {forgotSent ? (
+            <>
+              <p>Tu solicitud ya se envió al administrador. Para darle seguimiento, comunícate por WhatsApp con tu sucursal más cercana:</p>
+              <div className="customer-form" style={{ gap: 8 }}>
+                {SUCURSAL_WHATSAPP.map((s) => (
+                  <a key={s.numero} className="customer-secondary-link" href={`https://wa.me/${s.numero}`} target="_blank" rel="noreferrer">
+                    WhatsApp {s.label}
+                  </a>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <p>Escribe el correo de tu cuenta — le avisaremos al administrador para que te ayude a recuperarla.</p>
+              {error ? <div className="customer-alert">{error}</div> : null}
+              <form className="customer-form" onSubmit={submitForgot}>
+                <label>
+                  Correo
+                  <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} autoComplete="email" required />
+                </label>
+                <button className="customer-primary" disabled={loading}>{loading ? 'Enviando...' : 'Enviar solicitud'}</button>
+              </form>
+            </>
+          )}
+          <button type="button" className="customer-secondary-link" onClick={() => { setForgot(false); setForgotSent(false); setError(''); }}>
+            Volver a entrar
+          </button>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="customer-page">
@@ -81,6 +145,12 @@ export default function CustomerAuth({ mode = 'login', api = defaultApi, storage
           ) : null}
           <button className="customer-primary" disabled={loading}>{loading ? 'Entrando...' : isRegister ? 'Crear cuenta' : 'Entrar'}</button>
         </form>
+
+        {!isRegister && (
+          <button type="button" className="customer-secondary-link" onClick={() => setForgot(true)}>
+            ¿Olvidaste tu contraseña?
+          </button>
+        )}
 
         <Link className="customer-secondary-link" to={isRegister ? '/login' : '/registro'}>
           {isRegister ? 'Ya tengo cuenta' : 'Crear cuenta nueva'}

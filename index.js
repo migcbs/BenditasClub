@@ -196,6 +196,32 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   }
 });
 
+// Sin correo saliente: registra la solicitud para que el admin la vea en
+// Configuración y restablezca la contraseña a mano — el seguimiento real
+// pasa por WhatsApp (ver mensaje que se le muestra al cliente al enviar).
+// No revela si el correo existe o no: siempre responde success para no
+// filtrar qué correos están registrados.
+app.post('/api/auth/solicitar-restablecimiento', authLimiter, async (req, res) => {
+  try {
+    const { email, nombre, telefono } = req.body;
+    if (!email) return res.status(400).json({ error: 'El correo es obligatorio' });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    await prisma.passwordResetRequest.create({
+      data: {
+        email: normalizedEmail,
+        nombre: nombre?.trim() || null,
+        telefono: telefono?.trim() || null,
+        customerId: user?.role === 'cliente' ? user.id : null,
+      },
+    });
+    res.status(201).json({ success: true });
+  } catch (e) {
+    console.error('❌ Error solicitando restablecimiento:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 app.post('/api/auth/staff-login', authLimiter, async (req, res) => {
   try {
     const { sucursal, pin } = req.body;
