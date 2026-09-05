@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { CUSTOMER_TOKEN_KEY } from '../customer/CustomerAuth';
 import './WelcomePromoPopup.css';
 
+// sessionStorage (no localStorage): el usuario pidió que reaparezca en
+// cada visita nueva, no solo una vez para siempre en el dispositivo —
+// sessionStorage se limpia al cerrar la pestaña/navegador, así que una
+// visita nueva de verdad vuelve a mostrarlo, pero no en cada clic interno
+// dentro de la misma sesión de navegación.
 const DISMISS_KEY = 'bc_promo_popup_visto';
 
 // Campaña temporal: 1.5 meses desde que se publicó. Para extenderla o
@@ -17,21 +22,21 @@ const WelcomePromoPopup = () => {
 
   useEffect(() => {
     const yaRegistrado = window.localStorage.getItem(CUSTOMER_TOKEN_KEY);
-    const yaLoVio = window.localStorage.getItem(DISMISS_KEY);
+    const yaLoVioEstaVisita = window.sessionStorage.getItem(DISMISS_KEY);
     const expirada = Date.now() > PROMO_EXPIRA.getTime();
-    if (yaRegistrado || yaLoVio || expirada) return;
+    if (yaRegistrado || yaLoVioEstaVisita || expirada) return;
 
     const timer = setTimeout(() => setVisible(true), 900);
     return () => clearTimeout(timer);
   }, []);
 
   const cerrar = () => {
-    window.localStorage.setItem(DISMISS_KEY, '1');
+    window.sessionStorage.setItem(DISMISS_KEY, '1');
     setVisible(false);
   };
 
   const registrarse = () => {
-    window.localStorage.setItem(DISMISS_KEY, '1');
+    window.sessionStorage.setItem(DISMISS_KEY, '1');
     setVisible(false);
     navigate('/registro');
   };

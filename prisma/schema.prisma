@@ -249,21 +249,36 @@ model BranchSettings {
   updatedAt   DateTime       @updatedAt
 }
 
-// Tarifa de envío por radio de distancia, aproximada por código postal —
-// sin geocodificación real (nada de coordenadas ni de API de mapas de
-// paga): el admin conoce sus colonias y les asigna una tarifa fija. Un CP
-// sin fila aquí usa BranchSettings.envioMinimo como estimado.
+// Tarifa de envío por radio de distancia real — el código postal del
+// cliente se geocodifica (Nominatim/OpenStreetMap, gratis, ver
+// server/geocoding.js) y se compara contra las coordenadas fijas de cada
+// sucursal (Haversine). Cada fila es un tramo: "hasta X km cuesta $Y".
+// Un CP que no se pudo geocodificar, o que no cae en ningún tramo
+// definido (más lejos que el tramo más grande), usa
+// BranchSettings.envioMinimo / el tramo más caro como respaldo — ver
+// calcularCostoEnvio() en server/delivery.js.
 model DeliveryZone {
-  id           String         @id @default(uuid())
-  sucursal     SucursalNombre
-  codigoPostal String
-  costoEnvio   Int
-  etiqueta     String?
-  activo       Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id             String         @id @default(uuid())
+  sucursal       SucursalNombre
+  distanciaMaxKm Float
+  costoEnvio     Int
+  etiqueta       String?
+  activo         Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
-  @@unique([sucursal, codigoPostal])
+  @@unique([sucursal, distanciaMaxKm])
+}
+
+// Cache permanente de geocodificación por CP — Nominatim pide no repetir
+// la misma consulta (política de uso: 1 request/seg, cachear resultados),
+// y un código postal nunca cambia de coordenadas, así que cachear para
+// siempre es correcto, no solo una optimización.
+model PostalCodeGeo {
+  codigoPostal String   @id
+  lat          Float
+  lon          Float
+  cachedAt     DateTime @default(now())
 }
 
 // Sin correo saliente configurado: el cliente pide el restablecimiento

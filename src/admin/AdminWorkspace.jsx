@@ -574,7 +574,7 @@ function BranchSettings({ api, token }) {
 
   const [zonas, setZonas] = useState(null);
   const [zonaDialog, setZonaDialog] = useState(false);
-  const [zonaForm, setZonaForm] = useState({ sucursal: 'xico', codigoPostal: '', costoEnvio: '', etiqueta: '' });
+  const [zonaForm, setZonaForm] = useState({ sucursal: 'xico', distanciaMaxKm: '', costoEnvio: '', etiqueta: '' });
   const [zonaError, setZonaError] = useState('');
   const [zonaSaving, setZonaSaving] = useState(false);
 
@@ -598,11 +598,11 @@ function BranchSettings({ api, token }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { cargarZonas(); }, [api, token]);
 
-  const abrirZonaDialog = () => { setZonaForm({ sucursal: 'xico', codigoPostal: '', costoEnvio: '', etiqueta: '' }); setZonaError(''); setZonaDialog(true); };
+  const abrirZonaDialog = () => { setZonaForm({ sucursal: 'xico', distanciaMaxKm: '', costoEnvio: '', etiqueta: '' }); setZonaError(''); setZonaDialog(true); };
 
   const guardarZona = async () => {
-    if (!/^\d{4,5}$/.test(zonaForm.codigoPostal.trim()) || zonaForm.costoEnvio === '' || Number(zonaForm.costoEnvio) < 0) {
-      return setZonaError('Código postal y costo de envío válidos son obligatorios.');
+    if (!(Number(zonaForm.distanciaMaxKm) > 0) || zonaForm.costoEnvio === '' || Number(zonaForm.costoEnvio) < 0) {
+      return setZonaError('La distancia y el costo de envío deben ser números válidos.');
     }
     setZonaSaving(true);
     setZonaError('');
@@ -758,14 +758,17 @@ function BranchSettings({ api, token }) {
 
       <div className="admin-data-panel">
         <div className="admin-data-heading">
-          <h2>Zonas de entrega</h2>
-          <Button size="small" startIcon={<Plus size={16} />} onClick={abrirZonaDialog}>Agregar zona</Button>
+          <h2>Zonas de entrega por distancia</h2>
+          <Button size="small" startIcon={<Plus size={16} />} onClick={abrirZonaDialog}>Agregar tramo</Button>
         </div>
+        <p style={{ margin: '0 0 8px', padding: '0 18px', fontSize: 13, color: '#6e5c66' }}>
+          El código postal del cliente se ubica automáticamente (OpenStreetMap) y se compara contra la sucursal para calcular la distancia — cada tramo es "hasta X km cuesta $Y".
+        </p>
         {zonaError ? <Alert severity="error" onClose={() => setZonaError('')} sx={{ m: 2 }}>{zonaError}</Alert> : null}
         {!zonas ? <Loading /> : zonas.length ? zonas.map((zona) => (
           <div className="admin-list-row" key={zona.id}>
             <span>
-              <b>CP {zona.codigoPostal} · {SUCURSAL_LABEL[zona.sucursal]}</b>
+              <b>Hasta {zona.distanciaMaxKm} km · {SUCURSAL_LABEL[zona.sucursal]}</b>
               <small>{zona.etiqueta || 'Sin nombre de zona'}{!zona.activo ? ' · inactiva' : ''}</small>
             </span>
             <div className="admin-row-actions">
@@ -773,11 +776,11 @@ function BranchSettings({ api, token }) {
               <Button size="small" color="error" onClick={() => eliminarZona(zona)}>Quitar</Button>
             </div>
           </div>
-        )) : <Empty>Sin zonas configuradas — los pedidos a domicilio usarán el envío mínimo de cada sucursal.</Empty>}
+        )) : <Empty>Sin tramos configurados — todo pedido a domicilio usará el envío mínimo de cada sucursal.</Empty>}
       </div>
 
       <Dialog open={zonaDialog} onClose={() => !zonaSaving && setZonaDialog(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Nueva zona de entrega</DialogTitle>
+        <DialogTitle>Nuevo tramo de entrega</DialogTitle>
         <DialogContent className="admin-form-grid">
           {zonaError ? <Alert severity="error" sx={{ gridColumn: '1/-1' }}>{zonaError}</Alert> : null}
           <TextField select label="Sucursal" value={zonaForm.sucursal} onChange={(e) => setZonaForm({ ...zonaForm, sucursal: e.target.value })}>
@@ -785,10 +788,12 @@ function BranchSettings({ api, token }) {
             <MenuItem value="coatepec">Coatepec</MenuItem>
           </TextField>
           <TextField
-            label="Código postal"
-            value={zonaForm.codigoPostal}
-            onChange={(e) => setZonaForm({ ...zonaForm, codigoPostal: e.target.value })}
-            slotProps={{ htmlInput: { maxLength: 5, inputMode: 'numeric' } }}
+            label="Hasta cuántos km"
+            type="number"
+            helperText="Ej. 3 — cubre desde el tramo anterior hasta 3 km de la sucursal"
+            value={zonaForm.distanciaMaxKm}
+            onChange={(e) => setZonaForm({ ...zonaForm, distanciaMaxKm: e.target.value })}
+            slotProps={{ htmlInput: { min: 0, step: 0.5 } }}
           />
           <TextField
             label="Costo de envío"
@@ -806,7 +811,7 @@ function BranchSettings({ api, token }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setZonaDialog(false)} disabled={zonaSaving}>Cancelar</Button>
-          <Button variant="contained" onClick={guardarZona} disabled={zonaSaving}>{zonaSaving ? 'Guardando...' : 'Guardar zona'}</Button>
+          <Button variant="contained" onClick={guardarZona} disabled={zonaSaving}>{zonaSaving ? 'Guardando...' : 'Guardar tramo'}</Button>
         </DialogActions>
       </Dialog>
     </section>

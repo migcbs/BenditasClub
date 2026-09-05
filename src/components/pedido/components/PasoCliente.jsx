@@ -50,6 +50,7 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, direcciones = [
           if (!vivo) return;
           handleChange({ target: { name: "costoEnvio", value: resultado.costoEnvio } });
           handleChange({ target: { name: "envioExacto", value: resultado.exacto } });
+          handleChange({ target: { name: "distanciaKm", value: resultado.distanciaKm } });
         })
         .catch(() => { if (vivo) setEnvioError("No se pudo estimar el envío — se confirma por WhatsApp."); })
         .finally(() => { if (vivo) setBuscandoEnvio(false); });
@@ -232,7 +233,8 @@ const PasoCliente = ({ cliente = {}, errores = {}, handleChange, direcciones = [
               {buscandoEnvio ? "Calculando envío..." : envioError ? envioError : (
                 <>
                   🛵 Envío {cliente.envioExacto ? "" : "estimado "}: <strong>{formatearMoneda(cliente.costoEnvio || 0)}</strong>
-                  {!cliente.envioExacto && " (se confirma al recibir tu pedido)"}
+                  {cliente.distanciaKm != null && ` (${cliente.distanciaKm} km)`}
+                  {!cliente.envioExacto && " — se confirma al recibir tu pedido"}
                 </>
               )}
             </p>
