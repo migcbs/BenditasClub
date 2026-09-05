@@ -119,9 +119,9 @@ const PosApp = () => {
                           </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <Typography sx={{ fontWeight: 700, mr: 1 }}>${item.precio * item.cantidad}</Typography>
-                            <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad - 1)}><Minus size={14} /></IconButton>
-                            <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad + 1)}><Plus size={14} /></IconButton>
-                            <IconButton size="small" onClick={() => carrito.quitarItem(item.key)}><X size={14} /></IconButton>
+                            <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad - 1)} aria-label={`Quitar una unidad de ${item.nombre}`}><Minus size={14} /></IconButton>
+                            <IconButton size="small" onClick={() => carrito.actualizarCantidad(item.key, item.cantidad + 1)} aria-label={`Agregar una unidad de ${item.nombre}`}><Plus size={14} /></IconButton>
+                            <IconButton size="small" onClick={() => carrito.quitarItem(item.key)} aria-label={`Quitar ${item.nombre} del pedido`}><X size={14} /></IconButton>
                           </Box>
                         </Card>
                       </motion.div>

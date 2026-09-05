@@ -294,12 +294,19 @@ function Operation({ dashboard, api, token }) {
       <div className="admin-data-panel">
         <div className="admin-data-heading"><h2>Pedidos recientes</h2><span>{dashboard.recentOrders.length}</span></div>
         {dashboard.recentOrders.length ? dashboard.recentOrders.map((order) => (
-          <div className="admin-list-row admin-list-row--clickable" key={order.id} onClick={() => setOrderDetail(order)}>
+          <div
+            className="admin-list-row admin-list-row--clickable"
+            key={order.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => setOrderDetail(order)}
+            onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setOrderDetail(order); } }}
+          >
             <span><b>#{order.id.slice(0,6).toUpperCase()} · {order.clienteNombre || order.tipo}</b><small>{order.estadoCocina} · {order.sucursal}</small></span>
             <div className="admin-row-actions">
               <b>{money.format(order.total)}</b>
               {order.estado !== 'cancelado' && (
-                <Button size="small" color="error" disabled={busy === order.id} onClick={(event) => { event.stopPropagation(); eliminarDirecto(order); }}><Trash2 size={16} /></Button>
+                <Button size="small" color="error" disabled={busy === order.id} onClick={(event) => { event.stopPropagation(); eliminarDirecto(order); }} aria-label={`Eliminar venta #${order.id.slice(0, 6).toUpperCase()}`}><Trash2 size={16} /></Button>
               )}
             </div>
           </div>
@@ -330,15 +337,16 @@ function Operation({ dashboard, api, token }) {
       {orderDetail && <>
         <DialogTitle>Pedido #{orderDetail.id.slice(0, 6).toUpperCase()}</DialogTitle>
         <DialogContent>
-          <p style={{ margin: '0 0 12px', fontSize: 14, lineHeight: 1.8 }}>
-            {TIPO_LABEL_OP[orderDetail.tipo] || orderDetail.tipo}{orderDetail.mesa ? ` · Mesa ${orderDetail.mesa}` : ''}<br/>
-            Cliente: {orderDetail.clienteNombre || 'Público en general'}{orderDetail.clienteTelefono ? ` · ${orderDetail.clienteTelefono}` : ''}<br/>
-            {orderDetail.direccion ? <>Dirección: {orderDetail.direccion}<br/></> : null}
-            Sucursal: {SUCURSAL_LABEL[orderDetail.sucursal] || orderDetail.sucursal} · Atendió: {orderDetail.empleado?.nombre || '—'}<br/>
-            Estado: {orderDetail.estado} · Cocina: {orderDetail.estadoCocina}<br/>
-            Método de pago: {orderDetail.metodoPago || 'Pendiente'}<br/>
-            Creado: {fechaHora(orderDetail.createdAt)}
-          </p>
+          <dl className="admin-detail-grid">
+            <dt>Tipo</dt><dd>{TIPO_LABEL_OP[orderDetail.tipo] || orderDetail.tipo}{orderDetail.mesa ? ` · Mesa ${orderDetail.mesa}` : ''}</dd>
+            <dt>Cliente</dt><dd>{orderDetail.clienteNombre || 'Público en general'}{orderDetail.clienteTelefono ? ` · ${orderDetail.clienteTelefono}` : ''}</dd>
+            {orderDetail.direccion && <><dt>Dirección</dt><dd>{orderDetail.direccion}</dd></>}
+            <dt>Sucursal</dt><dd>{SUCURSAL_LABEL[orderDetail.sucursal] || orderDetail.sucursal}</dd>
+            <dt>Atendió</dt><dd>{orderDetail.empleado?.nombre || '—'}</dd>
+            <dt>Estado</dt><dd>{orderDetail.estado} · Cocina: {orderDetail.estadoCocina}</dd>
+            <dt>Pago</dt><dd>{orderDetail.metodoPago || 'Pendiente'}</dd>
+            <dt>Creado</dt><dd>{fechaHora(orderDetail.createdAt)}</dd>
+          </dl>
           <div className="admin-data-heading" style={{ padding: '8px 0' }}><h2>Productos</h2><span>{orderDetail.items.length}</span></div>
           {orderDetail.items.map((item) => (
             <div className="admin-list-row" key={item.id}>
@@ -472,16 +480,16 @@ function Finance({ api, token, branch, dashboard }) {
             <article><ArrowUpRight/><span><b>{money.format(totalEntradas)}</b><small>Entradas</small></span></article>
             <article><ArrowDownRight/><span><b>{money.format(totalSalidas)}</b><small>Salidas</small></span></article>
           </div>
-          <p style={{ margin: '0 0 6px', fontSize: 13, color: '#6e5c66' }}>
-            Abierta: {fechaHora(shiftDetail.openedAt)}
-            {shiftDetail.closedAt ? <><br/>Cerrada: {fechaHora(shiftDetail.closedAt)}</> : null}
-          </p>
-          {shiftDetail.status === 'closed' && (
-            <p style={{ margin: '0 0 12px', fontSize: 13 }}>
-              Esperado: <b>{money.format(Number(shiftDetail.expectedAmount))}</b> · Contado: <b>{money.format(Number(shiftDetail.countedAmount))}</b> · Diferencia: <b className={Number(shiftDetail.difference) < 0 ? 'stock-critical' : 'stock-healthy'}>{money.format(Number(shiftDetail.difference))}</b>
-              {shiftDetail.notes ? <><br/><i>{shiftDetail.notes}</i></> : null}
-            </p>
-          )}
+          <dl className="admin-detail-grid">
+            <dt>Abierta</dt><dd>{fechaHora(shiftDetail.openedAt)}</dd>
+            {shiftDetail.closedAt && <><dt>Cerrada</dt><dd>{fechaHora(shiftDetail.closedAt)}</dd></>}
+            {shiftDetail.status === 'closed' && <>
+              <dt>Esperado</dt><dd>{money.format(Number(shiftDetail.expectedAmount))}</dd>
+              <dt>Contado</dt><dd>{money.format(Number(shiftDetail.countedAmount))}</dd>
+              <dt>Diferencia</dt><dd className={Number(shiftDetail.difference) < 0 ? 'stock-critical' : 'stock-healthy'}>{money.format(Number(shiftDetail.difference))}</dd>
+              {shiftDetail.notes && <><dt>Notas</dt><dd>{shiftDetail.notes}</dd></>}
+            </>}
+          </dl>
           <div className="admin-data-heading" style={{ padding: '8px 0' }}><h2>Movimientos</h2><span>{shiftDetail.movements.length}</span></div>
           {shiftDetail.movements.length ? shiftDetail.movements.map((movement) => (
             <div className="admin-list-row" key={movement.id}>
@@ -545,14 +553,14 @@ function Finance({ api, token, branch, dashboard }) {
       {expenseDetail && <>
         <DialogTitle>{expenseDetail.concept}</DialogTitle>
         <DialogContent>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.8 }}>
-            Monto: <b>{money.format(Number(expenseDetail.amount))}</b><br/>
-            Categoría: {expenseDetail.category}<br/>
-            Método de pago: {expenseDetail.paymentMethod}<br/>
-            Sucursal: {SUCURSAL_LABEL[expenseDetail.sucursal] || expenseDetail.sucursal}<br/>
-            Fecha: {fechaHora(expenseDetail.occurredAt)}<br/>
-            {expenseDetail.receiptRef ? <>Comprobante: {expenseDetail.receiptRef}<br/></> : null}
-          </p>
+          <dl className="admin-detail-grid">
+            <dt>Monto</dt><dd>{money.format(Number(expenseDetail.amount))}</dd>
+            <dt>Categoría</dt><dd>{expenseDetail.category}</dd>
+            <dt>Pago</dt><dd>{expenseDetail.paymentMethod}</dd>
+            <dt>Sucursal</dt><dd>{SUCURSAL_LABEL[expenseDetail.sucursal] || expenseDetail.sucursal}</dd>
+            <dt>Fecha</dt><dd>{fechaHora(expenseDetail.occurredAt)}</dd>
+            {expenseDetail.receiptRef && <><dt>Comprobante</dt><dd>{expenseDetail.receiptRef}</dd></>}
+          </dl>
         </DialogContent>
         <DialogActions><Button onClick={() => setExpenseDetail(null)}>Cerrar</Button></DialogActions>
       </>}
@@ -1436,13 +1444,13 @@ function Customers({ api, token }) {
             <DialogContent>
               {detail.loading ? <Loading /> : detailError ? <Alert severity="error">{detailError}</Alert> : (
                 <>
-                  <p style={{ margin: '0 0 12px', fontSize: 14, lineHeight: 1.8 }}>
-                    Correo: {detail.email}<br />
-                    Teléfono: {detail.telefono || '—'}<br />
-                    Fecha de nacimiento: {detail.fechaNacimiento ? new Date(detail.fechaNacimiento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '—'}<br />
-                    Registrado: {fechaHora(detail.createdAt)}<br />
-                    Estado: {detail.activo ? 'Activo' : 'Inactivo'}
-                  </p>
+                  <dl className="admin-detail-grid">
+                    <dt>Correo</dt><dd>{detail.email}</dd>
+                    <dt>Teléfono</dt><dd>{detail.telefono || '—'}</dd>
+                    <dt>Nacimiento</dt><dd>{detail.fechaNacimiento ? new Date(detail.fechaNacimiento).toLocaleDateString('es-MX', { timeZone: 'UTC' }) : '—'}</dd>
+                    <dt>Registrado</dt><dd>{fechaHora(detail.createdAt)}</dd>
+                    <dt>Estado</dt><dd>{detail.activo ? 'Activo' : 'Inactivo'}</dd>
+                  </dl>
                   <div className="admin-module-stats" style={{ marginBottom: 16 }}>
                     <article><PackageCheck /><span><b>{detail.totalPedidosPagados}</b><small>Pedidos pagados</small></span></article>
                     <article><CircleDollarSign /><span><b>{money.format(detail.totalGastado)}</b><small>Total gastado</small></span></article>
