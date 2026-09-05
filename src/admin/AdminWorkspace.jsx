@@ -376,7 +376,8 @@ function Team({ api, token }) {
   const [staff, setStaff] = useState(EMPTY_STAFF);
 
   const load = () => api.users(token).then(setUsers).catch((requestError) => setError(requestError.message));
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [api, token]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [api, token]);
 
   const openStaff = (user) => {
     if (user) { setEditId(user.id); setStaff({ nombre: user.nombre, role: user.role, sucursal: user.sucursal, pin: '' }); }
