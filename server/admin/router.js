@@ -402,21 +402,21 @@ router.put('/branch-settings/:sucursal', async (req, res) => {
 
 router.get('/delivery-zones', async (req, res) => {
   const where = req.query.branch && req.query.branch !== 'all' ? { sucursal: req.query.branch } : {};
-  res.json(await prisma.deliveryZone.findMany({ where, orderBy: [{ sucursal: 'asc' }, { codigoPostal: 'asc' }] }));
+  res.json(await prisma.deliveryZone.findMany({ where, orderBy: [{ sucursal: 'asc' }, { distanciaMaxKm: 'asc' }] }));
 });
 
 router.post('/delivery-zones', async (req, res) => {
-  const { sucursal, codigoPostal, costoEnvio, etiqueta } = req.body;
-  if (!['xico', 'coatepec'].includes(sucursal) || !codigoPostal?.trim() || Number(costoEnvio) < 0 || Number.isNaN(Number(costoEnvio))) {
-    return res.status(400).json({ error: 'Sucursal, código postal y costo de envío válidos son obligatorios' });
+  const { sucursal, distanciaMaxKm, costoEnvio, etiqueta } = req.body;
+  if (!['xico', 'coatepec'].includes(sucursal) || !(Number(distanciaMaxKm) > 0) || Number(costoEnvio) < 0 || Number.isNaN(Number(costoEnvio))) {
+    return res.status(400).json({ error: 'Sucursal, distancia y costo de envío válidos son obligatorios' });
   }
   try {
     const zona = await prisma.deliveryZone.create({
-      data: { sucursal, codigoPostal: codigoPostal.trim(), costoEnvio: Number(costoEnvio), etiqueta: etiqueta?.trim() || null },
+      data: { sucursal, distanciaMaxKm: Number(distanciaMaxKm), costoEnvio: Number(costoEnvio), etiqueta: etiqueta?.trim() || null },
     });
     res.status(201).json(zona);
   } catch (error) {
-    if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe una zona para ese código postal en esa sucursal' });
+    if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe un tramo con esa distancia exacta en esa sucursal' });
     throw error;
   }
 });
