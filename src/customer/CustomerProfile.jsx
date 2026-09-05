@@ -7,6 +7,7 @@ import './customer.css';
 
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 
+const PASOS_COCINA = ['nueva', 'en_preparacion', 'lista', 'entregada'];
 const kitchenLabel = {
   nueva: 'Recibido',
   en_preparacion: 'En cocina',
@@ -23,6 +24,14 @@ const orderStatusLabel = (order) => {
   return kitchenLabel[order.estadoCocina] || order.estadoCocina;
 };
 
+// Índice del paso actual en PASOS_COCINA para pintar la barra de
+// seguimiento — -1 si aún ni siquiera lo aceptan (nada se enciende).
+const pasoActualIndex = (order) => {
+  if (order.estado === 'cancelado') return -1;
+  if (order.origen === 'online' && !order.recibidoEn) return -1;
+  return PASOS_COCINA.indexOf(order.estadoCocina);
+};
+
 export default function CustomerProfile({ api = defaultApi, storage = window.localStorage }) {
   useDocumentMeta({ title: 'Mi cuenta | Benditas Club', noindex: true });
   const navigate = useNavigate();
@@ -30,6 +39,7 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loyalty, setLoyalty] = useState(null);
+  const [canjeandoPuntos, setCanjeandoPuntos] = useState(false);
   const [form, setForm] = useState({ nombre: '', telefono: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -112,6 +122,36 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
       await cargarDirecciones();
     } catch (requestError) {
       setError(requestError.message);
+    }
+  };
+
+  const [reclamandoCumple, setReclamandoCumple] = useState(false);
+
+  const reclamarCumpleanos = async () => {
+    setReclamandoCumple(true);
+    setError('');
+    try {
+      await api.reclamarCumpleanos(token);
+      const actualizado = await api.loyalty(token);
+      setLoyalty(actualizado);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setReclamandoCumple(false);
+    }
+  };
+
+  const canjearPuntos = async (productId) => {
+    setCanjeandoPuntos(true);
+    setError('');
+    try {
+      await api.canjearPuntos(productId, token);
+      const actualizado = await api.loyalty(token);
+      setLoyalty(actualizado);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setCanjeandoPuntos(false);
     }
   };
 
@@ -258,6 +298,81 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
             <small>Cargando tu tarjeta...</small>
           )}
         </article>
+
+        <article className="customer-card">
+          <h2>Mis puntos</h2>
+          {loyalty ? (
+            <>
+              <p>Ganas el 2% del total de cada pedido pagado. Llevas <b>{loyalty.puntos.toFixed(2)}</b> puntos.</p>
+
+              {loyalty.pointsRedemptions?.some((r) => !r.redeemed) && (
+                <div className="customer-reward-ready">
+                  <p><b>¡Ya tienes un canje listo!</b> {loyalty.pointsRedemptions.find((r) => !r.redeemed).product?.nombre}</p>
+                  <div className="customer-reward-code">{loyalty.pointsRedemptions.find((r) => !r.redeemed).code}</div>
+                  <small>Muestra este código en sucursal para recogerlo.</small>
+                </div>
+              )}
+
+              {loyalty.productosCanjeables?.length ? (
+                <div className="customer-points-catalog">
+                  {loyalty.productosCanjeables.map((p) => {
+                    const alcanza = loyalty.puntos >= p.costoPuntos;
+                    return (
+                      <div key={p.id} className="customer-points-item">
+                        <span>{p.nombre}<small>{p.costoPuntos} puntos</small></span>
+                        <button
+                          type="button"
+                          className="customer-ghost"
+                          disabled={!alcanza || canjeandoPuntos}
+                          onClick={() => canjearPuntos(p.id)}
+                        >
+                          Canjear
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : <small>Todavía no hay productos configurados para canje con puntos.</small>}
+
+              {loyalty.pointsRedemptions?.some((r) => r.redeemed) && (
+                <details className="customer-reward-history">
+                  <summary>Puntos canjeados ({loyalty.pointsRedemptions.filter((r) => r.redeemed).length})</summary>
+                  {loyalty.pointsRedemptions.filter((r) => r.redeemed).map((r) => (
+                    <p key={r.id}>{r.product?.nombre} · {Number(r.puntos).toFixed(2)} puntos · {new Date(r.redeemedAt).toLocaleDateString('es-MX')}</p>
+                  ))}
+                </details>
+              )}
+            </>
+          ) : <small>Cargando tus puntos...</small>}
+        </article>
+
+        {loyalty?.activeBirthdayReward && (() => {
+          const hoy = new Date();
+          const nacimiento = loyalty.fechaNacimiento ? new Date(loyalty.fechaNacimiento) : null;
+          const esHoy = nacimiento && hoy.getUTCMonth() === nacimiento.getUTCMonth() && hoy.getUTCDate() === nacimiento.getUTCDate();
+          const yaReclamado = loyalty.birthdayRedemptions?.some((r) => r.year === hoy.getUTCFullYear());
+          const pendiente = loyalty.birthdayRedemptions?.find((r) => r.year === hoy.getUTCFullYear() && !r.redeemed);
+          if (!esHoy && !pendiente) return null;
+          return (
+            <article className="customer-card">
+              <h2>🎂 Cumpleaños</h2>
+              {pendiente ? (
+                <div className="customer-reward-ready">
+                  <p><b>¡Feliz cumpleaños!</b> {rewardDescription(pendiente.reward)}</p>
+                  <div className="customer-reward-code">{pendiente.code}</div>
+                  <small>Muestra este código en sucursal.</small>
+                </div>
+              ) : esHoy && !yaReclamado ? (
+                <>
+                  <p>¡Hoy es tu cumpleaños! Tienes un regalo esperándote: <b>{rewardDescription(loyalty.activeBirthdayReward)}</b></p>
+                  <button type="button" className="customer-primary" disabled={reclamandoCumple} onClick={reclamarCumpleanos}>
+                    {reclamandoCumple ? 'Reclamando...' : 'Reclamar mi regalo'}
+                  </button>
+                </>
+              ) : null}
+            </article>
+          );
+        })()}
       </section>
 
       <section className="customer-card">
@@ -272,6 +387,16 @@ export default function CustomerProfile({ api = defaultApi, storage = window.loc
               <small>{new Date(order.createdAt).toLocaleString('es-MX')} · {order.sucursal} · {order.tipo}</small>
               {order.estado === 'cancelado' && order.motivoRechazo && (
                 <small className="customer-order-reason">Motivo: {order.motivoRechazo}</small>
+              )}
+              {order.estado !== 'cancelado' && (
+                <div className="customer-order-tracker">
+                  {PASOS_COCINA.map((paso, i) => (
+                    <div key={paso} className={`tracker-paso ${i <= pasoActualIndex(order) ? 'is-activo' : ''}`}>
+                      <span className="tracker-punto" />
+                      <small>{kitchenLabel[paso]}</small>
+                    </div>
+                  ))}
+                </div>
               )}
             </span>
             <strong>{money.format(order.total)}</strong>

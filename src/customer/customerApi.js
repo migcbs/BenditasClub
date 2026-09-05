@@ -35,6 +35,12 @@ export const customerApi = {
     body: JSON.stringify(payload),
   }).then(handle),
   loyalty: (token) => fetch(`${API_BASE}/api/customer/loyalty`, { headers: auth(token) }).then(handle),
+  canjearPuntos: (productId, token) => fetch(`${API_BASE}/api/customer/points/canjear`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...auth(token) },
+    body: JSON.stringify({ productId }),
+  }).then(handle),
+  reclamarCumpleanos: (token) => fetch(`${API_BASE}/api/customer/birthday/reclamar`, { method: 'POST', headers: auth(token) }).then(handle),
   addresses: (token) => fetch(`${API_BASE}/api/customer/addresses`, { headers: auth(token) }).then(handle),
   createAddress: (payload, token) => fetch(`${API_BASE}/api/customer/addresses`, {
     method: 'POST',

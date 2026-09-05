@@ -27,14 +27,31 @@
 .customer-profile-hero h1 { font-size:clamp(30px,9vw,48px); }
 .customer-grid { width:min(100%,940px); margin:0 auto; display:grid; grid-template-columns:1fr; gap:16px; }
 .customer-loyalty small { display:block; margin-top:12px; color:#6e5c66; }
-.customer-stamps { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px; }
-.customer-stamps span { aspect-ratio:1; border:2px dashed #f0b9d8; border-radius:50%; background:#fff; }
-.customer-stamps span.is-filled { border-style:solid; border-color:#E765B7; background:radial-gradient(circle at 35% 35%,#fff 0 18%,#E765B7 19% 100%); }
+/* Una sola fila de círculos — se ve bien tanto con 6 (el default) como con
+   cualquier otro número que configure el admin; en pantallas muy angostas
+   se envuelve a 3 por fila en vez de apretarlos. */
+.customer-stamps { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-top:14px; max-width:320px; }
+.customer-stamps span { aspect-ratio:1; border:2px dashed #f0b9d8; border-radius:50%; background:#fff; transition:transform .2s ease; }
+.customer-stamps span.is-filled { border-style:solid; border-color:#E765B7; background:radial-gradient(circle at 35% 35%,#fff 0 18%,#E765B7 19% 100%); box-shadow:0 2px 8px rgba(231,101,183,.35); }
+
+@media (max-width:420px) {
+  .customer-stamps { grid-template-columns:repeat(3,1fr); max-width:220px; }
+}
 .customer-section-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; }
 .customer-order { min-height:68px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:center; padding:12px 0; border-top:1px solid rgba(36,26,32,.09); }
 .customer-order span { min-width:0; display:grid; gap:4px; }
 .customer-order small { overflow:hidden; color:#6e5c66; text-overflow:ellipsis; white-space:nowrap; }
 .customer-order-reason { white-space:normal !important; overflow:visible !important; color:#b3261e !important; }
+
+.customer-order-tracker { display:flex; align-items:flex-start; gap:2px; margin-top:8px; }
+.tracker-paso { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; }
+.tracker-paso::before { content:''; position:absolute; top:5px; left:-50%; width:100%; height:2px; background:#f0d9e6; z-index:0; }
+.tracker-paso:first-child::before { display:none; }
+.tracker-paso.is-activo::before { background:#E765B7; }
+.tracker-punto { position:relative; z-index:1; width:12px; height:12px; border-radius:50%; background:#f0d9e6; border:2px solid #fff8f0; }
+.tracker-paso.is-activo .tracker-punto { background:#E765B7; }
+.tracker-paso small { font-size:10px; color:#6e5c66; text-align:center; line-height:1.2; }
+.tracker-paso.is-activo small { color:#241a20; font-weight:700; }
 .customer-order strong { font-size:18px; }
 .customer-empty { padding:16px 0; }
 .customer-reward-ready { margin-top:16px; padding:16px; border:1px dashed #E765B7; border-radius:14px; background:rgba(231,101,183,.1); }
@@ -44,6 +61,12 @@
 .customer-reward-history { margin-top:14px; color:#6e5c66; font-size:13px; }
 .customer-reward-history summary { cursor:pointer; font-weight:800; color:#241a20; }
 .customer-reward-history p { margin-top:8px; }
+
+.customer-points-catalog { display: grid; gap: 8px; margin-top: 10px; }
+.customer-points-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid rgba(36,26,32,.1); border-radius: 12px; background: #fff; }
+.customer-points-item span { display: flex; flex-direction: column; gap: 2px; font-weight: 700; }
+.customer-points-item small { color: #6e5c66; font-weight: 600; }
+.customer-points-item button:disabled { opacity: .4; cursor: not-allowed; }
 
 .customer-address-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
 .customer-address-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid rgba(36,26,32,.1); border-radius: 12px; background: #fff; }

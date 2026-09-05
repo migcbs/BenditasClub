@@ -12,6 +12,9 @@ const SUCURSALES = [
 
 const digitos = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
+// Mismo isotipo que la pestaña del navegador y la navbar del sitio público.
+const LOGO_ICON = `${process.env.PUBLIC_URL}/logo192.jpg`;
+
 const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
   const [sucursal, setSucursal] = useState('xico');
   const [pin, setPin] = useState('');
@@ -60,6 +63,12 @@ const StaffLogin = ({ onLogin, title = 'BenditasClub POS' }) => {
           elevation={0}
           sx={{ ...glassSx, width: 340, borderRadius: 6, p: 3.5, textAlign: 'center' }}
         >
+          <Box
+            component="img"
+            src={LOGO_ICON}
+            alt=""
+            sx={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 4px 14px rgba(36,26,32,.16)', mb: 1.5 }}
+          />
           <Typography variant="h1" sx={{ fontSize: 22, mb: 2 }}>{title}</Typography>
 
           <TextField

@@ -19,16 +19,22 @@ function generateRedemptionCode() {
 async function awardStampForOrder(tx, order) {
   if (!order.clienteId) return null;
 
+  const activeReward = await tx.loyaltyReward.findFirst({ where: { activo: true } });
+  if (!activeReward) return null;
+
+  // Pedidos por debajo del mínimo configurado no cuentan — ni siquiera se
+  // toca la tarjeta, para no sumar un sello "a medias".
+  if (order.total < activeReward.minOrderAmount) return null;
+
   const card = await tx.loyaltyCard.upsert({
     where: { customerId: order.clienteId },
     create: { customerId: order.clienteId, stamps: 1 },
     update: { stamps: { increment: 1 } },
   });
 
-  const activeReward = await tx.loyaltyReward.findFirst({ where: { activo: true } });
-  const stampsRequired = activeReward?.stampsRequired ?? 6;
+  const stampsRequired = activeReward.stampsRequired;
 
-  if (!activeReward || card.stamps < stampsRequired) {
+  if (card.stamps < stampsRequired) {
     return { card, redemption: null };
   }
 
@@ -41,4 +47,20 @@ async function awardStampForOrder(tx, order) {
   return { card: resetCard, redemption };
 }
 
-module.exports = { awardStampForOrder, generateRedemptionCode };
+const TASA_PUNTOS = 0.02; // 2% de cada pedido pagado, sin importar recompensas/sellos.
+
+// Independiente de awardStampForOrder — los puntos se acumulan siempre que
+// el pedido esté ligado a una cuenta, no dependen de una recompensa activa
+// ni de un mínimo de compra.
+async function awardPointsForOrder(tx, order) {
+  if (!order.clienteId) return null;
+  const puntosGanados = Math.round(order.total * TASA_PUNTOS * 100) / 100;
+  if (puntosGanados <= 0) return null;
+  return tx.loyaltyCard.upsert({
+    where: { customerId: order.clienteId },
+    create: { customerId: order.clienteId, puntos: puntosGanados },
+    update: { puntos: { increment: puntosGanados } },
+  });
+}
+
+module.exports = { awardStampForOrder, awardPointsForOrder, generateRedemptionCode };

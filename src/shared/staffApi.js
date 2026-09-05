@@ -56,9 +56,42 @@ export const updateOrderEstado = (id, estado, metodoPago) =>
     body: JSON.stringify({ estado, metodoPago }),
   }).then(handle);
 
+export const solicitarEliminacion = (id, motivo) =>
+  fetch(`${API_BASE}/api/orders/${id}/solicitar-eliminacion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ motivo }),
+  }).then(handle);
+
 export const updateOrderCocina = (id, estadoCocina) =>
   fetch(`${API_BASE}/api/orders/${id}/cocina`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...authHeader() },
     body: JSON.stringify({ estadoCocina }),
+  }).then(handle);
+
+// Caja — siempre la de la propia sucursal del mesero (el backend la resuelve
+// por su token, no se manda sucursal ni shiftId desde aquí).
+export const getCajaActual = () =>
+  fetch(`${API_BASE}/api/caja/actual`, { headers: authHeader() }).then(handle);
+
+export const abrirCaja = (openingAmount) =>
+  fetch(`${API_BASE}/api/caja/abrir`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ openingAmount }),
+  }).then(handle);
+
+export const registrarMovimientoCaja = (type, amount, concept) =>
+  fetch(`${API_BASE}/api/caja/movimientos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ type, amount, concept }),
+  }).then(handle);
+
+export const cerrarCaja = (countedAmount, notes) =>
+  fetch(`${API_BASE}/api/caja/cerrar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ countedAmount, notes }),
   }).then(handle);

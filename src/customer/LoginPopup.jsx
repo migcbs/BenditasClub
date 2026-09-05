@@ -10,7 +10,7 @@ import './LoginPopup.css';
 // (Navbar solo cierra el popup; localStorage ya quedó actualizado).
 export default function LoginPopup({ onClose, onSuccess, api = defaultApi, storage = window.localStorage }) {
   const [isRegister, setIsRegister] = useState(false);
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', telefono: '', direccion: '' });
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', telefono: '', direccion: '', fechaNacimiento: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -67,10 +67,16 @@ export default function LoginPopup({ onClose, onSuccess, api = defaultApi, stora
             <input type="password" value={form.password} onChange={update('password')} autoComplete={isRegister ? 'new-password' : 'current-password'} minLength={8} required />
           </label>
           {isRegister ? (
-            <label>
-              Dirección (opcional — puedes indicar otra al momento de pedir)
-              <input value={form.direccion} onChange={update('direccion')} autoComplete="street-address" />
-            </label>
+            <>
+              <label>
+                Dirección (opcional — puedes indicar otra al momento de pedir)
+                <input value={form.direccion} onChange={update('direccion')} autoComplete="street-address" />
+              </label>
+              <label>
+                Fecha de nacimiento (opcional — para tu regalo de cumpleaños)
+                <input type="date" value={form.fechaNacimiento} onChange={update('fechaNacimiento')} autoComplete="bday" />
+              </label>
+            </>
           ) : null}
           <button className="customer-primary" disabled={loading}>{loading ? 'Entrando...' : isRegister ? 'Crear cuenta' : 'Entrar'}</button>
         </form>

@@ -19,8 +19,8 @@ const {
 } = require('./server/admin/analytics');
 const adminRouter = require('./server/admin/router');
 const { applyInventoryForOrder } = require('./server/admin/inventory-service');
-const { classifyInventoryHealth } = require('./server/admin/inventory');
-const { awardStampForOrder } = require('./server/loyalty/loyalty-service');
+const { classifyInventoryHealth, calculateExpectedCash } = require('./server/admin/inventory');
+const { awardStampForOrder, awardPointsForOrder, generateRedemptionCode } = require('./server/loyalty/loyalty-service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
@@ -110,7 +110,7 @@ app.get('/api/health', async (req, res) => {
 
 app.post('/api/auth/register', authLimiter, async (req, res) => {
   try {
-    const { nombre, email, password, telefono, direccion } = req.body;
+    const { nombre, email, password, telefono, direccion, fechaNacimiento } = req.body;
     if (!nombre || !email || !password) {
       return res.status(400).json({ error: 'Campos obligatorios: nombre, email, password' });
     }
@@ -122,6 +122,12 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
     const telLimpio = (telefono || '').replace(/\D/g, '');
     if (telLimpio.length !== 10) {
       return res.status(400).json({ error: 'Teléfono a 10 dígitos es obligatorio' });
+    }
+    // Opcional: habilita la promoción de cumpleaños si el admin configura una.
+    let fechaNacimientoParsed = null;
+    if (fechaNacimiento) {
+      fechaNacimientoParsed = new Date(fechaNacimiento);
+      if (Number.isNaN(fechaNacimientoParsed.getTime())) return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
     }
 
     const emailLimpio = email.toLowerCase().trim();
@@ -136,6 +142,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
         password: hashedPassword,
         role: 'cliente',
         telefono: telLimpio,
+        fechaNacimiento: fechaNacimientoParsed,
         // Dirección opcional al registrarse: si la dan, queda como su
         // primera dirección guardada (ver modelo Address) — puede agregar
         // más después desde su perfil.
@@ -238,7 +245,7 @@ app.get('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, nombre: true, email: true, telefono: true, role: true, activo: true, createdAt: true },
+      select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, role: true, activo: true, createdAt: true },
     });
     if (!user || !user.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
     res.json({ user });
@@ -250,12 +257,21 @@ app.get('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res
 
 app.put('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res) => {
   try {
-    const { nombre, telefono } = req.body;
+    const { nombre, telefono, fechaNacimiento } = req.body;
     if (!nombre?.trim()) return res.status(400).json({ error: 'El nombre es obligatorio' });
+    let fechaNacimientoParsed;
+    if (fechaNacimiento !== undefined) {
+      fechaNacimientoParsed = fechaNacimiento ? new Date(fechaNacimiento) : null;
+      if (fechaNacimientoParsed && Number.isNaN(fechaNacimientoParsed.getTime())) return res.status(400).json({ error: 'Fecha de nacimiento inválida' });
+    }
     const user = await prisma.user.update({
       where: { id: req.user.id },
-      data: { nombre: nombre.trim(), telefono: telefono?.trim() || null },
-      select: { id: true, nombre: true, email: true, telefono: true, role: true, activo: true, createdAt: true },
+      data: {
+        nombre: nombre.trim(),
+        telefono: telefono?.trim() || null,
+        ...(fechaNacimiento !== undefined ? { fechaNacimiento: fechaNacimientoParsed } : {}),
+      },
+      select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, role: true, activo: true, createdAt: true },
     });
     res.json({ user });
   } catch (e) {
@@ -611,7 +627,7 @@ app.get('/api/customer/orders', verifyToken, requireRole('cliente'), async (req,
 
 app.get('/api/customer/loyalty', verifyToken, requireRole('cliente'), async (req, res) => {
   try {
-    const [card, activeReward, redemptions] = await Promise.all([
+    const [card, activeReward, redemptions, productosCanjeables, pointsRedemptions, activeBirthdayReward, birthdayRedemptions, me] = await Promise.all([
       prisma.loyaltyCard.findUnique({ where: { customerId: req.user.id } }),
       prisma.loyaltyReward.findFirst({ where: { activo: true }, include: { product: true } }),
       prisma.loyaltyRedemption.findMany({
@@ -620,12 +636,25 @@ app.get('/api/customer/loyalty', verifyToken, requireRole('cliente'), async (req
         orderBy: { createdAt: 'desc' },
         take: 20,
       }),
+      // Sin mínimo genérico: cualquier producto con costoPuntos es
+      // canjeable en cuanto el cliente junte esa cantidad exacta.
+      prisma.product.findMany({ where: { activo: true, costoPuntos: { not: null } }, orderBy: { costoPuntos: 'asc' } }),
+      prisma.pointsRedemption.findMany({ where: { customerId: req.user.id }, include: { product: true }, orderBy: { createdAt: 'desc' }, take: 20 }),
+      prisma.birthdayReward.findFirst({ where: { activo: true }, include: { product: true } }),
+      prisma.birthdayRedemption.findMany({ where: { customerId: req.user.id }, include: { reward: true }, orderBy: { createdAt: 'desc' } }),
+      prisma.user.findUnique({ where: { id: req.user.id }, select: { fechaNacimiento: true } }),
     ]);
     res.json({
       stamps: card?.stamps ?? 0,
       stampsRequired: activeReward?.stampsRequired ?? 6,
       activeReward,
       redemptions,
+      puntos: Number(card?.puntos ?? 0),
+      productosCanjeables,
+      pointsRedemptions,
+      activeBirthdayReward,
+      birthdayRedemptions,
+      fechaNacimiento: me?.fechaNacimiento,
     });
   } catch (e) {
     console.error('❌ Error consultando fidelidad:', e);
@@ -654,9 +683,118 @@ app.post('/api/loyalty/redeem', verifyToken, requireRole('empleado', 'admin'), a
   }
 });
 
+// El cliente reclama el regalo de cumpleaños — solo si hoy es su
+// cumpleaños (mismo día y mes que fechaNacimiento) y no lo ha reclamado ya
+// este mismo año calendario.
+app.post('/api/customer/birthday/reclamar', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user.fechaNacimiento) return res.status(400).json({ error: 'No tienes registrada tu fecha de nacimiento.' });
+
+    const hoy = new Date();
+    const nacimiento = new Date(user.fechaNacimiento);
+    if (hoy.getUTCMonth() !== nacimiento.getUTCMonth() || hoy.getUTCDate() !== nacimiento.getUTCDate()) {
+      return res.status(400).json({ error: 'Hoy no es tu cumpleaños.' });
+    }
+
+    const activeReward = await prisma.birthdayReward.findFirst({ where: { activo: true } });
+    if (!activeReward) return res.status(404).json({ error: 'No hay una promoción de cumpleaños activa.' });
+
+    const year = hoy.getUTCFullYear();
+    const yaReclamado = await prisma.birthdayRedemption.findUnique({ where: { customerId_year: { customerId: req.user.id, year } } });
+    if (yaReclamado) return res.status(409).json({ error: 'Ya reclamaste tu regalo de cumpleaños este año.' });
+
+    const redemption = await prisma.birthdayRedemption.create({
+      data: { customerId: req.user.id, rewardId: activeReward.id, year, code: generateRedemptionCode() },
+      include: { reward: true },
+    });
+    res.status(201).json(redemption);
+  } catch (e) {
+    console.error('❌ Error reclamando cumpleaños:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/loyalty/birthday/redeem', verifyToken, requireRole('empleado', 'admin'), async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'code es obligatorio' });
+    const redemption = await prisma.birthdayRedemption.findUnique({ where: { code: code.toUpperCase().trim() }, include: { reward: true, customer: { select: { nombre: true } } } });
+    if (!redemption) return res.status(404).json({ error: 'Código no encontrado' });
+    if (redemption.redeemed) return res.status(409).json({ error: `Este código ya se canjeó el ${new Date(redemption.redeemedAt).toLocaleString('es-MX')}` });
+    const updated = await prisma.birthdayRedemption.update({
+      where: { id: redemption.id },
+      data: { redeemed: true, redeemedAt: new Date() },
+      include: { reward: true, customer: { select: { nombre: true } } },
+    });
+    res.json(updated);
+  } catch (e) {
+    console.error('❌ Error canjeando cumpleaños:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+// El cliente canjea puntos por UN producto específico (no un monto libre)
+// — se descuenta solo el costoPuntos de ese producto de su saldo, nunca
+// todo el balance. Genera un código para mostrar en sucursal, igual que
+// las recompensas por sellos.
+app.post('/api/customer/points/canjear', verifyToken, requireRole('cliente'), async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) return res.status(400).json({ error: 'productId es obligatorio' });
+
+    const redemption = await prisma.$transaction(async (tx) => {
+      const producto = await tx.product.findUnique({ where: { id: productId } });
+      if (!producto || !producto.activo || producto.costoPuntos == null) {
+        const error = new Error('Ese producto no está disponible para canje con puntos.');
+        error.status = 400;
+        throw error;
+      }
+      const card = await tx.loyaltyCard.findUnique({ where: { customerId: req.user.id } });
+      const puntos = Number(card?.puntos ?? 0);
+      if (puntos < producto.costoPuntos) {
+        const error = new Error(`Necesitas ${producto.costoPuntos} puntos para "${producto.nombre}" (tienes ${puntos}).`);
+        error.status = 400;
+        throw error;
+      }
+      await tx.loyaltyCard.update({ where: { customerId: req.user.id }, data: { puntos: { decrement: producto.costoPuntos } } });
+      return tx.pointsRedemption.create({
+        data: { customerId: req.user.id, productId: producto.id, puntos: producto.costoPuntos, code: generateRedemptionCode() },
+        include: { product: true },
+      });
+    });
+    res.status(201).json(redemption);
+  } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message });
+    console.error('❌ Error canjeando puntos:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+// Staff marca un código de puntos como entregado en sucursal — mismo
+// patrón que /api/loyalty/redeem para recompensas por sellos.
+app.post('/api/loyalty/points/redeem', verifyToken, requireRole('empleado', 'admin'), async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'code es obligatorio' });
+    const redemption = await prisma.pointsRedemption.findUnique({ where: { code: code.toUpperCase().trim() }, include: { customer: { select: { nombre: true } } } });
+    if (!redemption) return res.status(404).json({ error: 'Código no encontrado' });
+    if (redemption.redeemed) return res.status(409).json({ error: `Este código ya se canjeó el ${new Date(redemption.redeemedAt).toLocaleString('es-MX')}` });
+    const updated = await prisma.pointsRedemption.update({
+      where: { id: redemption.id },
+      data: { redeemed: true, redeemedAt: new Date() },
+      include: { customer: { select: { nombre: true } } },
+    });
+    res.json(updated);
+  } catch (e) {
+    console.error('❌ Error canjeando puntos:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, res) => {
   try {
-    const { nombre, precio, categoryId, maxSabores, isPromotion, tipo, imagenUrl } = req.body;
+    const { nombre, precio, categoryId, maxSabores, isPromotion, tipo, imagenUrl, costoPuntos } = req.body;
     if (!nombre || precio === undefined || !categoryId) {
       return res.status(400).json({ error: 'Campos obligatorios: nombre, precio, categoryId' });
     }
@@ -671,6 +809,7 @@ app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, r
         isPromotion: isPromotion ?? false,
         tipo: tipo === 'merch' ? 'merch' : 'comida',
         imagenUrl: imagenUrl || null,
+        costoPuntos: costoPuntos != null && costoPuntos !== '' ? Number(costoPuntos) : null,
       },
     });
     res.status(201).json(product);
@@ -682,10 +821,13 @@ app.post('/api/admin/products', verifyToken, requireRole('admin'), async (req, r
 
 app.put('/api/admin/products/:id', verifyToken, requireRole('admin'), async (req, res) => {
   try {
-    const { nombre, precio, categoryId, maxSabores, isPromotion, activo, imagenUrl } = req.body;
+    const { nombre, precio, categoryId, maxSabores, isPromotion, activo, imagenUrl, costoPuntos } = req.body;
     const product = await prisma.product.update({
       where: { id: req.params.id },
-      data: { nombre, precio, categoryId, maxSabores, isPromotion, activo, imagenUrl },
+      data: {
+        nombre, precio, categoryId, maxSabores, isPromotion, activo, imagenUrl,
+        ...(costoPuntos !== undefined ? { costoPuntos: costoPuntos === '' || costoPuntos === null ? null : Number(costoPuntos) } : {}),
+      },
     });
     res.json(product);
   } catch (e) {
@@ -868,6 +1010,30 @@ app.post('/api/admin/users', verifyToken, requireRole('admin'), async (req, res)
   }
 });
 
+app.put('/api/admin/users/:id', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { nombre, role, sucursal, activo, pin } = req.body;
+    const data = {};
+    if (nombre !== undefined) data.nombre = nombre;
+    if (role !== undefined) {
+      if (!['empleado', 'cocina'].includes(role)) return res.status(400).json({ error: 'role debe ser empleado o cocina' });
+      data.role = role;
+    }
+    if (sucursal !== undefined) data.sucursal = sucursal;
+    if (activo !== undefined) data.activo = activo;
+    if (pin) {
+      if (!/^\d{4}$/.test(pin)) return res.status(400).json({ error: 'pin debe ser exactamente 4 dígitos' });
+      data.pin = await bcrypt.hash(pin, 10);
+    }
+    const user = await prisma.user.update({ where: { id: req.params.id }, data });
+    const { password: _, pin: __, ...safeUser } = user;
+    res.json(safeUser);
+  } catch (e) {
+    console.error('❌ Error editando staff:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
 app.post('/api/orders', verifyToken, requireRole('empleado'), async (req, res) => {
   try {
     const { tipo, mesa, clienteNombre, clienteTelefono, direccion, notas, items } = req.body;
@@ -989,12 +1155,42 @@ app.put('/api/orders/:id/estado', verifyToken, requireRole('empleado'), async (r
       if (estado === 'pagado') {
         await applyInventoryForOrder(tx, orderUpdated.id, req.user.id);
         await awardStampForOrder(tx, orderUpdated);
+        await awardPointsForOrder(tx, orderUpdated);
       }
       return tx.order.findUnique({ where: { id: orderUpdated.id }, include: { items: true } });
     });
     res.json(updated);
   } catch (e) {
     console.error('❌ Error actualizando estado del pedido:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+// El mesero nunca puede borrar ni cancelar una venta directamente — solo
+// pedirlo con un motivo. El admin decide (aprobar cancela de verdad la
+// venta, rechazar la deja como estaba) para que quede registro de todo.
+app.post('/api/orders/:id/solicitar-eliminacion', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const motivo = req.body.motivo?.trim();
+    if (!motivo) return res.status(400).json({ error: 'El motivo es obligatorio' });
+
+    const orden = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!orden || orden.sucursal !== req.user.sucursal) return res.status(404).json({ error: 'Pedido no encontrado' });
+    if (orden.eliminacionEstado === 'pendiente') return res.status(409).json({ error: 'Ya hay una solicitud pendiente para este pedido' });
+
+    const updated = await prisma.order.update({
+      where: { id: req.params.id },
+      data: {
+        eliminacionEstado: 'pendiente',
+        eliminacionMotivo: motivo,
+        eliminacionSolicitadaPorId: req.user.id,
+        eliminacionSolicitadaAt: new Date(),
+      },
+      include: { items: true },
+    });
+    res.json(updated);
+  } catch (e) {
+    console.error('❌ Error solicitando eliminación:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
@@ -1024,6 +1220,96 @@ app.put('/api/orders/:id/cocina', verifyToken, requireRole('empleado', 'cocina')
     res.json(updated);
   } catch (e) {
     console.error('❌ Error actualizando estado de cocina:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+// ── Caja del mesero — mismo modelo CashShift/CashMovement que ya usa
+// Finanzas en el Admin, pero aquí escapado siempre a req.user.sucursal (el
+// mesero nunca ve ni toca la caja de la otra sucursal, y no necesita
+// entrar como admin solo para esto). Pagos con tarjeta/transferencia no
+// entran a "ventas en efectivo" — igual que en el cierre del Admin, ya
+// quedan fuera de este cálculo por sí solos (metodoPago: 'efectivo').
+async function calcularCajaActual(sucursal) {
+  const shift = await prisma.cashShift.findFirst({ where: { sucursal, status: 'open' }, include: { movements: { orderBy: { createdAt: 'desc' } } } });
+  if (!shift) return null;
+  const cashSales = await prisma.order.aggregate({
+    where: { sucursal, estado: 'pagado', metodoPago: 'efectivo', createdAt: { gte: shift.openedAt } },
+    _sum: { total: true },
+  });
+  const payIns = shift.movements.filter((m) => m.type === 'pay_in').reduce((sum, m) => sum + Number(m.amount), 0);
+  const payOuts = shift.movements.filter((m) => m.type === 'pay_out').reduce((sum, m) => sum + Number(m.amount), 0);
+  const esperado = calculateExpectedCash({ opening: shift.openingAmount, cashSales: cashSales._sum.total || 0, payIns, payOuts });
+  return { ...shift, cashSales: cashSales._sum.total || 0, esperado };
+}
+
+app.get('/api/caja/actual', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    res.json(await calcularCajaActual(req.user.sucursal));
+  } catch (e) {
+    console.error('❌ Error obteniendo caja actual:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/caja/abrir', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const openingAmount = Number(req.body.openingAmount);
+    if (!(openingAmount >= 0)) return res.status(400).json({ error: 'Fondo inicial inválido' });
+    const activo = await prisma.cashShift.findFirst({ where: { sucursal: req.user.sucursal, status: 'open' } });
+    if (activo) return res.status(409).json({ error: 'Ya hay una caja abierta en esta sucursal' });
+    await prisma.cashShift.create({ data: { sucursal: req.user.sucursal, openingAmount, openedById: req.user.id } });
+    res.status(201).json(await calcularCajaActual(req.user.sucursal));
+  } catch (e) {
+    console.error('❌ Error abriendo caja:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/caja/movimientos', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const { type, amount, concept } = req.body;
+    if (!['pay_in', 'pay_out'].includes(type) || !(Number(amount) > 0) || !concept?.trim()) {
+      return res.status(400).json({ error: 'Tipo, monto y concepto son obligatorios' });
+    }
+    const shift = await prisma.cashShift.findFirst({ where: { sucursal: req.user.sucursal, status: 'open' } });
+    if (!shift) return res.status(404).json({ error: 'No hay una caja abierta en esta sucursal' });
+    await prisma.cashMovement.create({ data: { cashShiftId: shift.id, type, amount: Number(amount), concept: concept.trim(), createdById: req.user.id } });
+    res.status(201).json(await calcularCajaActual(req.user.sucursal));
+  } catch (e) {
+    console.error('❌ Error registrando movimiento de caja:', e);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+app.post('/api/caja/cerrar', verifyToken, requireRole('empleado'), async (req, res) => {
+  try {
+    const shift = await prisma.cashShift.findFirst({ where: { sucursal: req.user.sucursal, status: 'open' }, include: { movements: true } });
+    if (!shift) return res.status(404).json({ error: 'No hay una caja abierta en esta sucursal' });
+    const countedAmount = Number(req.body.countedAmount);
+    if (!(countedAmount >= 0)) return res.status(400).json({ error: 'Monto contado inválido' });
+
+    const cashSales = await prisma.order.aggregate({ where: { sucursal: shift.sucursal, estado: 'pagado', metodoPago: 'efectivo', createdAt: { gte: shift.openedAt } }, _sum: { total: true } });
+    const payIns = shift.movements.filter((m) => m.type === 'pay_in').reduce((sum, m) => sum + Number(m.amount), 0);
+    const payOuts = shift.movements.filter((m) => m.type === 'pay_out').reduce((sum, m) => sum + Number(m.amount), 0);
+    const expectedAmount = calculateExpectedCash({ opening: shift.openingAmount, cashSales: cashSales._sum.total || 0, payIns, payOuts });
+
+    const cerrada = await prisma.cashShift.update({
+      where: { id: shift.id },
+      data: {
+        status: 'closed',
+        countedAmount,
+        expectedAmount,
+        difference: countedAmount - expectedAmount,
+        closedAt: new Date(),
+        closedById: req.user.id,
+        notes: req.body.notes || null,
+      },
+      include: { movements: true },
+    });
+    res.json(cerrada);
+  } catch (e) {
+    console.error('❌ Error cerrando caja:', e);
     res.status(500).json({ error: 'Error en servidor' });
   }
 });
