@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, MenuItem, Switch, TextField, Typography } from '@mui/material';
-import { Banknote, ChefHat, CircleDollarSign, ClipboardList, Edit3, Gift, PackageCheck, Plus, ReceiptText, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
+import { Alert, Button, ButtonBase, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, MenuItem, Switch, TextField, Typography } from '@mui/material';
+import { ArrowDownRight, ArrowUpRight, Banknote, ChefHat, CircleDollarSign, ClipboardList, Edit3, Gift, PackageCheck, Plus, ReceiptText, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const PINK = '#E765B7';
@@ -9,6 +9,8 @@ const CHART_COLORS = ['#E765B7', '#C43D8F', '#f2a4d1', '#8a5a72', '#f6c453', '#7
 const chartMoney = (value) => money.format(value);
 const compactMoneyFormat = new Intl.NumberFormat('es-MX', { notation: 'compact', maximumFractionDigits: 1 });
 const compactMoney = (value) => compactMoneyFormat.format(value).replace(/\s/g, '');
+const SUCURSAL_LABEL = { xico: 'Xico', coatepec: 'Coatepec' };
+const fechaHora = (value) => new Date(value).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' });
 
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 
@@ -201,10 +203,13 @@ const closeSupplierDialog = () => { setSupplierOpen(false); setEditSupplierId(nu
   </section>;
 }
 
+const TIPO_LABEL_OP = { mesa: 'Mesa', para_llevar: 'Para llevar', domicilio: 'Domicilio' };
+
 function Operation({ dashboard, api, token }) {
   const [pendientes, setPendientes] = useState([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
+  const [orderDetail, setOrderDetail] = useState(null);
 
   const cargarPendientes = () => api.pendingDeletions(token).then(setPendientes).catch((e) => setError(e.message));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -289,12 +294,12 @@ function Operation({ dashboard, api, token }) {
       <div className="admin-data-panel">
         <div className="admin-data-heading"><h2>Pedidos recientes</h2><span>{dashboard.recentOrders.length}</span></div>
         {dashboard.recentOrders.length ? dashboard.recentOrders.map((order) => (
-          <div className="admin-list-row" key={order.id}>
+          <div className="admin-list-row admin-list-row--clickable" key={order.id} onClick={() => setOrderDetail(order)}>
             <span><b>#{order.id.slice(0,6).toUpperCase()} · {order.clienteNombre || order.tipo}</b><small>{order.estadoCocina} · {order.sucursal}</small></span>
             <div className="admin-row-actions">
               <b>{money.format(order.total)}</b>
               {order.estado !== 'cancelado' && (
-                <Button size="small" color="error" disabled={busy === order.id} onClick={() => eliminarDirecto(order)}><Trash2 size={16} /></Button>
+                <Button size="small" color="error" disabled={busy === order.id} onClick={(event) => { event.stopPropagation(); eliminarDirecto(order); }}><Trash2 size={16} /></Button>
               )}
             </div>
           </div>
@@ -320,12 +325,43 @@ function Operation({ dashboard, api, token }) {
         ) : <Empty>No hay ventas en este periodo todavía.</Empty>}
       </div>
     </div>
+
+    <Dialog open={Boolean(orderDetail)} onClose={() => setOrderDetail(null)} fullWidth maxWidth="sm">
+      {orderDetail && <>
+        <DialogTitle>Pedido #{orderDetail.id.slice(0, 6).toUpperCase()}</DialogTitle>
+        <DialogContent>
+          <p style={{ margin: '0 0 12px', fontSize: 14, lineHeight: 1.8 }}>
+            {TIPO_LABEL_OP[orderDetail.tipo] || orderDetail.tipo}{orderDetail.mesa ? ` · Mesa ${orderDetail.mesa}` : ''}<br/>
+            Cliente: {orderDetail.clienteNombre || 'Público en general'}{orderDetail.clienteTelefono ? ` · ${orderDetail.clienteTelefono}` : ''}<br/>
+            {orderDetail.direccion ? <>Dirección: {orderDetail.direccion}<br/></> : null}
+            Sucursal: {SUCURSAL_LABEL[orderDetail.sucursal] || orderDetail.sucursal} · Atendió: {orderDetail.empleado?.nombre || '—'}<br/>
+            Estado: {orderDetail.estado} · Cocina: {orderDetail.estadoCocina}<br/>
+            Método de pago: {orderDetail.metodoPago || 'Pendiente'}<br/>
+            Creado: {fechaHora(orderDetail.createdAt)}
+          </p>
+          <div className="admin-data-heading" style={{ padding: '8px 0' }}><h2>Productos</h2><span>{orderDetail.items.length}</span></div>
+          {orderDetail.items.map((item) => (
+            <div className="admin-list-row" key={item.id}>
+              <span><b>{item.cantidad}× {item.nombre}</b>{item.sabores?.length ? <small>{item.sabores.join(', ')}</small> : null}</span>
+              <b>{money.format(item.subtotal)}</b>
+            </div>
+          ))}
+          {orderDetail.notas ? <p style={{ marginTop: 12, fontSize: 13, fontStyle: 'italic' }}>📝 {orderDetail.notas}</p> : null}
+          <p style={{ marginTop: 12, fontSize: 16, fontWeight: 700, textAlign: 'right' }}>Total: {money.format(orderDetail.total)}</p>
+        </DialogContent>
+        <DialogActions><Button onClick={() => setOrderDetail(null)}>Cerrar</Button></DialogActions>
+      </>}
+    </Dialog>
   </section>;
 }
+
+const CASH_MOVEMENT_LABEL = { pay_in: 'Entrada', pay_out: 'Salida' };
 
 function Finance({ api, token, branch, dashboard }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const [shiftDetail, setShiftDetail] = useState(null);
+  const [expenseDetail, setExpenseDetail] = useState(null);
   useEffect(() => {
     let live = true;
     Promise.all([api.cashShifts(branch, token), api.expenses(branch, token)])
@@ -336,10 +372,83 @@ function Finance({ api, token, branch, dashboard }) {
   if (error) return <Alert severity="error">{error}</Alert>;
   if (!data) return <Loading />;
   const expenses = data.expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
-  return <section className="admin-module"><header><div><Typography component="h1">Finanzas y caja</Typography><Typography>Venta, efectivo esperado, gastos y diferencias de cierre.</Typography></div><Chip label={`${data.shifts.filter((item) => item.status === 'open').length} cajas abiertas`} color="secondary" /></header><div className="admin-module-stats"><article><CircleDollarSign/><span><b>{money.format(dashboard.summary.sales)}</b><small>Venta neta</small></span></article><article><Banknote/><span><b>{money.format(dashboard.summary.cashSales)}</b><small>Venta en efectivo</small></span></article><article><ReceiptText/><span><b>{money.format(expenses)}</b><small>Gastos registrados</small></span></article></div><div className="admin-two-columns"><div className="admin-data-panel"><div className="admin-data-heading"><h2>Turnos de caja</h2><span>Últimos 30</span></div>{data.shifts.length ? data.shifts.map((shift) => <div className="admin-list-row" key={shift.id}><span><b>{shift.sucursal} · {shift.status === 'open' ? 'Abierta' : 'Cerrada'}</b><small>Fondo {money.format(Number(shift.openingAmount))}{shift.difference != null ? ` · diferencia ${money.format(Number(shift.difference))}` : ''}</small></span><Chip size="small" color={shift.status === 'open' ? 'success' : 'default'} label={shift.status} /></div>) : <Empty>No hay turnos de caja registrados.</Empty>}</div><div className="admin-data-panel"><div className="admin-data-heading"><h2>Gastos</h2><span>Comprobación</span></div>{data.expenses.length ? data.expenses.map((expense) => <div className="admin-list-row" key={expense.id}><span><b>{expense.concept}</b><small>{expense.category} · {expense.paymentMethod}</small></span><b>{money.format(Number(expense.amount))}</b></div>) : <Empty>Sin gastos en el periodo.</Empty>}</div></div></section>;
-}
+  const entradas = shiftDetail ? shiftDetail.movements.filter((m) => m.type === 'pay_in') : [];
+  const salidas = shiftDetail ? shiftDetail.movements.filter((m) => m.type === 'pay_out') : [];
+  const totalEntradas = entradas.reduce((sum, m) => sum + Number(m.amount), 0);
+  const totalSalidas = salidas.reduce((sum, m) => sum + Number(m.amount), 0);
+  return <section className="admin-module">
+    <header><div><Typography component="h1">Finanzas y caja</Typography><Typography>Venta, efectivo esperado, gastos y diferencias de cierre.</Typography></div><Chip label={`${data.shifts.filter((item) => item.status === 'open').length} cajas abiertas`} color="secondary" /></header>
+    <div className="admin-module-stats"><article><CircleDollarSign/><span><b>{money.format(dashboard.summary.sales)}</b><small>Venta neta</small></span></article><article><Banknote/><span><b>{money.format(dashboard.summary.cashSales)}</b><small>Venta en efectivo</small></span></article><article><ReceiptText/><span><b>{money.format(expenses)}</b><small>Gastos registrados</small></span></article></div>
+    <div className="admin-two-columns">
+      <div className="admin-data-panel">
+        <div className="admin-data-heading"><h2>Turnos de caja</h2><span>Últimos 30</span></div>
+        {data.shifts.length ? data.shifts.map((shift) => (
+          <ButtonBase key={shift.id} className="admin-list-row admin-list-row--clickable" onClick={() => setShiftDetail(shift)}>
+            <span><b>{SUCURSAL_LABEL[shift.sucursal] || shift.sucursal} · {shift.status === 'open' ? 'Abierta' : 'Cerrada'}</b><small>Fondo {money.format(Number(shift.openingAmount))}{shift.difference != null ? ` · diferencia ${money.format(Number(shift.difference))}` : ''}</small></span>
+            <Chip size="small" color={shift.status === 'open' ? 'success' : 'default'} label={shift.status} />
+          </ButtonBase>
+        )) : <Empty>No hay turnos de caja registrados.</Empty>}
+      </div>
+      <div className="admin-data-panel">
+        <div className="admin-data-heading"><h2>Gastos</h2><span>Comprobación</span></div>
+        {data.expenses.length ? data.expenses.map((expense) => (
+          <ButtonBase key={expense.id} className="admin-list-row admin-list-row--clickable" onClick={() => setExpenseDetail(expense)}>
+            <span><b>{expense.concept}</b><small>{expense.category} · {expense.paymentMethod}</small></span>
+            <b>{money.format(Number(expense.amount))}</b>
+          </ButtonBase>
+        )) : <Empty>Sin gastos en el periodo.</Empty>}
+      </div>
+    </div>
 
-const SUCURSAL_LABEL = { xico: 'Xico', coatepec: 'Coatepec' };
+    <Dialog open={Boolean(shiftDetail)} onClose={() => setShiftDetail(null)} fullWidth maxWidth="sm">
+      {shiftDetail && <>
+        <DialogTitle>Caja {SUCURSAL_LABEL[shiftDetail.sucursal] || shiftDetail.sucursal} · {shiftDetail.status === 'open' ? 'Abierta' : 'Cerrada'}</DialogTitle>
+        <DialogContent>
+          <div className="admin-module-stats" style={{ marginBottom: 16 }}>
+            <article><Banknote/><span><b>{money.format(Number(shiftDetail.openingAmount))}</b><small>Fondo inicial</small></span></article>
+            <article><ArrowUpRight/><span><b>{money.format(totalEntradas)}</b><small>Entradas</small></span></article>
+            <article><ArrowDownRight/><span><b>{money.format(totalSalidas)}</b><small>Salidas</small></span></article>
+          </div>
+          <p style={{ margin: '0 0 6px', fontSize: 13, color: '#6e5c66' }}>
+            Abierta: {fechaHora(shiftDetail.openedAt)}
+            {shiftDetail.closedAt ? <><br/>Cerrada: {fechaHora(shiftDetail.closedAt)}</> : null}
+          </p>
+          {shiftDetail.status === 'closed' && (
+            <p style={{ margin: '0 0 12px', fontSize: 13 }}>
+              Esperado: <b>{money.format(Number(shiftDetail.expectedAmount))}</b> · Contado: <b>{money.format(Number(shiftDetail.countedAmount))}</b> · Diferencia: <b className={Number(shiftDetail.difference) < 0 ? 'stock-critical' : 'stock-healthy'}>{money.format(Number(shiftDetail.difference))}</b>
+              {shiftDetail.notes ? <><br/><i>{shiftDetail.notes}</i></> : null}
+            </p>
+          )}
+          <div className="admin-data-heading" style={{ padding: '8px 0' }}><h2>Movimientos</h2><span>{shiftDetail.movements.length}</span></div>
+          {shiftDetail.movements.length ? shiftDetail.movements.map((movement) => (
+            <div className="admin-list-row" key={movement.id}>
+              <span><b>{movement.concept}</b><small>{CASH_MOVEMENT_LABEL[movement.type]} · {fechaHora(movement.createdAt)}</small></span>
+              <b className={movement.type === 'pay_out' ? 'stock-critical' : 'stock-healthy'}>{movement.type === 'pay_out' ? '-' : '+'}{money.format(Number(movement.amount))}</b>
+            </div>
+          )) : <Empty>Sin entradas o salidas registradas en este turno.</Empty>}
+        </DialogContent>
+        <DialogActions><Button onClick={() => setShiftDetail(null)}>Cerrar</Button></DialogActions>
+      </>}
+    </Dialog>
+
+    <Dialog open={Boolean(expenseDetail)} onClose={() => setExpenseDetail(null)} fullWidth maxWidth="xs">
+      {expenseDetail && <>
+        <DialogTitle>{expenseDetail.concept}</DialogTitle>
+        <DialogContent>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.8 }}>
+            Monto: <b>{money.format(Number(expenseDetail.amount))}</b><br/>
+            Categoría: {expenseDetail.category}<br/>
+            Método de pago: {expenseDetail.paymentMethod}<br/>
+            Sucursal: {SUCURSAL_LABEL[expenseDetail.sucursal] || expenseDetail.sucursal}<br/>
+            Fecha: {fechaHora(expenseDetail.occurredAt)}<br/>
+            {expenseDetail.receiptRef ? <>Comprobante: {expenseDetail.receiptRef}<br/></> : null}
+          </p>
+        </DialogContent>
+        <DialogActions><Button onClick={() => setExpenseDetail(null)}>Cerrar</Button></DialogActions>
+      </>}
+    </Dialog>
+  </section>;
+}
 
 function BranchSettings({ api, token }) {
   const [settings, setSettings] = useState(null);
@@ -776,13 +885,13 @@ function ImageUploadField({ label = 'Imagen', value, onChange, api, token, onErr
   };
   return (
     <div className="admin-image-field">
-      {value ? <img src={value} alt="" className="admin-image-preview" /> : null}
+      {value ? <img src={value} alt="" className="admin-image-preview" /> : <div className="admin-image-preview admin-thumb--placeholder"><ShoppingBasket size={32} /></div>}
       <div className="admin-row-actions">
-        <Button component="label" size="small" variant="outlined" disabled={uploading}>
+        <Button component="label" variant="outlined" disabled={uploading}>
           {uploading ? 'Subiendo…' : value ? 'Cambiar imagen' : `Subir ${label.toLowerCase()}`}
           <input id={inputId} type="file" accept="image/*" hidden onChange={handleFile} />
         </Button>
-        {value ? <Button size="small" color="warning" onClick={() => onChange('')} disabled={uploading}>Quitar</Button> : null}
+        {value ? <Button color="warning" onClick={() => onChange('')} disabled={uploading}>Quitar</Button> : null}
       </div>
     </div>
   );
@@ -883,23 +992,21 @@ function Merch({ api, token }) {
     <div className="admin-data-panel">
       <div className="admin-data-heading"><h2>Catálogo</h2><span>{products.length} productos</span></div>
       {products.length ? products.map((p) => (
-        <div className="admin-list-row" key={p.id} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {p.imagenUrl ? <img src={p.imagenUrl} alt="" className="admin-thumb" /> : null}
-              <span><b>{p.nombre}</b><small>{p.category?.nombre}</small></span>
-            </span>
-            <Button size="small" onClick={() => openVariant(p.id)}>+ Variante</Button>
+        <div className="admin-merch-product" key={p.id}>
+          <div className="admin-merch-product-head">
+            <figure>
+              {p.imagenUrl ? <img src={p.imagenUrl} alt="" className="admin-thumb admin-thumb--lg" /> : <div className="admin-thumb admin-thumb--lg admin-thumb--placeholder"><ShoppingBasket size={28} /></div>}
+            </figure>
+            <div className="admin-merch-title"><span>{p.category?.nombre || 'Sin categoría'}</span>{p.nombre}</div>
+            <Button variant="outlined" startIcon={<Plus size={18} />} onClick={() => openVariant(p.id)} sx={{ marginLeft: 'auto' }}>Variante</Button>
           </div>
           {p.variants.map((v) => (
-            <div key={v.id} className="admin-stock-row" style={{ marginLeft: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {v.imagenUrl ? <img src={v.imagenUrl} alt="" className="admin-thumb" /> : null}
-                <div>
-                  <b>{v.nombre}</b>
-                  <small>${v.precio} · {v.activo ? 'Activa' : 'Inactiva'}</small>
-                  <div className="admin-row-actions"><Button size="small" startIcon={<Edit3 size={14} />} onClick={() => openEditVariant(v)}>Editar</Button></div>
-                </div>
+            <div key={v.id} className="admin-merch-variant">
+              {v.imagenUrl ? <img src={v.imagenUrl} alt="" className="admin-thumb admin-thumb--md" /> : <div className="admin-thumb admin-thumb--md admin-thumb--placeholder"><ShoppingBasket size={22} /></div>}
+              <div className="admin-merch-variant-info">
+                <b>{v.nombre}</b>
+                <small>${v.precio} · {v.activo ? 'Activa' : 'Inactiva'}</small>
+                <Button variant="outlined" size="small" startIcon={<Edit3 size={14} />} onClick={() => openEditVariant(v)} sx={{ alignSelf: 'flex-start' }}>Editar</Button>
               </div>
               <div className="admin-stock-controls">
                 {['xico', 'coatepec'].map((sucursal) => {

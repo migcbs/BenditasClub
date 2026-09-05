@@ -10,8 +10,8 @@ const TOKEN_KEY = 'bc_admin_token';
 const demoDashboard = {
   summary: { sales: 18460, orders: 64, averageTicket: 288, cashSales: 10460, cardSales: 8000, pendingOrders: 2, cancelledOrders: 1, kitchenDelays: 2 },
   recentOrders: [
-    { id: 'bdt001', clienteNombre: 'Mesa 4', tipo: 'mesa', estadoCocina: 'en_preparacion', sucursal: 'xico', total: 599 },
-    { id: 'bdt002', clienteNombre: 'Mariana', tipo: 'para_llevar', estadoCocina: 'lista', sucursal: 'xico', total: 279 },
+    { id: 'bdt001', clienteNombre: 'Mesa 4', tipo: 'mesa', mesa: '4', estadoCocina: 'en_preparacion', estado: 'pendiente', sucursal: 'xico', total: 599, createdAt: new Date().toISOString(), empleado: { nombre: 'Ana' }, metodoPago: null, notas: '', items: [{ id: 'it1', cantidad: 2, nombre: '8 Alitas', sabores: ['BBQ', 'Mango habanero'], subtotal: 400 }, { id: 'it2', cantidad: 1, nombre: 'Papas', sabores: [], subtotal: 199 }] },
+    { id: 'bdt002', clienteNombre: 'Mariana', clienteTelefono: '2281234567', tipo: 'para_llevar', estadoCocina: 'lista', estado: 'pagado', sucursal: 'xico', total: 279, createdAt: new Date().toISOString(), empleado: { nombre: 'Ana' }, metodoPago: 'efectivo', notas: 'Sin cebolla', items: [{ id: 'it3', cantidad: 1, nombre: 'Boneless 250g', sabores: ['Buffalo'], subtotal: 279 }] },
   ],
   topProducts: [{ productId: 'p1', name: '8 Alitas', quantity: 21, sales: 2079 }, { productId: 'p2', name: 'Boneless 250g', quantity: 16, sales: 2224 }],
   alerts: [{ type: 'stock' }, { type: 'stock' }, { type: 'stock' }],
@@ -48,8 +48,8 @@ const demoApi = {
   purchases: async () => demoPurchases,
   createPurchase: async (payload) => { const supplier=demoSuppliers.find((item)=>item.id===payload.supplierId); demoPurchases=[{id:`po-${Date.now()}`,status:'draft',supplier,items:payload.items,total:payload.items.reduce((sum,item)=>sum+item.quantityOrdered*item.unitCost,0)},...demoPurchases]; },
   receivePurchase: async (id,payload) => { demoPurchases=demoPurchases.map((purchase)=>purchase.id===id?{...purchase,status:'received',receivedAt:new Date().toISOString(),items:purchase.items.map((item)=>({ ...item, quantityReceived:(payload.items.find((entry)=>entry.id===item.id)?.quantityReceived || item.quantityOrdered) }))}:purchase); },
-  cashShifts: async () => [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, difference: null, movements: [] }],
-  expenses: async () => [{ id: 'e1', concept: 'Gas', category: 'Servicios', paymentMethod: 'efectivo', amount: 620 }],
+  cashShifts: async () => [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, difference: null, openedAt: new Date().toISOString(), closedAt: null, movements: [{ id: 'm1', type: 'pay_in', amount: 300, concept: 'Depósito de cambio', createdAt: new Date().toISOString() }, { id: 'm2', type: 'pay_out', amount: 150, concept: 'Compra de hielo', createdAt: new Date().toISOString() }] }],
+  expenses: async () => [{ id: 'e1', concept: 'Gas', category: 'Servicios', paymentMethod: 'efectivo', amount: 620, sucursal: 'xico', occurredAt: new Date().toISOString(), receiptRef: null }],
   users: async () => [{ id: 'u1', nombre: 'Ana', role: 'empleado', sucursal: 'xico', activo: true }, { id: 'u2', nombre: 'Luis', role: 'cocina', sucursal: 'xico', activo: true }],
   createUser: async () => {},
   updateUser: async () => {},
