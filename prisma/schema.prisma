@@ -102,6 +102,7 @@ model User {
   password        String?
   telefono        String?
   fechaNacimiento DateTime?
+  fotoUrl         String?
 
   // staff (empleado/cocina)
   pin      String?

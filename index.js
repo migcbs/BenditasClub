@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const { put } = require('@vercel/blob');
 
 const prisma = require('./lib/prisma');
 const { verifyToken, requireRole, optionalAuth } = require('./middleware/auth');
@@ -278,7 +280,7 @@ app.get('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, role: true, activo: true, createdAt: true },
+      select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, fotoUrl: true, role: true, activo: true, createdAt: true },
     });
     if (!user || !user.activo) return res.status(401).json({ error: 'Cuenta inactiva' });
     // Solo informativo para el popup de pedido (mostrar el 10% antes de
@@ -308,12 +310,33 @@ app.put('/api/customer/me', verifyToken, requireRole('cliente'), async (req, res
         telefono: telefono?.trim() || null,
         ...(fechaNacimiento !== undefined ? { fechaNacimiento: fechaNacimientoParsed } : {}),
       },
-      select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, role: true, activo: true, createdAt: true },
+      select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, fotoUrl: true, role: true, activo: true, createdAt: true },
     });
     res.json({ user });
   } catch (e) {
     console.error('❌ Error actualizando perfil cliente:', e);
     res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+const uploadFoto = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+app.post('/api/customer/foto', verifyToken, requireRole('cliente'), uploadFoto.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo.' });
+    if (!/^image\//.test(req.file.mimetype)) return res.status(400).json({ error: 'Solo se permiten imágenes.' });
+    const ext = (req.file.originalname.match(/\.[a-zA-Z0-9]+$/) || [''])[0];
+    const filename = `clientes/${req.user.id}-${Date.now()}${ext}`;
+    const blob = await put(filename, req.file.buffer, { access: 'public', contentType: req.file.mimetype });
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { fotoUrl: blob.url },
+      select: { id: true, nombre: true, email: true, telefono: true, fechaNacimiento: true, fotoUrl: true, role: true, activo: true, createdAt: true },
+    });
+    res.json({ user });
+  } catch (e) {
+    console.error('❌ Error subiendo foto de perfil:', e);
+    res.status(500).json({ error: 'No se pudo subir la imagen.' });
   }
 });
 
