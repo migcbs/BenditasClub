@@ -31,6 +31,11 @@ export const customerApi = {
     headers: { 'Content-Type': 'application/json', ...auth(token) },
     body: JSON.stringify(payload),
   }).then(handle),
+  changePassword: (payload, token) => fetch(`${API_BASE}/api/customer/password`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...auth(token) },
+    body: JSON.stringify(payload),
+  }).then(handle),
   orders: (token) => fetch(`${API_BASE}/api/customer/orders`, { headers: auth(token) }).then(handle),
   // token es opcional: un invitado sin cuenta también puede crear un
   // pedido en línea (ver POST /api/customer/orders con optionalAuth).
