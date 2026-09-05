@@ -457,6 +457,11 @@ function BranchSettings({ api, token }) {
   const [error, setError] = useState('');
   const [savedFlash, setSavedFlash] = useState('');
 
+  const [requests, setRequests] = useState(null);
+  const [resetForms, setResetForms] = useState({});
+  const [resetBusy, setResetBusy] = useState('');
+  const [resetError, setResetError] = useState('');
+
   useEffect(() => {
     let live = true;
     api.branchSettings(token)
@@ -468,6 +473,10 @@ function BranchSettings({ api, token }) {
       .catch((requestError) => live && setError(requestError.message));
     return () => { live = false; };
   }, [api, token]);
+
+  const cargarSolicitudes = () => api.passwordResetRequests(token).then(setRequests).catch((requestError) => setResetError(requestError.message));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { cargarSolicitudes(); }, [api, token]);
 
   const updateField = (sucursal, field) => (event) => {
     setForms((current) => ({ ...current, [sucursal]: { ...current[sucursal], [field]: event.target.value } }));
@@ -488,50 +497,110 @@ function BranchSettings({ api, token }) {
     }
   };
 
+  const restablecer = async (request) => {
+    const nuevaPassword = resetForms[request.id];
+    if (!nuevaPassword || nuevaPassword.length < 8) return setResetError('Escribe una nueva contraseña de al menos 8 caracteres.');
+    setResetBusy(request.id);
+    setResetError('');
+    try {
+      await api.resolvePasswordReset(request.id, { nuevaPassword }, token);
+      await cargarSolicitudes();
+      setResetForms((current) => ({ ...current, [request.id]: '' }));
+    } catch (requestError) {
+      setResetError(requestError.message);
+    } finally {
+      setResetBusy('');
+    }
+  };
+
+  const descartar = async (request) => {
+    setResetBusy(request.id);
+    setResetError('');
+    try {
+      await api.resolvePasswordReset(request.id, {}, token);
+      await cargarSolicitudes();
+    } catch (requestError) {
+      setResetError(requestError.message);
+    } finally {
+      setResetBusy('');
+    }
+  };
+
   if (error) return <Alert severity="error">{error}</Alert>;
   if (!settings) return <Loading />;
+
+  const pendientes = (requests || []).filter((r) => r.estado === 'pendiente');
 
   return (
     <section className="admin-module">
       <header>
         <div>
-          <Typography component="h1">Cuentas para transferencia</Typography>
-          <Typography>El CLABE que ve el cliente en el popup de "Pagar por transferencia" al hacer su pedido en línea.</Typography>
+          <Typography component="h1">Configuración</Typography>
+          <Typography>Cuentas de transferencia por sucursal y solicitudes de restablecimiento de contraseña.</Typography>
         </div>
       </header>
-      <div className="admin-data-panel">
+
+      <div className="admin-two-columns">
         {settings.map((row) => (
-          <div className="admin-list-row" key={row.sucursal} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 12 }}>
-            <b>{SUCURSAL_LABEL[row.sucursal] || row.sucursal}</b>
-            <TextField
-              size="small"
-              label="CLABE (18 dígitos)"
-              value={forms[row.sucursal]?.clabe || ''}
-              onChange={updateField(row.sucursal, 'clabe')}
-              inputProps={{ maxLength: 18, inputMode: 'numeric' }}
-            />
-            <TextField
-              size="small"
-              label="Banco (opcional)"
-              value={forms[row.sucursal]?.banco || ''}
-              onChange={updateField(row.sucursal, 'banco')}
-            />
-            <TextField
-              size="small"
-              label="Titular (opcional)"
-              value={forms[row.sucursal]?.titular || ''}
-              onChange={updateField(row.sucursal, 'titular')}
-            />
-            <Button
-              variant="contained"
-              onClick={() => guardar(row.sucursal)}
-              disabled={saving === row.sucursal}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              {saving === row.sucursal ? 'Guardando...' : savedFlash === row.sucursal ? '¡Guardado!' : 'Guardar'}
-            </Button>
+          <div className="admin-data-panel admin-branch-card" key={row.sucursal}>
+            <div className="admin-branch-card-head">
+              <Banknote size={22} />
+              <div><b>{SUCURSAL_LABEL[row.sucursal] || row.sucursal}</b><small>Cuenta para recibir transferencias</small></div>
+            </div>
+            <div className="admin-form-grid" style={{ padding: '16px 18px' }}>
+              <TextField
+                label="CLABE (18 dígitos)"
+                value={forms[row.sucursal]?.clabe || ''}
+                onChange={updateField(row.sucursal, 'clabe')}
+                slotProps={{ htmlInput: { maxLength: 18, inputMode: 'numeric', style: { fontFamily: 'monospace', letterSpacing: '.02em' } } }}
+              />
+              <TextField
+                label="Banco receptor"
+                placeholder="Ej. BBVA, STP, Banorte…"
+                value={forms[row.sucursal]?.banco || ''}
+                onChange={updateField(row.sucursal, 'banco')}
+              />
+              <TextField
+                label="Titular de la cuenta"
+                value={forms[row.sucursal]?.titular || ''}
+                onChange={updateField(row.sucursal, 'titular')}
+              />
+              <Button
+                variant="contained"
+                onClick={() => guardar(row.sucursal)}
+                disabled={saving === row.sucursal}
+                style={{ alignSelf: 'flex-start' }}
+              >
+                {saving === row.sucursal ? 'Guardando...' : savedFlash === row.sucursal ? '¡Guardado!' : 'Guardar'}
+              </Button>
+            </div>
           </div>
         ))}
+      </div>
+
+      <div className="admin-data-panel">
+        <div className="admin-data-heading"><h2>Solicitudes de restablecimiento de contraseña</h2><span>{pendientes.length} pendiente{pendientes.length !== 1 ? 's' : ''}</span></div>
+        {resetError ? <Alert severity="error" onClose={() => setResetError('')} sx={{ m: 2 }}>{resetError}</Alert> : null}
+        {!requests ? <Loading /> : pendientes.length ? pendientes.map((request) => (
+          <div className="admin-list-row" key={request.id} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+            <span>
+              <b>{request.nombre || request.email}</b>
+              <small>{request.email}{request.telefono ? ` · ${request.telefono}` : ''} · {fechaHora(request.createdAt)}{!request.customerId ? ' · sin cuenta identificada' : ''}</small>
+            </span>
+            <div className="admin-row-actions">
+              <TextField
+                size="small"
+                type="password"
+                label="Nueva contraseña"
+                value={resetForms[request.id] || ''}
+                onChange={(e) => setResetForms((current) => ({ ...current, [request.id]: e.target.value }))}
+                disabled={!request.customerId || resetBusy === request.id}
+              />
+              <Button variant="contained" onClick={() => restablecer(request)} disabled={!request.customerId || resetBusy === request.id}>Restablecer</Button>
+              <Button color="warning" onClick={() => descartar(request)} disabled={resetBusy === request.id}>Descartar</Button>
+            </div>
+          </div>
+        )) : <Empty>No hay solicitudes pendientes.</Empty>}
       </div>
     </section>
   );

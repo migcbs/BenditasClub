@@ -22,6 +22,7 @@
 .customer-ghost { padding:0 18px; border:2px solid #241a20; background:transparent; color:#241a20; }
 .customer-ghost:hover { background:rgba(36,26,32,.05); }
 .customer-secondary-link,.customer-section-heading a { display:inline-flex; margin-top:16px; color:#C43D8F; font-weight:750; text-decoration:none; }
+button.customer-secondary-link { background:none; border:0; padding:0; font:inherit; cursor:pointer; }
 .customer-alert { width:min(100%,940px); margin:0 auto 14px; padding:12px 14px; border-radius:12px; color:#8a102e; background:#ffe4ec; }
 .customer-profile-hero { display:flex; align-items:center; justify-content:space-between; gap:16px; }
 .customer-profile-hero h1 { font-size:clamp(30px,9vw,48px); }

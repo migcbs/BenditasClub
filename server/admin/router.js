@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const { put } = require('@vercel/blob');
 const prisma = require('../../lib/prisma');
 const { verifyToken, requireRole } = require('../../middleware/auth');
@@ -392,6 +393,25 @@ router.put('/branch-settings/:sucursal', async (req, res) => {
     create: { sucursal, clabe: clabe?.replace(/\s/g, '') || null, banco: banco?.trim() || null, titular: titular?.trim() || null },
   });
   res.json(settings);
+});
+
+router.get('/password-reset-requests', async (_req, res) => {
+  res.json(await prisma.passwordResetRequest.findMany({ orderBy: { createdAt: 'desc' } }));
+});
+
+router.post('/password-reset-requests/:id/resolver', async (req, res) => {
+  const request = await prisma.passwordResetRequest.findUnique({ where: { id: req.params.id } });
+  if (!request) return res.status(404).json({ error: 'Solicitud no encontrada' });
+  const { nuevaPassword } = req.body;
+  if (nuevaPassword) {
+    if (!request.customerId) return res.status(400).json({ error: 'Esta solicitud no tiene una cuenta de cliente identificada — confirma el correo con el cliente antes de restablecer.' });
+    if (nuevaPassword.length < 8) return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres' });
+    await prisma.user.update({ where: { id: request.customerId }, data: { password: await bcrypt.hash(nuevaPassword, 10) } });
+  }
+  res.json(await prisma.passwordResetRequest.update({
+    where: { id: req.params.id },
+    data: { estado: 'atendida', resolvedAt: new Date(), resolvedById: req.user.id },
+  }));
 });
 
 router.use((error, _req, res, _next) => {
