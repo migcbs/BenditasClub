@@ -7,10 +7,14 @@ import ProductGrid from './ProductGrid';
 import CheckoutPanel from './CheckoutPanel';
 import OrdersList from './OrdersList';
 import ReceptionQueue from './ReceptionQueue';
+import CajaPanel from './CajaPanel';
 import StaffLogin from '../shared/StaffLogin';
 import { useStaffAuth } from '../shared/useStaffAuth';
 import { theme, glassSx } from '../shared/theme';
 import { usePosCarrito } from './usePosCarrito';
+
+// Mismo isotipo que la pestaña del navegador y la navbar del sitio público.
+const LOGO_ICON = `${process.env.PUBLIC_URL}/logo192.jpg`;
 
 const PosApp = () => {
   const { user, login, logout } = useStaffAuth();
@@ -31,7 +35,10 @@ const PosApp = () => {
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
         <AppBar position="static" color="transparent" elevation={0} sx={{ ...glassSx, boxShadow: 'none' }}>
           <Toolbar sx={{ justifyContent: 'space-between' }}>
-            <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{user.nombre} · {user.sucursal}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <Box component="img" src={LOGO_ICON} alt="" sx={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+              <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{user.nombre} · {user.sucursal}</Typography>
+            </Box>
             <IconButton onClick={logout} sx={{ color: 'text.primary' }} aria-label="Cerrar sesión">
               <LogOut size={20} />
             </IconButton>
@@ -45,6 +52,7 @@ const PosApp = () => {
             <Tab value="tomar" label="Tomar pedido" />
             <Tab value="lista" label="Pedidos del turno" />
             <Tab value="recepcion" label="Recepción" />
+            <Tab value="caja" label="Caja" />
           </Tabs>
         </AppBar>
 
@@ -96,11 +104,15 @@ const PosApp = () => {
             </Box>
         ) : tab === 'lista' ? (
             <Box sx={{ flex: 1, overflow: 'hidden' }}>
-              <OrdersList refreshKey={refreshKey} />
+              <OrdersList refreshKey={refreshKey} user={user} />
+            </Box>
+        ) : tab === 'recepcion' ? (
+            <Box sx={{ flex: 1, overflow: 'hidden' }}>
+              <ReceptionQueue refreshKey={refreshKey} onResolved={() => setRefreshKey((k) => k + 1)} />
             </Box>
         ) : (
             <Box sx={{ flex: 1, overflow: 'hidden' }}>
-              <ReceptionQueue refreshKey={refreshKey} onResolved={() => setRefreshKey((k) => k + 1)} />
+              <CajaPanel />
             </Box>
         )}
       </Box>

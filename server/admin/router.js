@@ -1,10 +1,29 @@
 const express = require('express');
+const multer = require('multer');
+const crypto = require('crypto');
+const { put } = require('@vercel/blob');
 const prisma = require('../../lib/prisma');
 const { verifyToken, requireRole } = require('../../middleware/auth');
 const { calculateExpectedCash, classifyInventoryHealth } = require('./inventory');
 
 const router = express.Router();
 router.use(verifyToken, requireRole('admin'));
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+router.post('/upload', upload.single('file'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo.' });
+  if (!/^image\//.test(req.file.mimetype)) return res.status(400).json({ error: 'Solo se permiten imágenes.' });
+  try {
+    const ext = (req.file.originalname.match(/\.[a-zA-Z0-9]+$/) || [''])[0];
+    const filename = `merch/${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+    const blob = await put(filename, req.file.buffer, { access: 'public', contentType: req.file.mimetype });
+    res.status(201).json({ url: blob.url });
+  } catch (error) {
+    console.error('❌ Error subiendo imagen:', error);
+    res.status(500).json({ error: 'No se pudo subir la imagen.' });
+  }
+});
 
 router.get('/inventory', async (req, res) => {
   const branch = req.query.branch || 'xico';
@@ -95,6 +114,14 @@ router.post('/suppliers', async (req, res) => {
   if (!req.body.nombre) return res.status(400).json({ error: 'El nombre es obligatorio' });
   res.status(201).json(await prisma.supplier.create({ data: req.body }));
 });
+router.put('/suppliers/:id', async (req, res) => {
+  const { nombre, contacto, telefono, email, paymentTerms, activo } = req.body;
+  if (nombre !== undefined && !nombre) return res.status(400).json({ error: 'El nombre es obligatorio' });
+  res.json(await prisma.supplier.update({
+    where: { id: req.params.id },
+    data: { ...(nombre !== undefined ? { nombre } : {}), ...(contacto !== undefined ? { contacto } : {}), ...(telefono !== undefined ? { telefono } : {}), ...(email !== undefined ? { email } : {}), ...(paymentTerms !== undefined ? { paymentTerms } : {}), ...(activo !== undefined ? { activo } : {}) },
+  }));
+});
 
 router.get('/purchases', async (req, res) => {
   const where = req.query.branch && req.query.branch !== 'all' ? { sucursal: req.query.branch } : {};
@@ -177,19 +204,20 @@ router.get('/loyalty/rewards', async (_req, res) => {
 });
 
 router.post('/loyalty/rewards', async (req, res) => {
-  const { label, type, value, productId, stampsRequired = 6 } = req.body;
+  const { label, type, value, productId, stampsRequired = 6, minOrderAmount = 0 } = req.body;
   if (!label || !LOYALTY_REWARD_TYPES.includes(type)) {
     return res.status(400).json({ error: 'label y type (uno de: ' + LOYALTY_REWARD_TYPES.join(', ') + ') son obligatorios' });
   }
   if (type === 'free_item' && !productId) return res.status(400).json({ error: 'free_item requiere productId' });
   if (Number(stampsRequired) <= 0) return res.status(400).json({ error: 'stampsRequired debe ser mayor a cero' });
+  if (Number(minOrderAmount) < 0) return res.status(400).json({ error: 'minOrderAmount no puede ser negativo' });
 
   const reward = await prisma.$transaction(async (tx) => {
     // Solo una recompensa activa a la vez — es la que se otorga cuando una
     // tarjeta llega a su umbral de sellos.
     await tx.loyaltyReward.updateMany({ where: { activo: true }, data: { activo: false } });
     return tx.loyaltyReward.create({
-      data: { label, type, value: value ?? null, productId: type === 'free_item' ? productId : null, stampsRequired: Number(stampsRequired), activo: true },
+      data: { label, type, value: value ?? null, productId: type === 'free_item' ? productId : null, stampsRequired: Number(stampsRequired), minOrderAmount: Number(minOrderAmount), activo: true },
       include: { product: true },
     });
   });
@@ -197,7 +225,7 @@ router.post('/loyalty/rewards', async (req, res) => {
 });
 
 router.put('/loyalty/rewards/:id', async (req, res) => {
-  const { label, type, value, productId, stampsRequired, activo } = req.body;
+  const { label, type, value, productId, stampsRequired, minOrderAmount, activo } = req.body;
   if (type && !LOYALTY_REWARD_TYPES.includes(type)) return res.status(400).json({ error: 'type inválido' });
 
   const reward = await prisma.$transaction(async (tx) => {
@@ -210,6 +238,7 @@ router.put('/loyalty/rewards/:id', async (req, res) => {
         ...(value !== undefined ? { value } : {}),
         ...(productId !== undefined ? { productId: productId || null } : {}),
         ...(stampsRequired !== undefined ? { stampsRequired: Number(stampsRequired) } : {}),
+        ...(minOrderAmount !== undefined ? { minOrderAmount: Number(minOrderAmount) } : {}),
         ...(activo !== undefined ? { activo } : {}),
       },
       include: { product: true },
@@ -226,6 +255,121 @@ router.get('/loyalty/redemptions', async (req, res) => {
     orderBy: { createdAt: 'desc' },
     take: 100,
   }));
+});
+
+// ── Promoción de cumpleaños — mismo patrón que las recompensas por sellos ──
+router.get('/birthday-rewards', async (req, res) => {
+  res.json(await prisma.birthdayReward.findMany({ include: { product: true }, orderBy: { createdAt: 'desc' } }));
+});
+
+router.post('/birthday-rewards', async (req, res) => {
+  const { label, type, value, productId } = req.body;
+  if (!label || !LOYALTY_REWARD_TYPES.includes(type)) {
+    return res.status(400).json({ error: 'label y type (uno de: ' + LOYALTY_REWARD_TYPES.join(', ') + ') son obligatorios' });
+  }
+  if (type === 'free_item' && !productId) return res.status(400).json({ error: 'free_item requiere productId' });
+  const reward = await prisma.$transaction(async (tx) => {
+    await tx.birthdayReward.updateMany({ where: { activo: true }, data: { activo: false } });
+    return tx.birthdayReward.create({
+      data: { label, type, value: value ?? null, productId: type === 'free_item' ? productId : null, activo: true },
+      include: { product: true },
+    });
+  });
+  res.status(201).json(reward);
+});
+
+router.put('/birthday-rewards/:id', async (req, res) => {
+  const { label, type, value, productId, activo } = req.body;
+  if (type && !LOYALTY_REWARD_TYPES.includes(type)) return res.status(400).json({ error: 'type inválido' });
+  const reward = await prisma.$transaction(async (tx) => {
+    if (activo === true) await tx.birthdayReward.updateMany({ where: { activo: true, id: { not: req.params.id } }, data: { activo: false } });
+    return tx.birthdayReward.update({
+      where: { id: req.params.id },
+      data: {
+        ...(label !== undefined ? { label } : {}),
+        ...(type !== undefined ? { type } : {}),
+        ...(value !== undefined ? { value } : {}),
+        ...(productId !== undefined ? { productId: productId || null } : {}),
+        ...(activo !== undefined ? { activo } : {}),
+      },
+      include: { product: true },
+    });
+  });
+  res.json(reward);
+});
+
+router.get('/birthday-redemptions', async (req, res) => {
+  const where = req.query.redeemed !== undefined ? { redeemed: req.query.redeemed === 'true' } : {};
+  res.json(await prisma.birthdayRedemption.findMany({
+    where,
+    include: { reward: true, customer: { select: { nombre: true, email: true } } },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  }));
+});
+
+// ── Programa de puntos (2% de cada pedido, separado de los sellos) — sin
+// mínimo genérico: cada producto define su propio costo en puntos, ver
+// costoPuntos en PUT /products/:id. ──
+router.get('/loyalty/points-redemptions', async (req, res) => {
+  const where = req.query.redeemed !== undefined ? { redeemed: req.query.redeemed === 'true' } : {};
+  res.json(await prisma.pointsRedemption.findMany({
+    where,
+    include: { customer: { select: { nombre: true, email: true } } },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  }));
+});
+
+// ── Eliminación de ventas — nunca se borra la fila, para que se
+// contabilice todo. El mesero solo solicita con motivo (ver
+// /api/orders/:id/solicitar-eliminacion); aquí el admin aprueba/rechaza o
+// elimina (cancela) directo sin pasar por una solicitud. ──
+router.get('/orders/eliminaciones-pendientes', async (req, res) => {
+  res.json(await prisma.order.findMany({
+    where: { eliminacionEstado: 'pendiente' },
+    include: { items: true },
+    orderBy: { eliminacionSolicitadaAt: 'desc' },
+  }));
+});
+
+router.put('/orders/:id/eliminacion', async (req, res) => {
+  const { aprobar } = req.body;
+  const orden = await prisma.order.findUnique({ where: { id: req.params.id } });
+  if (!orden || orden.eliminacionEstado !== 'pendiente') return res.status(404).json({ error: 'No hay una solicitud pendiente para este pedido' });
+
+  const updated = await prisma.order.update({
+    where: { id: req.params.id },
+    data: {
+      eliminacionEstado: aprobar ? 'aprobada' : 'rechazada',
+      eliminacionResueltaPorId: req.user.id,
+      eliminacionResueltaAt: new Date(),
+      ...(aprobar ? { estado: 'cancelado' } : {}),
+    },
+    include: { items: true },
+  });
+  res.json(updated);
+});
+
+// Eliminación directa por el admin, sin pasar por una solicitud del
+// mesero — igual "soft delete" (queda como cancelada, nunca desaparece).
+router.delete('/orders/:id', async (req, res) => {
+  const motivo = req.body?.motivo?.trim() || 'Eliminada directamente por administrador';
+  const orden = await prisma.order.findUnique({ where: { id: req.params.id } });
+  if (!orden) return res.status(404).json({ error: 'Pedido no encontrado' });
+
+  const updated = await prisma.order.update({
+    where: { id: req.params.id },
+    data: {
+      estado: 'cancelado',
+      eliminacionEstado: 'aprobada',
+      eliminacionMotivo: motivo,
+      eliminacionResueltaPorId: req.user.id,
+      eliminacionResueltaAt: new Date(),
+    },
+    include: { items: true },
+  });
+  res.json(updated);
 });
 
 // ── Datos bancarios por sucursal (pago por transferencia) ──

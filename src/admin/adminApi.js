@@ -39,12 +39,20 @@ export const adminApi = {
   cashShifts: (branch, token) => fetch(`${API_BASE}/api/admin/cash-shifts?branch=${branch}`, { headers: auth(token) }).then(handle),
   expenses: (branch, token) => fetch(`${API_BASE}/api/admin/expenses?branch=${branch}`, { headers: auth(token) }).then(handle),
   users: (token) => fetch(`${API_BASE}/api/admin/users`, { headers: auth(token) }).then(handle),
+  createUser: (payload, token) => fetch(`${API_BASE}/api/admin/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  updateUser: (id, payload, token) => fetch(`${API_BASE}/api/admin/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  updateSupplier: (id, payload, token) => fetch(`${API_BASE}/api/admin/suppliers/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   loyaltyRewards: (token) => fetch(`${API_BASE}/api/admin/loyalty/rewards`, { headers: auth(token) }).then(handle),
   createLoyaltyReward: (payload, token) => fetch(`${API_BASE}/api/admin/loyalty/rewards`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   updateLoyaltyReward: (id, payload, token) => fetch(`${API_BASE}/api/admin/loyalty/rewards/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   loyaltyRedemptions: (token) => fetch(`${API_BASE}/api/admin/loyalty/redemptions`, { headers: auth(token) }).then(handle),
   categories: (token) => fetch(`${API_BASE}/api/admin/categories`, { headers: auth(token) }).then(handle),
   createCategory: (payload, token) => fetch(`${API_BASE}/api/admin/categories`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  uploadImage: (file, token) => {
+    const form = new FormData();
+    form.append('file', file);
+    return fetch(`${API_BASE}/api/admin/upload`, { method: 'POST', headers: auth(token), body: form }).then(handle);
+  },
   merchProducts: (token) => fetch(`${API_BASE}/api/admin/merch/products`, { headers: auth(token) }).then(handle),
   merchOrders: (token) => fetch(`${API_BASE}/api/admin/merch/orders`, { headers: auth(token) }).then(handle),
   createProduct: (payload, token) => fetch(`${API_BASE}/api/admin/products`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
@@ -54,4 +62,12 @@ export const adminApi = {
   updateVariantStock: (id, payload, token) => fetch(`${API_BASE}/api/admin/variants/${id}/stock`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
   branchSettings: (token) => fetch(`${API_BASE}/api/admin/branch-settings`, { headers: auth(token) }).then(handle),
   updateBranchSettings: (sucursal, payload, token) => fetch(`${API_BASE}/api/admin/branch-settings/${sucursal}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  pointsRedemptions: (token) => fetch(`${API_BASE}/api/admin/loyalty/points-redemptions`, { headers: auth(token) }).then(handle),
+  birthdayRewards: (token) => fetch(`${API_BASE}/api/admin/birthday-rewards`, { headers: auth(token) }).then(handle),
+  createBirthdayReward: (payload, token) => fetch(`${API_BASE}/api/admin/birthday-rewards`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  updateBirthdayReward: (id, payload, token) => fetch(`${API_BASE}/api/admin/birthday-rewards/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify(payload) }).then(handle),
+  birthdayRedemptions: (token) => fetch(`${API_BASE}/api/admin/birthday-redemptions`, { headers: auth(token) }).then(handle),
+  pendingDeletions: (token) => fetch(`${API_BASE}/api/admin/orders/eliminaciones-pendientes`, { headers: auth(token) }).then(handle),
+  resolveDeletion: (id, aprobar, token) => fetch(`${API_BASE}/api/admin/orders/${id}/eliminacion`, { method: 'PUT', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify({ aprobar }) }).then(handle),
+  deleteOrder: (id, motivo, token) => fetch(`${API_BASE}/api/admin/orders/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', ...auth(token) }, body: JSON.stringify({ motivo }) }).then(handle),
 };

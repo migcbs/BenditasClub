@@ -4,7 +4,9 @@ import { AlertTriangle, ArrowUpRight, Banknote, ChefHat, ChevronRight, Flame, Ga
 import { motion } from 'framer-motion';
 import AdminWorkspace from './AdminWorkspace';
 
-const brand = '/assets/plates/brand-lockup.png';
+// Mismo isotipo que la pestaña del navegador y la navbar del sitio público
+// (public/logo192.jpg) — antes usaba un lockup de marca distinto aquí.
+const brand = `${process.env.PUBLIC_URL}/logo192.jpg`;
 
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 

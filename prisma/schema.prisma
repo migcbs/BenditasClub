@@ -31,6 +31,13 @@ enum EstadoPedido {
   cancelado
 }
 
+enum EstadoEliminacion {
+  ninguna
+  pendiente
+  aprobada
+  rechazada
+}
+
 enum MetodoPago {
   tarjeta
   efectivo
@@ -91,9 +98,10 @@ model User {
   role Role   @default(cliente)
 
   // clientes
-  email    String? @unique
-  password String?
-  telefono String?
+  email           String?   @unique
+  password        String?
+  telefono        String?
+  fechaNacimiento DateTime?
 
   // staff (empleado/cocina)
   pin      String?
@@ -106,6 +114,8 @@ model User {
   merchOrders    MerchOrder[] @relation("CustomerMerchOrders")
   loyaltyCard    LoyaltyCard?
   loyaltyRedemptions LoyaltyRedemption[] @relation("CustomerRedemptions")
+  pointsRedemptions  PointsRedemption[]
+  birthdayRedemptions BirthdayRedemption[]
   addresses      Address[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,10 +139,16 @@ model Product {
   maxSabores  Int?
   isPromotion Boolean     @default(false)
   activo      Boolean     @default(true)
+  // null = no canjeable por puntos. Si tiene valor, el cliente lo puede
+  // cambiar por sus puntos acumulados en cuanto junte esta cantidad — sin
+  // un mínimo genérico aparte, ver PointsRedemption.
+  costoPuntos Int?
   orderItems  OrderItem[]
   recipe      Recipe?
   variants    ProductVariant[]
   loyaltyRewards LoyaltyReward[]
+  birthdayRewards BirthdayReward[]
+  pointsRedemptions PointsRedemption[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
@@ -243,6 +259,17 @@ model Order {
   updatedAt           DateTime       @updatedAt
   inventoryAppliedAt  DateTime?
   inventoryRevertedAt DateTime?
+
+  // Nunca se borra la fila de verdad — para que "se contabilice todo". El
+  // mesero solo puede solicitar con motivo; el admin aprueba (cancela la
+  // venta) o rechaza (queda como si nada), o elimina directo sin pasar por
+  // una solicitud.
+  eliminacionEstado        EstadoEliminacion @default(ninguna)
+  eliminacionMotivo        String?
+  eliminacionSolicitadaPorId String?
+  eliminacionSolicitadaAt  DateTime?
+  eliminacionResueltaPorId String?
+  eliminacionResueltaAt    DateTime?
 }
 
 model OrderItem {
@@ -422,10 +449,44 @@ model LoyaltyReward {
   productId      String?
   product        Product?            @relation(fields: [productId], references: [id])
   stampsRequired Int                 @default(6)
+  minOrderAmount Int                 @default(0)
   activo         Boolean             @default(true)
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
   redemptions    LoyaltyRedemption[]
+}
+
+// Promoción de cumpleaños — mismo tipo de recompensa que LoyaltyReward
+// (descuento/producto gratis) pero se desbloquea por fecha de nacimiento,
+// no por sellos. Solo una activa a la vez, igual que las de sellos.
+model BirthdayReward {
+  id          String              @id @default(uuid())
+  label       String
+  type        LoyaltyRewardType
+  value       Int?
+  productId   String?
+  product     Product?            @relation(fields: [productId], references: [id])
+  activo      Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  redemptions BirthdayRedemption[]
+}
+
+// Un cliente solo puede reclamar la promo de cumpleaños una vez por año —
+// se marca con el año calendario en el que se reclamó.
+model BirthdayRedemption {
+  id         String         @id @default(uuid())
+  customerId String
+  customer   User           @relation(fields: [customerId], references: [id])
+  rewardId   String
+  reward     BirthdayReward @relation(fields: [rewardId], references: [id])
+  year       Int
+  code       String         @unique
+  redeemed   Boolean        @default(false)
+  redeemedAt DateTime?
+  createdAt  DateTime       @default(now())
+
+  @@unique([customerId, year])
 }
 
 model LoyaltyCard {
@@ -433,7 +494,30 @@ model LoyaltyCard {
   customerId String   @unique
   customer   User     @relation(fields: [customerId], references: [id])
   stamps     Int      @default(0)
+  // 2% del total de cada pedido pagado — independiente de los sellos, se
+  // acumula siempre (con o sin recompensa activa) y se canjea por
+  // separado, ver PointsRedemption.
+  puntos     Decimal  @default(0) @db.Decimal(10, 2)
   updatedAt  DateTime @updatedAt
+}
+
+// Canje de puntos acumulados (no de sellos) — el cliente "cobra" su saldo
+// completo, se le da un código para mostrar en sucursal, y el staff decide
+// ahí qué producto le da a cambio (no hay un catálogo de precios en puntos
+// todavía, solo el mínimo para poder canjear).
+// Canje por un producto específico (no un monto libre) — se descuenta
+// costoPuntos del saldo del cliente, no todo su balance.
+model PointsRedemption {
+  id         String    @id @default(uuid())
+  customerId String
+  customer   User      @relation(fields: [customerId], references: [id])
+  productId  String?
+  product    Product?  @relation(fields: [productId], references: [id])
+  puntos     Decimal   @db.Decimal(10, 2)
+  code       String    @unique
+  redeemed   Boolean   @default(false)
+  redeemedAt DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model LoyaltyRedemption {

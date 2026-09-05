@@ -1,8 +1,10 @@
 // src/pos/OrdersList.jsx
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Card, Typography, Chip, Button, Alert } from '@mui/material';
+import { Printer, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { listOrders, updateOrderEstado, updateOrderCocina } from '../shared/staffApi';
+import { listOrders, updateOrderEstado, updateOrderCocina, solicitarEliminacion } from '../shared/staffApi';
+import { imprimirComanda } from './printTicket';
 
 const CHIP_COLOR = { pendiente: 'warning', pagado: 'success', cancelado: 'default' };
 const TIPO_LABEL = { mesa: 'Mesa', para_llevar: 'Para llevar', domicilio: 'Domicilio' };
@@ -15,7 +17,7 @@ const describirPedido = (orden) => {
   return orden.clienteNombre ? `${nombre} · ${orden.clienteNombre}` : nombre;
 };
 
-const OrdersList = ({ refreshKey }) => {
+const OrdersList = ({ refreshKey, user }) => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState('');
 
@@ -57,6 +59,18 @@ const OrdersList = ({ refreshKey }) => {
     }
   };
 
+  const pedirEliminacion = async (orden) => {
+    const motivo = window.prompt(`¿Por qué hay que eliminar la venta de "${describirPedido(orden)}" ($${orden.total})?\nEl admin verá este motivo antes de decidir.`);
+    if (!motivo?.trim()) return;
+    setError('');
+    try {
+      await solicitarEliminacion(orden.id, motivo.trim());
+      cargar();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
   return (
     <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -79,7 +93,12 @@ const OrdersList = ({ refreshKey }) => {
                 </Typography>
               ))}
               <Typography sx={{ fontWeight: 700, mt: 0.5 }}>Total: ${orden.total}</Typography>
-              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              {orden.notas && (
+                <Typography variant="body2" sx={{ mt: 0.5, fontStyle: 'italic', color: 'text.secondary' }}>
+                  📝 {orden.notas}
+                </Typography>
+              )}
+              <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
                 {orden.estadoCocina === 'lista' && (
                   <Button size="small" variant="outlined" onClick={() => marcarEntregado(orden)}>Marcar entregado</Button>
                 )}
@@ -88,6 +107,18 @@ const OrdersList = ({ refreshKey }) => {
                     <Button size="small" variant="contained" color="success" onClick={() => marcar(orden, 'pagado')}>Marcar pagado</Button>
                     <Button size="small" color="error" onClick={() => marcar(orden, 'cancelado')}>Cancelar</Button>
                   </>
+                )}
+                <Button size="small" variant="outlined" startIcon={<Printer size={16} />} onClick={() => imprimirComanda(orden, { meseroNombre: user?.nombre, tpv: `POS ${user?.sucursal || ''}` })}>
+                  Imprimir nota
+                </Button>
+                {orden.estado === 'pagado' && (
+                  orden.eliminacionEstado === 'pendiente' ? (
+                    <Chip size="small" color="warning" label="Eliminación en revisión" />
+                  ) : (
+                    <Button size="small" variant="contained" color="error" startIcon={<Trash2 size={16} />} onClick={() => pedirEliminacion(orden)}>
+                      Solicitar eliminación
+                    </Button>
+                  )
                 )}
               </Box>
             </Card>

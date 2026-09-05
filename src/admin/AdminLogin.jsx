@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
-import logo from '../assets/logo.png';
+
+// Mismo isotipo que la pestaña del navegador y la navbar del sitio público
+// (antes era el lockup ancho de src/assets/logo.png, inconsistente con el
+// resto del sitio).
+const logo = `${process.env.PUBLIC_URL}/logo192.jpg`;
 
 export default function AdminLogin({ onLogin, onDemo }) {
   const [email, setEmail] = useState('');
