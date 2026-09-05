@@ -15,6 +15,8 @@ const demoDashboard = {
   ],
   topProducts: [{ productId: 'p1', name: '8 Alitas', quantity: 21, sales: 2079 }, { productId: 'p2', name: 'Boneless 250g', quantity: 16, sales: 2224 }],
   alerts: [{ type: 'stock' }, { type: 'stock' }, { type: 'stock' }],
+  byBranch: [{ branch: 'xico', sales: 11200, orders: 38 }, { branch: 'coatepec', sales: 7260, orders: 26 }],
+  hourlySales: Array.from({ length: 24 }, (_, hour) => ({ hour, sales: hour >= 12 && hour <= 21 ? Math.round(600 + Math.sin((hour - 12) / 3) * 500 + Math.random() * 300) : 0, orders: 0 })),
 };
 let demoInventory = [
     { id: 'i1', nombre: 'Alita de pollo', unit: 'kg', quantity: 8.4, reorderPoint: 12, health: 'low' },
@@ -49,6 +51,12 @@ const demoApi = {
   cashShifts: async () => [{ id: 'c1', sucursal: 'xico', status: 'open', openingAmount: 1500, difference: null, movements: [] }],
   expenses: async () => [{ id: 'e1', concept: 'Gas', category: 'Servicios', paymentMethod: 'efectivo', amount: 620 }],
   users: async () => [{ id: 'u1', nombre: 'Ana', role: 'empleado', sucursal: 'xico', activo: true }, { id: 'u2', nombre: 'Luis', role: 'cocina', sucursal: 'xico', activo: true }],
+  createUser: async () => {},
+  updateUser: async () => {},
+  updateSupplier: async () => {},
+  pendingDeletions: async () => [],
+  resolveDeletion: async () => {},
+  deleteOrder: async () => {},
   loyaltyRewards: async () => demoRewards,
   loyaltyRedemptions: async () => demoRedemptions,
   createLoyaltyReward: async (payload) => { demoRewards = [...demoRewards.map((r) => ({ ...r, activo: false })), { id: `lr-${Date.now()}`, ...payload, activo: true }]; },

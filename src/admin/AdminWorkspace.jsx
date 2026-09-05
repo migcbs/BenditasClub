@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, MenuItem, Switch, TextField, Typography } from '@mui/material';
 import { Banknote, ChefHat, CircleDollarSign, ClipboardList, Edit3, Gift, PackageCheck, Plus, ReceiptText, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+const PINK = '#E765B7';
+const PINK_DEEP = '#C43D8F';
+const CHART_COLORS = ['#E765B7', '#C43D8F', '#f2a4d1', '#8a5a72', '#f6c453', '#7cc6a8'];
+const chartMoney = (value) => money.format(value);
+const compactMoneyFormat = new Intl.NumberFormat('es-MX', { notation: 'compact', maximumFractionDigits: 1 });
+const compactMoney = (value) => compactMoneyFormat.format(value).replace(/\s/g, '');
 
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 
@@ -225,6 +233,43 @@ function Operation({ dashboard, api, token }) {
     {error && <Alert severity="error" onClose={() => setError('')}>{error}</Alert>}
     <div className="admin-module-stats"><article><ChefHat/><span><b>{dashboard.summary.pendingOrders}</b><small>Pedidos abiertos</small></span></article><article><PackageCheck/><span><b>{dashboard.summary.orders}</b><small>Pedidos del periodo</small></span></article><article><CircleDollarSign/><span><b>{money.format(dashboard.summary.averageTicket)}</b><small>Ticket promedio</small></span></article></div>
 
+    <div className="admin-two-columns">
+      <div className="admin-data-panel">
+        <div className="admin-data-heading"><h2>Ventas por hora</h2><span>Hoy</span></div>
+        <div className="admin-chart-box">
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={dashboard.hourlySales} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+              <defs>
+                <linearGradient id="ventasHora" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={PINK} stopOpacity={0.5} />
+                  <stop offset="95%" stopColor={PINK} stopOpacity={0.03} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(36,26,32,.08)" />
+              <XAxis dataKey="hour" tickFormatter={(h) => `${h}h`} fontSize={11} interval={2} />
+              <YAxis fontSize={11} width={40} tickFormatter={compactMoney} />
+              <Tooltip formatter={(value) => chartMoney(value)} labelFormatter={(h) => `${h}:00 hrs`} />
+              <Area type="monotone" dataKey="sales" stroke={PINK_DEEP} strokeWidth={2} fill="url(#ventasHora)" name="Ventas" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      <div className="admin-data-panel">
+        <div className="admin-data-heading"><h2>Ventas por sucursal</h2><span>Periodo actual</span></div>
+        <div className="admin-chart-box">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={dashboard.byBranch.map((b) => ({ ...b, label: b.branch === 'xico' ? 'Xico' : 'Coatepec' }))} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(36,26,32,.08)" />
+              <XAxis dataKey="label" fontSize={12} />
+              <YAxis fontSize={11} width={40} tickFormatter={compactMoney} />
+              <Tooltip formatter={(value) => chartMoney(value)} />
+              <Bar dataKey="sales" name="Ventas" fill={PINK} radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+
     {pendientes.length > 0 && (
       <div className="admin-data-panel">
         <div className="admin-data-heading"><h2>Solicitudes de eliminación</h2><span>{pendientes.length}</span></div>
@@ -255,7 +300,25 @@ function Operation({ dashboard, api, token }) {
           </div>
         )) : <Empty>No hay pedidos en este periodo.</Empty>}
       </div>
-      <div className="admin-data-panel"><div className="admin-data-heading"><h2>Productos líderes</h2><span>Unidades</span></div>{dashboard.topProducts.map((product) => <div className="admin-list-row" key={product.productId || product.name}><span><b>{product.name || product.nombre}</b><small>{money.format(product.sales)} vendidos</small></span><b>{product.quantity}</b></div>)}</div>
+      <div className="admin-data-panel">
+        <div className="admin-data-heading"><h2>Productos líderes</h2><span>Unidades</span></div>
+        {dashboard.topProducts.length ? (
+          <>
+            <div className="admin-chart-box">
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={dashboard.topProducts} dataKey="sales" nameKey="name" innerRadius={45} outerRadius={78} paddingAngle={2}>
+                    {dashboard.topProducts.map((product, index) => <Cell key={product.productId || product.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(value) => chartMoney(value)} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {dashboard.topProducts.map((product) => <div className="admin-list-row" key={product.productId || product.name}><span><b>{product.name || product.nombre}</b><small>{money.format(product.sales)} vendidos</small></span><b>{product.quantity}</b></div>)}
+          </>
+        ) : <Empty>No hay ventas en este periodo todavía.</Empty>}
+      </div>
     </div>
   </section>;
 }
