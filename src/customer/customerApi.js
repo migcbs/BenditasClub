@@ -36,6 +36,11 @@ export const customerApi = {
     headers: { 'Content-Type': 'application/json', ...auth(token) },
     body: JSON.stringify(payload),
   }).then(handle),
+  uploadFoto: (file, token) => {
+    const form = new FormData();
+    form.append('file', file);
+    return fetch(`${API_BASE}/api/customer/foto`, { method: 'POST', headers: auth(token), body: form }).then(handle);
+  },
   orders: (token) => fetch(`${API_BASE}/api/customer/orders`, { headers: auth(token) }).then(handle),
   // token es opcional: un invitado sin cuenta también puede crear un
   // pedido en línea (ver POST /api/customer/orders con optionalAuth).
