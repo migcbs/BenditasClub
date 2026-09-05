@@ -362,13 +362,39 @@ function Finance({ api, token, branch, dashboard }) {
   const [error, setError] = useState('');
   const [shiftDetail, setShiftDetail] = useState(null);
   const [expenseDetail, setExpenseDetail] = useState(null);
+  const [closeForm, setCloseForm] = useState({ countedAmount: '', notes: '' });
+  const [closing, setClosing] = useState(false);
+  const [closeError, setCloseError] = useState('');
+
+  const cargar = () => Promise.all([api.cashShifts(branch, token), api.expenses(branch, token)])
+    .then(([shifts, expenses]) => setData({ shifts, expenses }));
+
   useEffect(() => {
     let live = true;
-    Promise.all([api.cashShifts(branch, token), api.expenses(branch, token)])
-      .then(([shifts, expenses]) => live && setData({ shifts, expenses }))
-      .catch((requestError) => live && setError(requestError.message));
+    cargar().catch((requestError) => live && setError(requestError.message));
     return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, token, branch]);
+
+  const abrirDetalle = (shift) => { setShiftDetail(shift); setCloseForm({ countedAmount: '', notes: '' }); setCloseError(''); };
+
+  const cerrarCaja = async () => {
+    if (!closeForm.countedAmount || Number.isNaN(Number(closeForm.countedAmount))) {
+      return setCloseError('Escribe el efectivo contado en caja.');
+    }
+    setClosing(true);
+    setCloseError('');
+    try {
+      const cerrada = await api.closeCashShift(shiftDetail.id, { countedAmount: Number(closeForm.countedAmount), notes: closeForm.notes || undefined }, token);
+      setShiftDetail(cerrada);
+      await cargar();
+    } catch (requestError) {
+      setCloseError(requestError.message);
+    } finally {
+      setClosing(false);
+    }
+  };
+
   if (error) return <Alert severity="error">{error}</Alert>;
   if (!data) return <Loading />;
   const expenses = data.expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
@@ -383,7 +409,7 @@ function Finance({ api, token, branch, dashboard }) {
       <div className="admin-data-panel">
         <div className="admin-data-heading"><h2>Turnos de caja</h2><span>Últimos 30</span></div>
         {data.shifts.length ? data.shifts.map((shift) => (
-          <ButtonBase key={shift.id} className="admin-list-row admin-list-row--clickable" onClick={() => setShiftDetail(shift)}>
+          <ButtonBase key={shift.id} className="admin-list-row admin-list-row--clickable" onClick={() => abrirDetalle(shift)}>
             <span><b>{SUCURSAL_LABEL[shift.sucursal] || shift.sucursal} · {shift.status === 'open' ? 'Abierta' : 'Cerrada'}</b><small>Fondo {money.format(Number(shift.openingAmount))}{shift.difference != null ? ` · diferencia ${money.format(Number(shift.difference))}` : ''}</small></span>
             <Chip size="small" color={shift.status === 'open' ? 'success' : 'default'} label={shift.status} />
           </ButtonBase>
@@ -426,8 +452,34 @@ function Finance({ api, token, branch, dashboard }) {
               <b className={movement.type === 'pay_out' ? 'stock-critical' : 'stock-healthy'}>{movement.type === 'pay_out' ? '-' : '+'}{money.format(Number(movement.amount))}</b>
             </div>
           )) : <Empty>Sin entradas o salidas registradas en este turno.</Empty>}
+
+          {shiftDetail.status === 'open' && (
+            <>
+              <div className="admin-data-heading" style={{ padding: '16px 0 8px' }}><h2>Cerrar caja</h2></div>
+              {closeError ? <Alert severity="error" onClose={() => setCloseError('')} sx={{ mb: 1.5 }}>{closeError}</Alert> : null}
+              <div className="admin-form-grid">
+                <TextField
+                  label="Efectivo contado"
+                  type="number"
+                  value={closeForm.countedAmount}
+                  onChange={(e) => setCloseForm((current) => ({ ...current, countedAmount: e.target.value }))}
+                  slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+                  disabled={closing}
+                />
+                <TextField
+                  label="Notas (opcional)"
+                  value={closeForm.notes}
+                  onChange={(e) => setCloseForm((current) => ({ ...current, notes: e.target.value }))}
+                  disabled={closing}
+                />
+                <Button variant="contained" color="secondary" onClick={cerrarCaja} disabled={closing} style={{ alignSelf: 'flex-start' }}>
+                  {closing ? 'Cerrando...' : 'Cerrar caja'}
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
-        <DialogActions><Button onClick={() => setShiftDetail(null)}>Cerrar</Button></DialogActions>
+        <DialogActions><Button onClick={() => setShiftDetail(null)}>Cerrar ventana</Button></DialogActions>
       </>}
     </Dialog>
 
