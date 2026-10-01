@@ -20,10 +20,13 @@ module.exports = {
     // con Jest 28+.
     '^.+\\.(js|jsx)$': path.join(reactScriptsConfig, 'babelTransform.js'),
     '^.+\\.css$': path.join(__dirname, 'jest.cssTransform.js'),
-    '^(?!.*\\.(js|jsx|css|json)$)': path.join(__dirname, 'jest.fileTransform.js'),
+    // .cjs/.mjs son código (ej. reselect, que usa recharts), no assets — si
+    // caen aquí se convierten en un string y truena con "createSelector is
+    // not a function".
+    '^(?!.*\\.(js|jsx|cjs|mjs|css|json)$)': path.join(__dirname, 'jest.fileTransform.js'),
   },
   transformIgnorePatterns: [
-    '[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$',
+    '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|cjs|mjs)$',
     '^.+\\.module\\.(css|sass|scss)$',
   ],
   moduleNameMapper: {

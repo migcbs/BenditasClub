@@ -53,11 +53,14 @@ test('registers a new customer account online', async () => {
   );
 
   await userEvent.type(screen.getByLabelText(/nombre/i), 'Ana Cliente');
+  await userEvent.type(screen.getByLabelText(/teléfono/i), '2281234567');
   await userEvent.type(screen.getByLabelText(/correo/i), 'ana@benditas.local');
   await userEvent.type(screen.getByLabelText(/contraseña/i), 'Password123');
   await userEvent.click(screen.getByRole('button', { name: /crear cuenta/i }));
 
-  await waitFor(() => expect(api.register).toHaveBeenCalledWith({ nombre: 'Ana Cliente', email: 'ana@benditas.local', password: 'Password123' }));
+  await waitFor(() => expect(api.register).toHaveBeenCalledWith(expect.objectContaining({
+    nombre: 'Ana Cliente', telefono: '2281234567', email: 'ana@benditas.local', password: 'Password123',
+  })));
   expect(await screen.findByText(/perfil listo/i)).toBeVisible();
 });
 
@@ -75,7 +78,14 @@ test('shows customer profile, loyalty progress and order history', async () => {
       stampsRequired: 6,
       activeReward: { id: 'r1', label: '20% de descuento', type: 'discount_percent', value: 20 },
       redemptions: [],
+      puntos: 0,
+      productosCanjeables: [],
+      pointsRedemptions: [],
+      activeBirthdayReward: null,
+      birthdayRedemptions: [],
     }),
+    addresses: jest.fn().mockResolvedValue([]),
+    couponsPublicos: jest.fn().mockResolvedValue([]),
   };
 
   render(
@@ -88,11 +98,14 @@ test('shows customer profile, loyalty progress and order history', async () => {
   );
 
   expect(await screen.findByText('Ana')).toBeVisible();
-  expect(screen.getByText(/en cocina/i)).toBeVisible();
+  // Aparece en el encabezado del pedido y en el seguimiento de pasos de cocina
+  expect(screen.getAllByText(/en cocina/i)[0]).toBeVisible();
   expect(screen.getByText('$177')).toBeVisible();
   expect(await screen.findByLabelText(/2 de 6 sellos de fidelidad/i)).toBeVisible();
   expect(screen.getByText(/20% de descuento/i)).toBeVisible();
 
+  // Los datos de contacto se editan dentro del diálogo de Ajustes
+  await userEvent.click(screen.getByRole('button', { name: /^ajustes$/i }));
   await userEvent.clear(screen.getByLabelText(/^nombre/i));
   await userEvent.type(screen.getByLabelText(/^nombre/i), 'Ana Club');
   await userEvent.clear(screen.getByLabelText(/teléfono/i));
@@ -113,7 +126,14 @@ test('shows a ready-to-redeem reward with its code and a wallet button', async (
       stampsRequired: 6,
       activeReward: { id: 'r1', label: 'Envío gratis', type: 'free_shipping' },
       redemptions: [{ id: 'red1', code: 'AB12-CD34', redeemed: false, reward: { type: 'free_shipping' } }],
+      puntos: 0,
+      productosCanjeables: [],
+      pointsRedemptions: [],
+      activeBirthdayReward: null,
+      birthdayRedemptions: [],
     }),
+    addresses: jest.fn().mockResolvedValue([]),
+    couponsPublicos: jest.fn().mockResolvedValue([]),
   };
 
   render(
